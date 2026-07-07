@@ -1,149 +1,51 @@
-/* ============================================================
-   main.js — Youth Agro-Services Network
-   ============================================================ */
+// =====================================================
+// AGROSERVICES — MAIN JS
+// =====================================================
 
-   document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
+  /* ---------- Mobile nav toggle ---------- */
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
 
-    /* ----------------------------------------------------------
-       1. SCROLL-IN ANIMATION FOR PAGE CARDS
-          Uses IntersectionObserver to fade+slide cards into view
-       ---------------------------------------------------------- */
-    const cards = document.querySelectorAll('.page-card');
-  
-    if ('IntersectionObserver' in window) {
-      const cardObserver = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry, idx) {
-            if (entry.isIntersecting) {
-              // Stagger each card by 80ms
-              const delay = Array.from(cards).indexOf(entry.target) * 80;
-              setTimeout(function () {
-                entry.target.classList.add('visible');
-              }, delay);
-              cardObserver.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.12 }
-      );
-  
-      cards.forEach(function (card) {
-        cardObserver.observe(card);
-      });
-    } else {
-      // Fallback for browsers without IntersectionObserver
-      cards.forEach(function (card) {
-        card.classList.add('visible');
-      });
-    }
-  
-  
-    /* ----------------------------------------------------------
-       2. STICKY NAVBAR SHADOW ON SCROLL
-       ---------------------------------------------------------- */
-    const navbar = document.querySelector('.navbar');
-  
-    window.addEventListener('scroll', function () {
-      if (window.scrollY > 10) {
-        navbar.classList.add('shadow');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+      const icon = navToggle.querySelector('i');
+      if (navLinks.classList.contains('open')) {
+        icon.classList.remove('bi-list');
+        icon.classList.add('bi-x-lg');
       } else {
-        navbar.classList.remove('shadow');
+        icon.classList.remove('bi-x-lg');
+        icon.classList.add('bi-list');
       }
     });
-  
-  
-    /* ----------------------------------------------------------
-       3. SMOOTH ACTIVE LINK HIGHLIGHT ON CLICK
-       ---------------------------------------------------------- */
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-  
-    navLinks.forEach(function (link) {
-      link.addEventListener('click', function () {
-        // Remove active from all
-        navLinks.forEach(function (l) {
-          l.classList.remove('nav-btn-active');
-        });
-        // Add to clicked
-        this.classList.add('nav-btn-active');
+
+    // Close mobile menu when a nav link is clicked
+    navLinks.querySelectorAll('.nav-link').forEach((link) => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        const icon = navToggle.querySelector('i');
+        icon.classList.remove('bi-x-lg');
+        icon.classList.add('bi-list');
       });
     });
-  
-  
-    /* ----------------------------------------------------------
-       4. AUTO-CLOSE MOBILE NAV ON LINK CLICK
-       ---------------------------------------------------------- */
-    const navCollapse = document.getElementById('mainNav');
-  
-    if (navCollapse) {
-      navLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
-          // Only collapse if the toggler is visible (mobile)
-          const toggler = document.querySelector('.navbar-toggler');
-          if (toggler && getComputedStyle(toggler).display !== 'none') {
-            const bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-            if (bsCollapse) {
-              bsCollapse.hide();
-            }
-          }
-        });
-      });
-    }
-  
-  
-    /* ----------------------------------------------------------
-       5. BUTTON RIPPLE EFFECT
-          Adds a ripple on any .btn click
-       ---------------------------------------------------------- */
-    document.querySelectorAll('.btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        const circle = document.createElement('span');
-        const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-        const radius = diameter / 2;
-  
-        const rect = btn.getBoundingClientRect();
-        circle.style.cssText = [
-          'position: absolute',
-          'border-radius: 50%',
-          'background: rgba(255,255,255,0.3)',
-          'pointer-events: none',
-          'transform: scale(0)',
-          'animation: ripple 0.5s linear',
-          'width: ' + diameter + 'px',
-          'height: ' + diameter + 'px',
-          'left: ' + (e.clientX - rect.left - radius) + 'px',
-          'top: ' + (e.clientY - rect.top - radius) + 'px',
-        ].join(';');
-  
-        // Inject keyframes once
-        if (!document.getElementById('ripple-style')) {
-          const style = document.createElement('style');
-          style.id = 'ripple-style';
-          style.textContent = '@keyframes ripple { to { transform: scale(2.5); opacity: 0; } }';
-          document.head.appendChild(style);
-        }
-  
-        // Ensure btn has relative positioning
-        const pos = getComputedStyle(btn).position;
-        if (pos === 'static') btn.style.position = 'relative';
-        btn.style.overflow = 'hidden';
-  
-        btn.appendChild(circle);
-        setTimeout(function () { circle.remove(); }, 500);
-      });
-    });
-  
-  
-    /* ----------------------------------------------------------
-       6. LEARN MORE LINK HOVER ARROW NUDGE
-          Already handled in CSS via gap transition;
-          JS adds aria-label for accessibility
-       ---------------------------------------------------------- */
-    document.querySelectorAll('.page-card__link').forEach(function (link) {
-      const cardTitle = link.closest('.page-card').querySelector('.page-card__title');
-      if (cardTitle) {
-        link.setAttribute('aria-label', 'Learn more about ' + cardTitle.textContent.trim());
+  }
+
+  /* ---------- Sticky navbar shadow on scroll ---------- */
+  const navbar = document.getElementById('navbar');
+  if (navbar) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+      } else {
+        navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.08)';
       }
     });
-  
-  });
-  
+  }
+
+  /* ---------- Footer current year ---------- */
+  const yearEl = document.getElementById('year');
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear();
+  }
+});
