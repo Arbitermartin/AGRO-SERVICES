@@ -2,6 +2,14 @@ const express = require("express")
 const router = express.Router()
 const utilities = require("../utilities")
 
+
+router.get("/about", utilities.handleErrors(async (req, res) => {
+  let nav = await utilities.getNav()
+  res.render("pages/about", { 
+    title: "About Us", 
+    nav 
+  })
+}))
 router.get("/contact", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/contact", { 
