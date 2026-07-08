@@ -409,16 +409,18 @@ button {
 ===================================================== */
 .services {
   background: var(--bg-main);
-  padding: 190px 0 100px;
+  padding: 40px;
+  position: relative;
 }
 
 .section-heading {
   text-align: center;
   margin-bottom: 56px;
+
 }
 
 .section-heading h2 {
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: 3rem;
   font-weight: 700;
   color: var(--primary-green);
   letter-spacing: 0.3px;
@@ -1193,6 +1195,14 @@ button {
 .step-header {
   text-align: center;
   margin-bottom: 32px;
+}
+.form-field.is-invalid input,
+.form-field.is-invalid select {
+  border-color: var(--danger) !important;
+}
+
+.form-field.is-invalid label {
+  color: var(--danger);
 }
 /* Enhanced form fields for consistency (including SELECT) */
 .input-wrap select {

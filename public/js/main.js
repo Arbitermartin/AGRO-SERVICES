@@ -142,13 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
  // end DOMContentLoaded
 
-   /* =====================================================
-     REGISTRATION MULTI-STEP FORM
+     /* =====================================================
+     REGISTRATION MULTI-STEP FORM WITH VALIDATION
   ===================================================== */
   const registrationPage = document.querySelector('.registration-page');
   if (registrationPage) {
     let currentStep = 1;
-    let selectedPlan = 1; // 0=Basic, 1=Standard, 2=Premium
 
     const updateProgress = () => {
       const progressContainer = document.getElementById('stepProgress');
@@ -163,6 +162,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+    const validateStep = (step) => {
+      const currentCard = document.getElementById(`step-${step}`);
+      if (!currentCard) return true;
+
+      const requiredFields = currentCard.querySelectorAll('input[required], select[required]');
+      let isValid = true;
+
+      requiredFields.forEach(field => {
+        const formField = field.closest('.form-field');
+        if (!field.value.trim()) {
+          isValid = false;
+          if (formField) {
+            formField.classList.add('is-invalid');
+          }
+        } else {
+          if (formField) formField.classList.remove('is-invalid');
+        }
+      });
+
+      if (!isValid) {
+        alert("Please fill in all required fields before continuing.");
+      }
+      return isValid;
+    };
+
     window.showStep = (step) => {
       document.querySelectorAll('.step-card').forEach(card => card.style.display = 'none');
       const target = document.getElementById(`step-${step}`);
@@ -172,6 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.nextStep = (from) => {
+      if (!validateStep(from)) return;
+
       if (from === 5) {
         submitRegistration();
         return;
@@ -183,8 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
       showStep(from - 1);
     };
 
+    // Remove invalid class when user starts typing
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('input[required], select[required]')) {
+        const formField = e.target.closest('.form-field');
+        if (formField) formField.classList.remove('is-invalid');
+      }
+    });
+
     window.selectPlan = (index) => {
-      selectedPlan = index;
       document.querySelectorAll('.plan-option').forEach((el, i) => {
         el.classList.toggle('selected', i === index);
       });
@@ -201,14 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const proofInput = document.getElementById('proofUpload');
     if (uploadArea && proofInput) {
       uploadArea.addEventListener('click', () => proofInput.click());
-      
       proofInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
           document.getElementById('uploadedFile').style.display = 'block';
           document.getElementById('fileName').textContent = e.target.files[0].name;
         }
       });
-    }
+    };
 
     window.submitRegistration = () => {
       const stepsContainer = document.getElementById('registrationSteps');
@@ -217,11 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
         stepsContainer.style.display = 'none';
         successScreen.style.display = 'block';
       }
-      console.log('✅ Registration data submitted successfully');
+      console.log('✅ Registration submitted successfully');
     };
 
-    // Initialize registration
+    // Initialize
     updateProgress();
     showStep(1);
   }
-
