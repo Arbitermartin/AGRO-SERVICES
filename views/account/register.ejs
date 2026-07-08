@@ -1,0 +1,166 @@
+<section class="registration-page">
+    <div class="container">
+      <!-- Progress -->
+      <div class="progress-container" style="margin-bottom: 40px; text-align: center;">
+        <div class="step-progress" id="stepProgress"></div>
+      </div>
+  
+      <div id="registrationSteps">
+        <!-- Step 1 -->
+        <div class="step-card" id="step-1">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <h2>Create your account</h2>
+            <p>Let's get started</p>
+          </div>
+          <form class="auth-form">
+            <div class="form-field">
+              <label>Full Name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" id="fullName" placeholder="Enter your full name" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <div class="input-wrap">
+                <i class="bi bi-envelope input-icon"></i>
+                <input type="email" id="regEmail" placeholder="Enter your email" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Phone Number</label>
+              <div class="input-wrap">
+                <i class="bi bi-telephone input-icon"></i>
+                <input type="tel" id="phone" placeholder="Enter your phone number" required>
+              </div>
+            </div>
+            <button type="button" onclick="nextStep(1)" class="btn btn-filled btn-block btn-lg">Next</button>
+            <div class="auth-switch" style="margin-top:20px;text-align:center;">
+              Already have an account? <a href="/login">Log in</a>
+            </div>
+          </form>
+        </div>
+  
+        <!-- Step 2 -->
+        <div class="step-card" id="step-2" style="display:none;">
+          <div class="step-header">
+            <div class="step-number">2</div>
+            <h2>Tell us about yourself</h2>
+            <p>Personalize your account</p>
+          </div>
+          <form class="auth-form">
+            <div class="form-field">
+              <label>Date of Birth</label>
+              <div class="input-wrap">
+                <input type="date" id="dob" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Location</label>
+              <div class="input-wrap">
+                <select id="location" required>
+                  <option value="">Select your region</option>
+                  <option value="Arusha">Arusha</option>
+                  <option value="Dodoma">Dodoma</option>
+                  <option value="Mwanza">Mwanza</option>
+                  <option value="Mbeya">Mbeya</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Farm Size (acres)</label>
+              <div class="input-wrap">
+                <input type="number" id="farmSize" step="0.1" placeholder="e.g. 2.5" required>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <button type="button" onclick="prevStep(2)" class="btn btn-outline btn-block">Back</button>
+              <button type="button" onclick="nextStep(2)" class="btn btn-filled btn-block">Next</button>
+            </div>
+          </form>
+        </div>
+  
+        <!-- Step 3: Plans -->
+        <div class="step-card" id="step-3" style="display:none;">
+          <div class="step-header">
+            <div class="step-number">3</div>
+            <h2>Choose your plan</h2>
+            <p>Select a membership tier</p>
+          </div>
+          <div class="plans-grid">
+            <div class="plan-option" id="plan-0" onclick="selectPlan(0)">
+              <div class="plan-header"><input type="radio" name="plan"> <strong>Basic</strong> <span>TZS 10,000/yr</span></div>
+              <ul><li>✓ Market prices</li><li>✓ Basic advisory</li></ul>
+            </div>
+            <div class="plan-option selected" id="plan-1" onclick="selectPlan(1)">
+              <div class="plan-header"><input type="radio" name="plan"> <strong>Standard</strong> <span>TZS 25,000/yr</span></div>
+              <ul><li>✓ All Basic</li><li>✓ Training access</li><li>✓ Expert support</li></ul>
+            </div>
+            <div class="plan-option" id="plan-2" onclick="selectPlan(2)">
+              <div class="plan-header"><input type="radio" name="plan"> <strong>Premium</strong> <span>TZS 50,000/yr</span></div>
+              <ul><li>✓ All Standard</li><li>✓ Priority support</li><li>✓ Input discounts</li></ul>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <button type="button" onclick="prevStep(3)" class="btn btn-outline btn-block">Back</button>
+            <button type="button" onclick="nextStep(3)" class="btn btn-filled btn-block">Continue to Payment</button>
+          </div>
+        </div>
+  
+        <!-- Step 4: Payment -->
+        <div class="step-card" id="step-4" style="display:none;">
+          <div class="step-header">
+            <div class="step-number">4</div>
+            <h2>Complete payment</h2>
+          </div>
+          <div style="background:#f1f8e9;padding:20px;border-radius:12px;margin-bottom:24px;">
+            <p><strong>Standard Plan — TZS 25,000</strong></p>
+          </div>
+          <div class="payment-methods">
+            <div class="payment-method selected" onclick="selectPayment(0)">
+              <i class="bi bi-phone"></i><span>Mobile Money (M-Pesa/Tigo)</span>
+            </div>
+            <div class="payment-method" onclick="selectPayment(1)">
+              <i class="bi bi-bank"></i><span>Bank Transfer</span>
+            </div>
+          </div>
+          <button onclick="nextStep(4)" class="btn btn-filled btn-block" style="margin-top:30px;">I've Made Payment</button>
+        </div>
+  
+        <!-- Step 5: Upload -->
+        <div class="step-card" id="step-5" style="display:none;">
+          <div class="step-header">
+            <div class="step-number">5</div>
+            <h2>Upload Payment Proof</h2>
+          </div>
+          <div class="upload-area" id="uploadArea">
+            <i class="bi bi-cloud-upload" style="font-size:3rem;color:var(--primary-green);display:block;margin-bottom:12px;"></i>
+            <p>Tap to upload screenshot<br><small>JPG, PNG or PDF (max 5MB)</small></p>
+            <input type="file" id="proofUpload" accept="image/*,.pdf" style="display:none;">
+          </div>
+          <div id="uploadedFile" style="display:none;">
+            <span id="fileName">payment_receipt.jpg ✓</span>
+          </div>
+          <div class="form-field" style="margin-top:20px;">
+            <label>Transaction Reference</label>
+            <div class="input-wrap">
+              <input type="text" id="transRef" placeholder="e.g. MP240912.1345">
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:30px;">
+            <button onclick="prevStep(5)" class="btn btn-outline btn-block">Back</button>
+            <button onclick="submitRegistration()" class="btn btn-filled btn-block">Submit for Review</button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Success -->
+      <div id="successScreen" style="display:none;text-align:center;padding:60px 20px;">
+        <div style="width:90px;height:90px;background:#e8f5e9;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:42px;">✅</div>
+        <h2 style="color:var(--primary-green);">Registration Submitted!</h2>
+        <p>Your payment proof was submitted.<br>Our admin team is verifying it — usually within 24 hours.</p>
+        <button onclick="window.location.href='/'" class="btn btn-filled btn-lg" style="margin-top:30px;">Go to Home</button>
+      </div>
+    </div>
+  </section>

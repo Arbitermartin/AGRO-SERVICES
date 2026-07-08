@@ -142,3 +142,86 @@ document.addEventListener('DOMContentLoaded', () => {
   }
  // end DOMContentLoaded
 
+   /* =====================================================
+     REGISTRATION MULTI-STEP FORM
+  ===================================================== */
+  const registrationPage = document.querySelector('.registration-page');
+  if (registrationPage) {
+    let currentStep = 1;
+    let selectedPlan = 1; // 0=Basic, 1=Standard, 2=Premium
+
+    const updateProgress = () => {
+      const progressContainer = document.getElementById('stepProgress');
+      if (!progressContainer) return;
+      progressContainer.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const dot = document.createElement('span');
+        dot.textContent = i;
+        if (i < currentStep) dot.classList.add('completed');
+        if (i === currentStep) dot.classList.add('active');
+        progressContainer.appendChild(dot);
+      }
+    };
+
+    window.showStep = (step) => {
+      document.querySelectorAll('.step-card').forEach(card => card.style.display = 'none');
+      const target = document.getElementById(`step-${step}`);
+      if (target) target.style.display = 'block';
+      currentStep = step;
+      updateProgress();
+    };
+
+    window.nextStep = (from) => {
+      if (from === 5) {
+        submitRegistration();
+        return;
+      }
+      showStep(from + 1);
+    };
+
+    window.prevStep = (from) => {
+      showStep(from - 1);
+    };
+
+    window.selectPlan = (index) => {
+      selectedPlan = index;
+      document.querySelectorAll('.plan-option').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+    };
+
+    window.selectPayment = (index) => {
+      document.querySelectorAll('.payment-method').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+    };
+
+    // Upload handler
+    const uploadArea = document.getElementById('uploadArea');
+    const proofInput = document.getElementById('proofUpload');
+    if (uploadArea && proofInput) {
+      uploadArea.addEventListener('click', () => proofInput.click());
+      
+      proofInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('uploadedFile').style.display = 'block';
+          document.getElementById('fileName').textContent = e.target.files[0].name;
+        }
+      });
+    }
+
+    window.submitRegistration = () => {
+      const stepsContainer = document.getElementById('registrationSteps');
+      const successScreen = document.getElementById('successScreen');
+      if (stepsContainer && successScreen) {
+        stepsContainer.style.display = 'none';
+        successScreen.style.display = 'block';
+      }
+      console.log('✅ Registration data submitted successfully');
+    };
+
+    // Initialize registration
+    updateProgress();
+    showStep(1);
+  }
+

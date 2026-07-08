@@ -16,4 +16,11 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       nav 
     })
   }))
+  router.get("/register", utilities.handleErrors(async (req, res) => {
+    let nav = await utilities.getNav()
+    res.render("account/register", { 
+      title: "Register", 
+      nav 
+    })
+  }))
   module.exports = router
