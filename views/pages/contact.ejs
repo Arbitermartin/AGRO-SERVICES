@@ -1,0 +1,118 @@
+
+
+  <!-- ===================== CONTACT HERO BANNER ===================== -->
+  <section class="contact-hero">
+    <div class="contact-hero-shapes" aria-hidden="true">
+      <i class="bi bi-flower1"></i>
+      <i class="bi bi-flower2"></i>
+    </div>
+    <div class="container">
+      <h1>Get in Touch</h1>
+      <p>We'd love to hear from you &mdash; reach out with questions, partnership ideas, or support requests.</p>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT INFO CARDS ===================== -->
+  <section class="contact-info-section">
+    <div class="container contact-info-cards">
+      <div class="contact-info-card">
+        <div class="contact-info-icon"><i class="bi bi-telephone-fill"></i></div>
+        <h3>Call Us</h3>
+        <p>+255 718 068 895</p>
+      </div>
+      <div class="contact-info-card">
+        <div class="contact-info-icon"><i class="bi bi-envelope-fill"></i></div>
+        <h3>Email Us</h3>
+        <p>info@agroservices.co.tz</p>
+      </div>
+      <div class="contact-info-card">
+        <div class="contact-info-icon"><i class="bi bi-geo-alt-fill"></i></div>
+        <h3>Visit Us</h3>
+        <p>123 Agro Street, Dar es Salaam, Tanzania</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT FORM + MAP ===================== -->
+  <section class="contact-main-section">
+    <div class="container contact-main-grid">
+
+      <!-- Form -->
+      <div class="contact-form-card">
+        <h2>Send us a message</h2>
+        <p class="contact-form-sub">Fill the form and our team will respond within 24 hours.</p>
+
+        <% if (typeof sent !== 'undefined' && sent) { %>
+          <div class="contact-success" id="contactSuccess">
+            <i class="bi bi-check-circle-fill"></i> Your message has been sent. We'll be in touch soon!
+          </div>
+        <% } %>
+
+        <form class="contact-form" id="contactForm" action="/contact" method="POST" novalidate>
+          <div class="contact-form-row">
+            <div class="form-field">
+              <label for="name">Full name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" id="name" name="name" placeholder="Your full name" required>
+              </div>
+              <span class="field-error">Please enter your name</span>
+            </div>
+            <div class="form-field">
+              <label for="cEmail">Email address</label>
+              <div class="input-wrap">
+                <i class="bi bi-envelope input-icon"></i>
+                <input type="email" id="cEmail" name="email" placeholder="name@example.com" required>
+              </div>
+              <span class="field-error">Enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="subject">Subject</label>
+            <div class="input-wrap">
+              <i class="bi bi-chat-left-text input-icon"></i>
+              <input type="text" id="subject" name="subject" placeholder="What is this about?" required>
+            </div>
+            <span class="field-error">Please enter a subject</span>
+          </div>
+
+          <div class="form-field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" placeholder="Your message" required></textarea>
+            <div class="char-counter"><span id="charCount">0</span>/500</div>
+            <span class="field-error">Please enter your message</span>
+          </div>
+
+          <button type="submit" class="btn btn-filled btn-block" id="contactBtn">
+            <span class="btn-label">Send Message</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Map + hours + socials -->
+      <div class="contact-side">
+        <div class="contact-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127449.72605617491!2d36.59480894564472!3d-3.397968870930667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18371c88f2387383%3A0xbc1907f7ec497152!2sArusha!5e0!3m2!1sen!2stz!4v1783511174338!5m2!1sen!2stz" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
+        </div>
+
+        <div class="contact-hours">
+          <h4>Office Hours</h4>
+          <div class="hours-row"><span>Mon &ndash; Fri</span><span>8:00 AM &ndash; 6:00 PM</span></div>
+          <div class="hours-row"><span>Saturday</span><span>9:00 AM &ndash; 1:00 PM</span></div>
+          <div class="hours-row"><span>Sunday</span><span>Closed</span></div>
+        </div>
+
+        <div class="contact-socials">
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+

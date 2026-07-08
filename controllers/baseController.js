@@ -4,7 +4,7 @@ const baseController = {}
 
 baseController.buildHome = async function(req, res){
   const nav = await utilities.getNav()
-  res.render("index", {
+  res.render("pages/index", {
     title: "Youth Agro-services Network",
     nav,
     errors: null
