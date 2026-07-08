@@ -1366,17 +1366,18 @@ button {
 
 .leadership-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4,1fr);
   gap: 24px;
 }
 
 .team-card {
   background: #1f2521;
   color: white;
-  padding: 40px 24px;
+  padding: 32px 24px;
   border-radius: 16px;
   text-align: center;
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
+  min-height: 380px;
 }
 
 .team-card:hover {
@@ -1386,15 +1387,30 @@ button {
 .team-avatar {
   width: 110px;
   height: 110px;
-  background: linear-gradient(135deg, #4ade80, #22c55e);
   color: #1f2521;
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 700;
   border-radius: 16px;
   margin: 0 auto 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.team-photo {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.photo-card {
+  padding: 20px 24px;
+}
+
+.photo-card h4 {
+  margin-top: 12px;
 }
 
 .field-team-grid {
@@ -1407,10 +1423,9 @@ button {
   text-align: center;
 }
 
-.circle-avatar {
+.circle-avatar img {
   width: 90px;
   height: 90px;
-  background: #4ade80;
   color: #1f2521;
   font-size: 1.8rem;
   font-weight: 700;
