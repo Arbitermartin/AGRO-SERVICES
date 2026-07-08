@@ -3,7 +3,7 @@ const utilities = require("../utilities/")
 const baseController = {}
 
 baseController.buildHome = async function(req, res){
-  const nav = await utilities.getNavWithActive(req.originalUrl)
+  const nav = await utilities.getNav()
   const stats = await utilities.getPortalStats()
 
 
