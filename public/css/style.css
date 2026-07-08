@@ -1,0 +1,80 @@
+:root {
+    /* PRIMARY BRAND COLORS */
+    --primary-green: #2E7D32;
+    --dark-green: #1B5E20;
+    --secondary-green: #388E3C;
+    --light-green: #66BB6A;
+  
+    /* BACKGROUND COLORS */
+    --bg-main: #F8FAF6;
+    --bg-dashboard: #F5F7F9;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #1B5E20;
+    --bg-navbar: #FFFFFF;
+    --bg-footer: #1B4332;
+    --bg-light-green: #F4F8F2;
+  
+    /* TEXT COLORS */
+    --text-primary: #1B4332;
+    --text-secondary: #546E5D;
+    --text-muted: #7A7A7A;
+    --text-white: #FFFFFF;
+  
+    /* BUTTON COLORS */
+    --btn-primary: #2E7D32;
+    --btn-primary-hover: #1B5E20;
+    --btn-secondary: #FBC02D;
+    --btn-secondary-hover: #F9A825;
+    --btn-text-light: #FFFFFF;
+    --btn-text-dark: #212121;
+  
+    /* STATUS COLORS */
+    --success: #43A047;
+    --warning: #FB8C00;
+    --danger: #E53935;
+    --info: #1E88E5;
+  
+    /* CARD COLORS */
+    --card-member-bg: #E8F5E9;
+    --card-event-bg: #E3F2FD;
+    --card-training-bg: #FFF3E0;
+    --card-job-bg: #F3E5F5;
+    --card-payment-bg: #FFF8E1;
+    --card-ticket-bg: #E1F5FE;
+  
+    /* ICON COLORS */
+    --icon-member: #2E7D32;
+    --icon-event: #1976D2;
+    --icon-training: #FB8C00;
+    --icon-job: #8E24AA;
+    --icon-payment: #F9A825;
+    --icon-ticket: #0288D1;
+  
+    /* TABLE COLORS */
+    --table-header: #2E7D32;
+    --table-header-text: #FFFFFF;
+    --table-row-hover: #F1F8E9;
+    --table-border: #E0E0E0;
+  
+    /* BORDER & SHADOW */
+    --border-color: #E0E0E0;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+  
+    /* EXTRA COLORS */
+    --white: #FFFFFF;
+    --black: #212121;
+    --yellow: #FFC107;
+    --orange: #FB8C00;
+    --purple: #8E24AA;
+    --blue: #1E88E5;
+    --brown: #795548;
+  
+    /* LAYOUT TOKENS */
+    --container-width: 1200px;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --font-base: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  

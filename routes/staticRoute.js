@@ -17,6 +17,13 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       nav 
     })
   }))
+  router.get("/team", utilities.handleErrors(async (req, res) => {
+    let nav = await utilities.getNav()
+    res.render("pages/team", { 
+      title: "Our Team", 
+      nav 
+    })
+  }))
   router.get("/login", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("account/login", { 
