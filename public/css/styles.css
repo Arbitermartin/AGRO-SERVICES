@@ -206,18 +206,19 @@ button {
   height: 76px;
 }
 
-.brand {
+/* Brand */
+.nav-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: var(--text-primary);
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
-
-.brand-icon {
-  color: var(--primary-green);
-  font-size: 1.5rem;
+.nav-brand img {
+  height: 36px;
+  width: 36px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .nav-toggle {
