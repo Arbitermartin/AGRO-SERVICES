@@ -1625,6 +1625,10 @@ button {
     grid-template-columns: 1fr;
     gap: 40px;
   }
+  .about-section{
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
   .contact-info-cards {
     grid-template-columns: 1fr;
     margin-top: -30px;
