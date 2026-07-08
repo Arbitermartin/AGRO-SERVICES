@@ -1,0 +1,121 @@
+<div class="auth-page">
+    <div class="auth-wrapper">
+
+      <!-- ===================== LEFT BRAND PANEL ===================== -->
+      <div class="auth-brand-panel">
+        <a href="/" class="brand auth-brand-logo">
+          <i class="bi bi-flower1 brand-icon"></i>
+          <span class="brand-name">YASNET</span>
+        </a>
+
+        <div class="auth-floaters" aria-hidden="true">
+          <i class="bi bi-flower2 floater f1"></i>
+          <i class="bi bi-sun floater f2"></i>
+          <i class="bi bi-cloud floater f3"></i>
+          <i class="bi bi-flower3 floater f4"></i>
+        </div>
+
+        <div class="auth-brand-copy">
+          <h1>Welcome back to your farming community</h1>
+          <p>Sign in to access training, job opportunities, advisory support, and everything else AgroServices has to offer.</p>
+        </div>
+
+        <blockquote class="auth-testimonial">
+          <p>&ldquo;YASNET connected me to learn and grow I never had access to before.&rdquo;</p>
+          <cite>Member since 2026</cite>
+        </blockquote>
+      </div>
+
+      <!-- ===================== RIGHT FORM PANEL ===================== -->
+      <div class="auth-form-panel">
+        <div class="auth-form-card">
+
+          <div class="auth-form-head">
+            <h2>Sign in</h2>
+            <p>Enter your details to continue</p>
+          </div>
+
+          <form class="auth-form" id="loginForm" action="/login" method="POST" novalidate>
+
+            <!-- Email -->
+            <div class="form-field" id="emailField">
+              <label for="email">Email address</label>
+              <div class="input-wrap">
+                <i class="bi bi-envelope input-icon"></i>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="name@example.com"
+                  autocomplete="email"
+                  required
+                >
+                <i class="bi bi-check-circle-fill valid-icon"></i>
+              </div>
+              <span class="field-error" id="emailError">Enter a valid email address</span>
+            </div>
+
+            <!-- Password -->
+            <div class="form-field" id="passwordField">
+              <label for="password">Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  minlength="8"
+                  pattern="^.{8,}$"
+                  title="Password must be at least 8 characters"
+                  required
+                >
+                <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <span class="field-hint" id="passwordHint">
+                <i class="bi bi-info-circle"></i> Must be at least 8 characters
+              </span>
+              <span class="field-error" id="passwordError">Password must be at least 8 characters</span>
+              <span class="capslock-warning" id="capsWarning">
+                <i class="bi bi-exclamation-triangle"></i> Caps Lock is on
+              </span>
+            </div>
+
+            <div class="form-row-between">
+              <label class="checkbox-label">
+                <input type="checkbox" name="remember" id="remember">
+                <span class="checkbox-box"></span>
+                Remember me
+              </label>
+              <a href="/forgot-password" class="link-muted">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-filled btn-block" id="loginBtn">
+              <span class="btn-label">Sign in</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+
+            <div class="form-divider"><span>or continue with</span></div>
+
+            <div class="social-auth">
+              <button type="button" class="social-btn">
+                <i class="bi bi-google"></i> Google
+              </button>
+              <button type="button" class="social-btn">
+                <i class="bi bi-facebook"></i> Facebook
+              </button>
+            </div>
+
+            <p class="auth-switch">
+              Don't have an account? <a href="/register">Create one</a>
+            </p>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>

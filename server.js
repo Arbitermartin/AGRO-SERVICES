@@ -5,9 +5,13 @@
 
 const express = require("express")
 const app = express()
+const path = require("path");
 const env = require("dotenv").config();
+const accountRoute = require("./routes/accountRoute")
 const expressLayouts = require("express-ejs-layouts")
 const static = require("./routes/static")
+const utilities = require("./utilities")
+const baseController = require("./controllers/baseController")
 
 
 
@@ -29,9 +33,13 @@ app.use(static)
  * 
  * build home view here.
  * ******************/ 
-app.get("/", function(req,res){
-    res.render("index",{title: "Home"})
-})
+app.use(express.static(path.join(__dirname, 'public'))) 
+
+// /* ***********************
+//  * Routes (MUST come after middleware)
+//  *************************/
+app.use("/account", accountRoute)
+app.get("/", utilities.handleErrors(baseController.buildHome))
 
 
 /* ***********************
