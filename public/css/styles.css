@@ -437,6 +437,7 @@ button {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  margin: 0 auto;
 }
 
 .service-card {
@@ -1865,6 +1866,14 @@ button {
 
   .services {
     display: block;
+  }
+  .services-grid{
+    grid-template-columns: 1fr;
+    justify-content: center;
+  }
+  .service-card{
+    width: 100%;
+    max-width: 320px;
   }
 }
 
