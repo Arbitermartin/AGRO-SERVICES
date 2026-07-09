@@ -1741,7 +1741,10 @@ button {
   }
 
   .services-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1fr);
+  }
+  .service-item i{
+    padding: 0.5rem;
   }
   .auth-wrapper {
     grid-template-columns: 1fr;
