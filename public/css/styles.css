@@ -1322,7 +1322,9 @@ button {
 }
 
 .team-hero {
-  background: linear-gradient(135deg, #1e5c23, #2e7d32);
+  background-image: url("../images/site/team2.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
   color: white;
   padding: 110px 0 90px;
   text-align: center;
