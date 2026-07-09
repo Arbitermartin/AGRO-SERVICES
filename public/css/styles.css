@@ -1377,8 +1377,8 @@ button {
 }
 
 .team-card {
-  background: #1f2521;
-  color: white;
+  /* background: var(--card-member-bg); */
+  color: var(--black);
   padding: 32px 24px;
   border-radius: 16px;
   text-align: center;
@@ -1393,21 +1393,19 @@ button {
 .team-avatar {
   width: 110px;
   height: 110px;
-  color: #1f2521;
   font-size: 2.4rem;
   font-weight: 700;
-  border-radius: 16px;
   margin: 0 auto 20px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+
 .team-photo {
   width: 100%;
-  height: 220px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 12px;
   margin-bottom: 20px;
 }
 
@@ -1874,6 +1872,14 @@ button {
   .service-card{
     width: 100%;
     max-width: 320px;
+  }
+  .leadership-grid{
+    grid-template-columns: 1fr;
+    justify-content: center;
+  }
+  .team-card{
+    width: 100%;
+    max-width: 380px;
   }
 }
 
