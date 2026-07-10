@@ -241,9 +241,9 @@ button {
   transition: color 0.2s ease;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link:hover {
   color: var(--primary-green);
+  text-decoration: underline;
 }
 
 .nav-link.active::after {
@@ -1800,6 +1800,7 @@ button {
   .services {
     display: block;
   }
+ 
 }
 @media (max-width: 768px) {
   .nav-toggle {
@@ -1881,6 +1882,13 @@ button {
     width: 100%;
     max-width: 380px;
   }
+  .news-events-grid{
+    display: block;
+  
+   }
+ .news-column, .events-column { 
+   width: 100%; 
+ }
 }
 
 @media (max-width: 576px) {
