@@ -7,29 +7,62 @@ document.addEventListener('DOMContentLoaded', () => {
   const navToggle = document.getElementById('navToggle');
   const navLinks = document.getElementById('navLinks');
 
+  const closeMobileNav = () => {
+    navLinks.classList.remove('open');
+    const icon = navToggle.querySelector('i');
+    icon.classList.remove('bi-x-lg');
+    icon.classList.add('bi-list');
+  };
+
   if (navToggle && navLinks) {
     navToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
+      const isOpen = navLinks.classList.toggle('open');
       const icon = navToggle.querySelector('i');
-      if (navLinks.classList.contains('open')) {
-        icon.classList.remove('bi-list');
-        icon.classList.add('bi-x-lg');
-      } else {
-        icon.classList.remove('bi-x-lg');
-        icon.classList.add('bi-list');
-      }
+      icon.classList.toggle('bi-list', !isOpen);
+      icon.classList.toggle('bi-x-lg', isOpen);
     });
 
-    // Close mobile menu when a nav link is clicked
-    navLinks.querySelectorAll('.nav-link').forEach((link) => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('open');
-        const icon = navToggle.querySelector('i');
-        icon.classList.remove('bi-x-lg');
-        icon.classList.add('bi-list');
-      });
+    // Close the whole mobile menu only when a real destination link is
+    // clicked — not when a dropdown toggle button is clicked (that should
+    // just expand/collapse its submenu instead).
+    navLinks.querySelectorAll('a.nav-link, .dropdown-item').forEach((link) => {
+      link.addEventListener('click', closeMobileNav);
     });
   }
+
+  /* ---------- Generic dropdown handling (About Us, Resources) ---------- */
+  const allDropdownToggles = Array.from(document.querySelectorAll('.dropdown-toggle'));
+
+  const closeAllDropdowns = (except) => {
+    allDropdownToggles.forEach((toggle) => {
+      if (toggle === except) return;
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.classList.remove('open');
+      const menu = toggle.nextElementSibling;
+      if (menu) menu.classList.remove('open');
+    });
+  };
+
+  allDropdownToggles.forEach((toggle) => {
+    const menu = toggle.nextElementSibling;
+    if (!menu) return;
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', isOpen);
+      closeAllDropdowns(toggle);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    const clickedInsideAnyMenu = allDropdownToggles.some((toggle) => {
+      const menu = toggle.nextElementSibling;
+      return toggle.contains(e.target) || (menu && menu.contains(e.target));
+    });
+    if (!clickedInsideAnyMenu) closeAllDropdowns();
+  });
 
   /* ---------- Sticky navbar shadow on scroll ---------- */
   const navbar = document.getElementById('navbar');

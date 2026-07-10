@@ -206,7 +206,6 @@ button {
   height: 76px;
 }
 
-/* Brand */
 .nav-brand {
   display: flex;
   align-items: center;
@@ -241,9 +240,9 @@ button {
   transition: color 0.2s ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: var(--primary-green);
-  text-decoration: underline;
 }
 
 .nav-link.active::after {
@@ -268,6 +267,81 @@ button {
   padding: 8px 20px;
 }
 
+/* ---------- Nav dropdowns (About Us / Resources) ---------- */
+.nav-dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.dropdown-caret {
+  font-size: 0.65rem;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"] .dropdown-caret,
+.dropdown-toggle.open .dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  min-width: 220px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 32px var(--shadow-medium);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  z-index: 1100;
+}
+
+.dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+}
+
+.dropdown-item i {
+  color: var(--primary-green);
+  font-size: 0.95rem;
+  width: 18px;
+  text-align: center;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-light-green);
+}
+
+.dropdown-item.is-active {
+  background: var(--bg-light-green);
+  color: var(--primary-green);
+  font-weight: 600;
+}
 /* =====================================================
    HERO
 ===================================================== */
@@ -1824,13 +1898,48 @@ button {
   }
 
   .nav-links.open {
-    max-height: 400px;
+    max-height: 720px;
+    overflow-y: auto;
   }
 
   .nav-link {
     width: 100%;
     padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
+  }
+
+  /* Dropdowns become inline accordions on mobile instead of floating menus */
+  .nav-dropdown {
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .dropdown-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: none;
+  }
+
+  .dropdown-menu {
+    position: static;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0 0 0 6px;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+    background: var(--bg-light-green);
+    border-radius: 8px;
+  }
+
+  .dropdown-menu.open {
+    max-height: 320px;
+    padding: 6px;
+    margin-bottom: 8px;
   }
 
   .nav-actions {

@@ -1,4 +1,4 @@
- 
+
   <header class="navbar" id="navbar">
     <div class="container navbar-inner">
       <div class="nav-brand">
@@ -13,9 +13,57 @@
 
       <nav class="nav-links" id="navLinks">
         <a href="/" class="nav-link">Home</a>
-        <a href="/about" class="nav-link">About Us</a>
+
+        <!-- About Us dropdown -->
+        <div class="nav-dropdown">
+          <button class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+            About Us
+            <i class="bi bi-chevron-down dropdown-caret"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="/about" class="dropdown-item">
+              <i class="bi bi-info-circle"></i>
+              <span>About Us</span>
+            </a>
+            <a href="/team" class="dropdown-item">
+              <i class="bi bi-people"></i>
+              <span>Our Team</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Resources dropdown -->
+        <div class="nav-dropdown">
+          <button class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+            Resources
+            <i class="bi bi-chevron-down dropdown-caret"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a href="/resources#blog" class="dropdown-item">
+              <i class="bi bi-briefcase-fill"></i>
+              <span>Job opportunities</span>
+            </a>
+            <a href="/resources#blog" class="dropdown-item">
+              <i class="bi bi-camera-video-fill"></i>
+              <span>Video Gallery</span>
+            </a>
+            <a href="/resources#guides" class="dropdown-item">
+              <i class="bi bi-book"></i>
+              <span>Guides &amp; Training</span>
+            </a>
+            <a href="/resources#downloads" class="dropdown-item">
+              <i class="bi bi-download"></i>
+              <span>Downloads</span>
+            </a>
+            <a href="/resources#faq" class="dropdown-item">
+              <i class="bi bi-question-circle"></i>
+              <span>FAQs</span>
+            </a>
+          </div>
+        </div>
+
         <a href="/contact" class="nav-link">Contact Us</a>
-        <a href="/team" class="nav-link">Our Team</a>
+
         <div class="nav-actions">
           <a href="/login" class="btn btn-outline">Login</a>
           <a href="/register" class="btn btn-filled">Register</a>
