@@ -24,6 +24,13 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       nav 
     })
   }))
+  router.get("/jobs", utilities.handleErrors(async (req, res) => {
+    let nav = await utilities.getNav()
+    res.render("pages/jobs", { 
+      title: "Job Opportunities", 
+      nav 
+    })
+  }))
   router.get("/login", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("account/login", { 

@@ -289,3 +289,53 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
     showStep(1);
   }
+  /* =====================================================
+     JOB OPPORTUNITIES PAGE — LIVE SEARCH & FILTER
+  ===================================================== */
+  const jobsList = document.getElementById('jobsList');
+  if (jobsList) {
+    const searchInput = document.getElementById('jobSearch');
+    const locationFilter = document.getElementById('jobLocationFilter');
+    const typeFilter = document.getElementById('jobTypeFilter');
+    const jobCards = Array.from(jobsList.querySelectorAll('.job-card'));
+    const emptyState = document.getElementById('jobsEmpty');
+    const clearBtn = document.getElementById('clearJobFilters');
+
+    const applyJobFilters = () => {
+      const query = searchInput.value.trim().toLowerCase();
+      const location = locationFilter.value;
+      const type = typeFilter.value;
+
+      let visibleCount = 0;
+
+      jobCards.forEach((card) => {
+        const title = card.dataset.title.toLowerCase();
+        const cardLocation = card.dataset.location;
+        const cardType = card.dataset.type;
+
+        const matchesQuery = query === '' || title.includes(query);
+        const matchesLocation = location === 'all' || cardLocation === location;
+        const matchesType = type === 'all' || cardType === type;
+
+        const isMatch = matchesQuery && matchesLocation && matchesType;
+        card.classList.toggle('is-hidden', !isMatch);
+        if (isMatch) visibleCount += 1;
+      });
+
+      emptyState.classList.toggle('show', visibleCount === 0);
+    };
+
+    searchInput.addEventListener('input', applyJobFilters);
+    locationFilter.addEventListener('change', applyJobFilters);
+    typeFilter.addEventListener('change', applyJobFilters);
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        locationFilter.value = 'all';
+        typeFilter.value = 'all';
+        applyJobFilters();
+        searchInput.focus();
+      });
+    }
+  } // end DOMContentLoaded
