@@ -339,3 +339,35 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   } // end DOMContentLoaded
+
+  /* =====================================================
+     GUIDANCE & TRAINING PAGE — CATEGORY FILTER
+  ===================================================== */
+  const trainingGrid = document.getElementById('trainingGrid');
+  if (trainingGrid) {
+    const filterPills = Array.from(document.querySelectorAll('.training-pill'));
+    const trainingCards = Array.from(trainingGrid.querySelectorAll('.training-card'));
+    const trainingEmpty = document.getElementById('trainingEmpty');
+
+    const applyTrainingFilter = (category) => {
+      let visibleCount = 0;
+
+      trainingCards.forEach((card) => {
+        const isMatch = category === 'all' || card.dataset.category === category;
+        card.classList.toggle('is-hidden', !isMatch);
+        if (isMatch) visibleCount += 1;
+      });
+
+      trainingEmpty.classList.toggle('show', visibleCount === 0);
+    };
+
+    filterPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        // Toggle active state
+        filterPills.forEach((p) => p.classList.remove('is-active'));
+        pill.classList.add('is-active');
+
+        applyTrainingFilter(pill.dataset.filter);
+      });
+    });
+  }

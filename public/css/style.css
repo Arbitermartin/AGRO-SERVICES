@@ -535,11 +535,257 @@
   color: var(--primary-green);
   margin-bottom: 8px;
 }
+
+/* =====================================================
+   GUIDANCE & TRAINING PAGE
+===================================================== */
+.training-section {
+  background: var(--bg-main);
+  padding: 60px 0 90px;
+}
+
+/* ---------- Category filter pills ---------- */
+.training-filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.training-pill {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 9px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: var(--font-base);
+  transition: all 0.2s ease;
+}
+
+.training-pill:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.training-pill.is-active {
+  background: var(--primary-green);
+  border-color: var(--primary-green);
+  color: var(--text-white);
+  font-weight: 600;
+}
+
+/* ---------- Program grid ---------- */
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 20px;
+}
+
+.training-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 26px var(--shadow-light);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.training-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 34px var(--shadow-medium);
+}
+
+.training-card.is-hidden {
+  display: none;
+}
+
+.training-thumb {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-white);
+  font-size: 2.1rem;
+}
+
+.training-body {
+  padding: 18px 18px 20px;
+}
+
+.training-tag {
+  display: inline-block;
+  background: var(--bg-light-green);
+  color: var(--primary-green);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.training-body h3 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 10px;
+  min-height: 2.7em;
+}
+
+.training-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.training-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.training-enroll {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Empty state ---------- */
+.training-empty {
+  display: none;
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+}
+
+.training-empty.show {
+  display: block;
+}
+
+.training-empty i {
+  font-size: 2rem;
+  color: var(--light-green);
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.training-empty h3 {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.training-empty p {
+  font-size: 0.88rem;
+}
+
+/* ---------- Downloadable guides ---------- */
+.training-guides {
+  margin: 50px 0 40px;
+}
+
+.training-guides h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+}
+
+.training-guides h2 i {
+  color: var(--primary-green);
+}
+
+.training-guides-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.training-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 15px 20px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.training-guide-item:hover {
+  border-color: var(--primary-green);
+  background: var(--bg-light-green);
+}
+
+.training-guide-item > i:first-child {
+  color: var(--primary-green);
+  font-size: 1.15rem;
+}
+
+.training-guide-item div {
+  flex: 1;
+}
+
+.training-guide-item h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.training-guide-item span {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.guide-download-icon {
+  color: var(--primary-green);
+  font-size: 1.1rem;
+}
+
+/* ---------- Request training CTA ---------- */
+.training-cta {
+  background: var(--bg-light-green);
+  border-radius: var(--radius-md);
+  padding: 26px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.training-cta h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.training-cta p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+/* end here training style */
 /* ===========================
    MOBILE
 =========================== */
 @media (max-width: 900px) {
   .jobs-why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* training */
+  .training-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -599,6 +845,28 @@
     text-align: center;
     order: 3;
   }
+  /* training page */
+  .training-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-filters {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .training-pill {
+    flex-shrink: 0;
+  }
+
+  .training-cta {
+    flex-direction: column;
+    text-align: center;
+  }
+  /* end here */
 }
 
 @media (max-width:480px){
