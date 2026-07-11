@@ -371,3 +371,36 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+  /* =====================================================
+     HOMEPAGE FAQ ACCORDION
+  ===================================================== */
+  const faqHomeList = document.getElementById('faqHomeList');
+  if (faqHomeList) {
+    const faqItems = Array.from(faqHomeList.querySelectorAll('.faq-home-item'));
+
+    faqItems.forEach((item) => {
+      const question = item.querySelector('.faq-home-question');
+      const icon = item.querySelector('.faq-home-icon i');
+
+      question.addEventListener('click', () => {
+        const isCurrentlyOpen = item.classList.contains('is-open');
+
+        // Close every item first (accordion behavior — only one open at a time)
+        faqItems.forEach((other) => {
+          other.classList.remove('is-open');
+          other.querySelector('.faq-home-question').setAttribute('aria-expanded', 'false');
+          const otherIcon = other.querySelector('.faq-home-icon i');
+          otherIcon.classList.remove('bi-dash');
+          otherIcon.classList.add('bi-plus');
+        });
+
+        // Re-open the clicked item, unless it was already open (then leave all closed)
+        if (!isCurrentlyOpen) {
+          item.classList.add('is-open');
+          question.setAttribute('aria-expanded', 'true');
+          icon.classList.remove('bi-plus');
+          icon.classList.add('bi-dash');
+        }
+      });
+    });
+  }
