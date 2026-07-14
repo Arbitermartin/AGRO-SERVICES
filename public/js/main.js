@@ -404,3 +404,71 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+  /* =====================================================
+     ADMIN DASHBOARD
+  ===================================================== */
+  const dbSidebar = document.getElementById('dbSidebar');
+  if (dbSidebar) {
+
+    /* ---------- Sidebar submenu accordions (Members, Events, Jobs, etc.) ---------- */
+    const dbNavToggles = Array.from(document.querySelectorAll('.db-nav-toggle'));
+
+    dbNavToggles.forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+        // Close every other submenu first (accordion behavior)
+        dbNavToggles.forEach((other) => {
+          if (other !== toggle) other.setAttribute('aria-expanded', 'false');
+        });
+
+        toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      });
+    });
+
+    /* ---------- Mobile sidebar toggle ---------- */
+    const dbSidebarToggle = document.getElementById('dbSidebarToggle');
+    if (dbSidebarToggle) {
+      dbSidebarToggle.addEventListener('click', () => {
+        dbSidebar.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        const clickedInsideSidebar = dbSidebar.contains(e.target);
+        const clickedToggleBtn = dbSidebarToggle.contains(e.target);
+        if (!clickedInsideSidebar && !clickedToggleBtn) {
+          dbSidebar.classList.remove('open');
+        }
+      });
+    }
+
+    /* ---------- User dropdown (Update Profile / Change Password / Logout) ---------- */
+    const dbUserToggle = document.getElementById('dbUserToggle');
+    const dbUserDropdown = document.getElementById('dbUserDropdown');
+
+    if (dbUserToggle && dbUserDropdown) {
+      dbUserToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dbUserDropdown.classList.toggle('open');
+        dbUserToggle.setAttribute('aria-expanded', isOpen);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dbUserDropdown.contains(e.target) && e.target !== dbUserToggle) {
+          dbUserDropdown.classList.remove('open');
+          dbUserToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    /* ---------- Approve / Reject button feedback ---------- */
+    document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.db-approval-item');
+        if (!item) return;
+        item.style.transition = 'opacity 0.3s ease';
+        item.style.opacity = '0';
+        setTimeout(() => item.remove(), 300);
+      });
+    });
+  }
