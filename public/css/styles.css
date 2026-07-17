@@ -893,6 +893,7 @@ button {
   width: 100%;
   position: relative;
   padding: 13px 22px;
+  margin-top: 1rem;
 }
 
 .btn-spinner {
@@ -1537,6 +1538,12 @@ button {
   min-height: 100vh;
   background: var(--bg-main);
   padding: 40px 20px;
+}
+.field-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  min-height: 1em; /* reserves space so layout doesn't jump when the message appears */
 }
 
 .step-card {

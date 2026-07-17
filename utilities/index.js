@@ -32,5 +32,29 @@ utilities.handleErrors = (fn) => {
     Promise.resolve(fn(req, res, next)).catch(next)
   }
 }
+/* ****************************************
+ * Middleware: require any logged-in account
+ * *************************************** */
+utilities.checkLogin = (req, res, next) => {
+  if (req.session.account) {
+    return next();
+  }
+  req.flash("error", "Please log in to access this page.");
+  return res.redirect("/account/login");
+};
+
+/* ****************************************
+ * Middleware factory: require a specific role
+ * Usage: utilities.checkRole("admin")
+ * *************************************** */
+utilities.checkRole = (allowedRole) => {
+  return (req, res, next) => {
+    if (req.session.account && req.session.account.account_type === allowedRole) {
+      return next();
+    }
+    req.flash("error", "You do not have permission to view that page.");
+    return res.redirect("/account/login");
+  };
+};
 
 module.exports = utilities

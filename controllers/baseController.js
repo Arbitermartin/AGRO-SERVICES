@@ -16,7 +16,6 @@ baseController.buildHome = async function(req, res) {
     const upcomingEvents = await accountModel.getUpcomingEvents(5);
 
     let nav = await utilities.getNav();
-
     res.render("pages/index", {
       title: "Home",
       nav,

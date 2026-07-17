@@ -1617,6 +1617,9 @@
 .db-btn-reject {
   background: var(--danger);
 }
+.notice{
+  color: red;
+}
 
 /* ===========================
    MOBILE

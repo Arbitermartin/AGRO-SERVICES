@@ -13,7 +13,7 @@ router.get("/about", utilities.handleErrors(async (req, res) => {
 router.get("/contact", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/contact", { 
-      title: "Contact Page", 
+      title: "Contact Us", 
       nav 
     })
   }))
@@ -35,13 +35,6 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/training", { 
       title: "Training", 
-      nav 
-    })
-  }))
-  router.get("/index", utilities.handleErrors(async (req, res) => {
-    let nav = await utilities.getNav()
-    res.render("dashboards/index", { 
-      title: "Dashboard", 
       nav 
     })
   }))

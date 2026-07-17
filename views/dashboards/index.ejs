@@ -126,8 +126,8 @@
             <i class="bi bi-list"></i>
           </button>
           <div>
-            <div class="db-welcome">Welcome, Super Admin</div>
-            <div class="db-role">Role: Super Administrator</div>
+            <div class="db-welcome">Welcome, <%= account.full_name %></div>
+            <div class="db-role">Role: <%= account.account_type %></div>
           </div>
         </div>
 
@@ -147,17 +147,17 @@
           <!-- User menu -->
           <div class="db-user-menu">
             <button type="button" class="db-user-toggle" id="dbUserToggle" aria-haspopup="true" aria-expanded="false">
-              <span class="db-avatar">SA</span>
-              <span class="db-user-name">Super Admin</span>
+              <span class="db-avatar"><%=initials%></span>
+              <span class="db-user-name"><%=account.full_name%></span>
               <i class="bi bi-chevron-down db-user-caret"></i>
             </button>
 
             <div class="db-user-dropdown" id="dbUserDropdown">
               <div class="db-user-dropdown-head">
-                <span class="db-avatar db-avatar-lg">SA</span>
+                <span class="db-avatar db-avatar-lg"><%= initials %></span>
                 <div>
-                  <div class="db-user-dropdown-name">Super Admin</div>
-                  <div class="db-user-dropdown-email">admin@agroservices.co.tz</div>
+                  <div class="db-user-dropdown-name"><%= account.full_name %></div>
+                  <div class="db-user-dropdown-email"><%= account.email %></div>
                 </div>
               </div>
               <div class="db-user-dropdown-divider"></div>
@@ -168,7 +168,7 @@
                 <i class="bi bi-key"></i> Change Password
               </a>
               <div class="db-user-dropdown-divider"></div>
-              <a href="/login" class="db-user-dropdown-item db-user-dropdown-danger">
+              <a href="/account/logout" class="db-user-dropdown-item db-user-dropdown-danger">
                 <i class="bi bi-box-arrow-right"></i> Logout
               </a>
             </div>

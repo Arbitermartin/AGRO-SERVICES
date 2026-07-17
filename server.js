@@ -13,6 +13,9 @@ const static = require("./routes/static")
 const staticRoute = require("./routes/staticRoute")
 const utilities = require("./utilities")
 const baseController = require("./controllers/baseController")
+const session = require("express-session")
+const flash =require("connect-flash")
+const cookieParser = require("cookie-parser")
 const db = require("./database/db");
 
 
@@ -25,6 +28,10 @@ const db = require("./database/db");
 
 
 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+
 /*********************************
  * This is view template engine
  * **************************/ 
@@ -33,9 +40,34 @@ app.use(expressLayouts)
 app.set("layout","./layouts/layout")
 
 
+/* ***********************
+ * Middleware
+ * ************************/
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  name: 'sessionId',
+}));
+
+app.use(flash());
+// Express Messages Middleware
+app.use(require('connect-flash')())
+app.use(function(req, res, next){
+  res.locals.messages = require('express-messages')(req, res)
+  next()
+})
+
+
+//Delivery  login activity.
+app.use(cookieParser())
+
+
 /****************************************
  * static route
- * ***************************/ 
+ * ***************************/
+
+app.use("/account", accountRoute);
 app.use(static)
 app.use("/", staticRoute)
 
