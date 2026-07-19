@@ -65,10 +65,15 @@ router.get(
  * Logout
  * *************************************** */
 router.get("/logout", accountController.accountLogout);
+
+/****************************
+ * 
+ * update profile
+ */
 router.post(
-  "/change-password",
+  "/update-profile",
   utilities.checkLogin,
-  utilities.handleErrors(accountController.changePassword)
+  utilities.handleErrors(accountController.updateProfile)
 );
 
 

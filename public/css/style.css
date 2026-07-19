@@ -1641,6 +1641,10 @@
 .error{
   color: var(--danger)
 }
+/* deliver success message */
+.success{
+  color: green;
+}
 /* =====================================================
    MEMBER DASHBOARD — TRAININGS & JOBS
 ===================================================== */

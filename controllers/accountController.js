@@ -125,19 +125,47 @@ function getInitials(fullName) {
     .join("");
 }
 /* ****************************************
- * Dashboards — one function per role
+ * Delivery admin dashboard here.
  * *************************************** */
 async function buildAdminDashboard(req, res) {
   let nav = await utilities.getNav();
+  const account = req.session.account;
+  const profile = (await accountModel.getProfileByAccountId(account.id)) || {};
+  const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id)) || {} : {};
+  const adminDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
+
   res.render("dashboards/index", {
     title: "Admin Dashboard",
     nav,
-    account: req.session.account,
-    initials: getInitials(req.session.account.full_name),
-    // Add these two lines 👇
-    showNav: false,
-    showFooter: false
+    account,
+    initials: getInitials(account.full_name),
+    profile,
+    birthPlace,
+    adminDetails,
+     // Add these two lines 👇
+  showNav: false,
+  showFooter: false
   });
+}
+async function updateProfile(req, res) {
+  try {
+    const accountId = req.session.account.id;
+    const { full_name, date_of_birth, gender, nationality, bio, region, district, ward, department, office, admin_role } = req.body;
+
+    await accountModel.updateFullName(accountId, full_name);
+    req.session.account.full_name = full_name;
+
+    const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
+    await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
+    await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
+
+    req.flash("success", "Profile updated successfully.");
+    res.redirect("/account/dashboard/admin?profileUpdated=true");
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Failed to update profile.");
+    res.redirect("/account/dashboard/admin");
+  }
 }
 
 async function buildIctStaffDashboard(req, res) {
@@ -170,44 +198,19 @@ async function buildMemberDashboard(req, res) {
  * Logout
  * *************************************** */
 function accountLogout(req, res) {
-  req.session.destroy(() => {
-    res.redirect("/account/login");
-  });
+  req.flash("success","You have been logged out successfully.");
+  const flashMessages =req.session.flash;
+
+  req.session.regenerate((err)=>{
+    if(err) console.error(err);
+    req.session.flash =flashMessages;
+    res.redirect("/account/login")
+  }) 
 }
-async function changePassword(req, res) {
-  try {
-    const { current_password, new_password, confirm_new_password } = req.body;
-    const accountId = req.session.account.id;
-
-    if (new_password !== confirm_new_password) {
-      req.flash("error", "New passwords do not match.");
-      return res.redirect("/account/dashboard/admin");
-    }
-
-    const account = await accountModel.getAccountById(accountId);
-    const currentMatch = await bcrypt.compare(current_password, account.password);
-
-    if (!currentMatch) {
-      req.flash("error", "Current password is incorrect.");
-      return res.redirect("/account/dashboard/admin");
-    }
-
-    const hashedNewPassword = await bcrypt.hash(new_password, 10);
-    await accountModel.updatePassword(accountId, hashedNewPassword);
-
-    req.flash("success", "Password updated successfully.");
-    res.redirect("/account/dashboard/admin?passwordChanged=true");
-  } catch (error) {
-    console.error(error);
-    req.flash("error", "Failed to update password.");
-    res.redirect("/account/dashboard/admin");
-  }
-}
-
 
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,buildIctStaffDashboard,buildMemberDashboard,accountLogout,changePassword
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile, buildIctStaffDashboard,buildMemberDashboard,accountLogout
 
 }

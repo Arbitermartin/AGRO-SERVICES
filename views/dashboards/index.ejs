@@ -161,7 +161,7 @@
                 </div>
               </div>
               <div class="db-user-dropdown-divider"></div>
-              <a href="/dashboard/profile" class="db-user-dropdown-item">
+              <a href="#" id="updateProfileLink" class="db-user-dropdown-item">
                 <i class="bi bi-person"></i> Update Profile
               </a>
               <a href="#" id="changePasswordLink" class="db-user-dropdown-item">
@@ -458,6 +458,139 @@
           </form>
         </div>
         <!-- end #changePasswordPanel -->
+         <!-- ✅ Update Profile panel — sibling of #dbMainContent, hidden by default -->
+<div id="updateProfilePanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-gear"></i></div>
+    <h2>Update Profile</h2>
+    <p>Keep your personal and work details up to date</p>
+  </div>
+
+  <form action="/account/update-profile" method="POST" class="auth-form" id="updateProfileForm">
+
+    <h3 class="profile-section-title">Personal Information</h3>
+
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" name="full_name" value="<%= account.full_name %>" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Email</label>
+      <div class="input-wrap">
+        <i class="bi bi-envelope input-icon"></i>
+        <input type="email" value="<%= account.email %>" disabled>
+      </div>
+      <small class="field-hint">Email cannot be changed. Contact ICT support if this needs to update.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Date of Birth</label>
+      <div class="input-wrap">
+        <i class="bi bi-calendar-event input-icon"></i>
+        <input type="date" name="date_of_birth" value="<%= profile.date_of_birth || '' %>">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Gender</label>
+      <div class="input-wrap">
+        <i class="bi bi-person-badge input-icon"></i>
+        <select name="gender">
+          <option value="">Select gender</option>
+          <option value="male" <%= profile.gender === 'male' ? 'selected' : '' %>>Male</option>
+          <option value="female" <%= profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+          <option value="other" <%= profile.gender === 'other' ? 'selected' : '' %>>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Nationality</label>
+      <div class="input-wrap">
+        <i class="bi bi-flag input-icon"></i>
+        <input type="text" name="nationality" value="<%= profile.nationality || '' %>" placeholder="e.g. Tanzanian">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Bio</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+        <textarea name="bio" rows="3" placeholder="A short bio about yourself" style="padding-left:44px;"><%= profile.bio || '' %></textarea>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Place of Birth</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Region</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo-alt input-icon"></i>
+          <input type="text" name="region" value="<%= birthPlace.region || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>District</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo input-icon"></i>
+          <input type="text" name="district" value="<%= birthPlace.district || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Ward</label>
+        <div class="input-wrap">
+          <i class="bi bi-pin-map input-icon"></i>
+          <input type="text" name="ward" value="<%= birthPlace.ward || '' %>">
+        </div>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Work Details</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Department</label>
+        <div class="input-wrap">
+          <i class="bi bi-building input-icon"></i>
+          <input type="text" name="department" value="<%= adminDetails.department || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Office</label>
+        <div class="input-wrap">
+          <i class="bi bi-building-gear input-icon"></i>
+          <input type="text" name="office" value="<%= adminDetails.office || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Admin Role</label>
+        <div class="input-wrap">
+          <i class="bi bi-award input-icon"></i>
+          <input type="text" name="admin_role" value="<%= adminDetails.admin_role || '' %>" placeholder="e.g. Super Administrator">
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 20px;">
+      Save Changes
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelUpdateProfile"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+</div>
+<!-- end #updateProfilePanel -->
 
       </div>
       <!-- end db-content -->
