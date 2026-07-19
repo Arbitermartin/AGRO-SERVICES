@@ -745,6 +745,16 @@ button {
 .input-wrap input:focus ~ .input-icon {
   color: var(--primary-green);
 }
+.toggle-visibility {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--black);
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 2; /* sits above browser extension icons if possible */
+}
 
 .valid-icon {
   position: absolute;

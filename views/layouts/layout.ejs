@@ -5,12 +5,18 @@
 </head>
 
 <body>
-    <%- include('../partials/navigation') %>
+    <!-- Conditionally show Navigation -->
+    <% if (typeof showNav === 'undefined' || showNav === true) { %>
+        <%- include('../partials/navigation') %>
+    <% } %>
 
     <main>
-        <%- body %>   <!-- VERY IMPORTANT -->
+        <%- body %>
     </main>
 
-    <%- include('../partials/footer') %>
+    <!-- Conditionally show Footer -->
+    <% if (typeof showFooter === 'undefined' || showFooter === true) { %>
+        <%- include('../partials/footer') %>
+    <% } %>
 </body>
 </html>

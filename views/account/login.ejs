@@ -34,6 +34,16 @@
             <h2>Sign in</h2>
             <p>Enter your details to continue</p>
           </div>
+          <%- messages() %>
+   
+
+          <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            <ul class="error-list" style="color:#c0392b; margin-bottom:20px;">
+              <% errors.forEach(err => { %>
+                <li><%= err.msg %></li>
+              <% }) %>
+            </ul>
+          <% } %>
 
           <form class="auth-form" id="loginForm" action="/account/login" method="POST" novalidate>
 

@@ -134,6 +134,9 @@ async function buildAdminDashboard(req, res) {
     nav,
     account: req.session.account,
     initials: getInitials(req.session.account.full_name),
+    // Add these two lines 👇
+    showNav: false,
+    showFooter: false
   });
 }
 
@@ -144,6 +147,9 @@ async function buildIctStaffDashboard(req, res) {
     nav,
     account: req.session.account,
     initials: getInitials(req.session.account.full_name),
+     // Add these two lines 👇
+     showNav: false,
+     showFooter: false
   });
 }
 
@@ -154,6 +160,9 @@ async function buildMemberDashboard(req, res) {
     nav,
     account: req.session.account,
     initials: getInitials(req.session.account.full_name),
+     // Add these two lines 👇
+     showNav: false,
+     showFooter: false
   });
 }
 
@@ -165,10 +174,40 @@ function accountLogout(req, res) {
     res.redirect("/account/login");
   });
 }
+async function changePassword(req, res) {
+  try {
+    const { current_password, new_password, confirm_new_password } = req.body;
+    const accountId = req.session.account.id;
+
+    if (new_password !== confirm_new_password) {
+      req.flash("error", "New passwords do not match.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const account = await accountModel.getAccountById(accountId);
+    const currentMatch = await bcrypt.compare(current_password, account.password);
+
+    if (!currentMatch) {
+      req.flash("error", "Current password is incorrect.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const hashedNewPassword = await bcrypt.hash(new_password, 10);
+    await accountModel.updatePassword(accountId, hashedNewPassword);
+
+    req.flash("success", "Password updated successfully.");
+    res.redirect("/account/dashboard/admin?passwordChanged=true");
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Failed to update password.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
 
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,buildIctStaffDashboard,buildMemberDashboard,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,buildIctStaffDashboard,buildMemberDashboard,accountLogout,changePassword
 
 }

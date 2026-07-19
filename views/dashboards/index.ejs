@@ -13,7 +13,7 @@
 
       <nav class="db-nav">
 
-        <a href="/dashboard" class="db-nav-link is-active">
+        <a href="/account/dashboard/admin" class="db-nav-link is-active">
           <i class="bi bi-speedometer2"></i> Dashboard
         </a>
 
@@ -147,8 +147,8 @@
           <!-- User menu -->
           <div class="db-user-menu">
             <button type="button" class="db-user-toggle" id="dbUserToggle" aria-haspopup="true" aria-expanded="false">
-              <span class="db-avatar"><%=initials%></span>
-              <span class="db-user-name"><%=account.full_name%></span>
+              <span class="db-avatar"><%= initials %></span>
+              <span class="db-user-name"><%= account.full_name %></span>
               <i class="bi bi-chevron-down db-user-caret"></i>
             </button>
 
@@ -164,7 +164,7 @@
               <a href="/dashboard/profile" class="db-user-dropdown-item">
                 <i class="bi bi-person"></i> Update Profile
               </a>
-              <a href="/dashboard/change-password" class="db-user-dropdown-item">
+              <a href="#" id="changePasswordLink" class="db-user-dropdown-item">
                 <i class="bi bi-key"></i> Change Password
               </a>
               <div class="db-user-dropdown-divider"></div>
@@ -178,228 +178,289 @@
 
       <div class="db-content">
 
-        <!-- ===================== STAT CARDS ===================== -->
-        <div class="db-stats-grid">
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-people-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Total Members</div>
-              <div class="db-stat-value">1,248</div>
-              <div class="db-stat-delta db-stat-delta-green">&uarr; 35 this month</div>
+        <%- messages() %>
+
+        <!-- ✅ Everything that should be HIDDEN when Change Password is shown -->
+        <div id="dbMainContent">
+
+          <!-- ===================== STAT CARDS ===================== -->
+          <div class="db-stats-grid">
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-people-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Total Members</div>
+                <div class="db-stat-value">1,248</div>
+                <div class="db-stat-delta db-stat-delta-green">&uarr; 35 this month</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-calendar-event-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Events</div>
+                <div class="db-stat-value">24</div>
+                <div class="db-stat-delta db-stat-delta-blue">5 upcoming</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-briefcase-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Job Postings</div>
+                <div class="db-stat-value">18</div>
+                <div class="db-stat-delta db-stat-delta-green">3 active</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-mortarboard-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Trainings</div>
+                <div class="db-stat-value">16</div>
+                <div class="db-stat-delta db-stat-delta-orange">4 upcoming</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+              <div>
+                <div class="db-stat-label">Pending Payments</div>
+                <div class="db-stat-value">32</div>
+                <div class="db-stat-delta db-stat-delta-yellow">Your approval</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-shield-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Admins</div>
+                <div class="db-stat-value">6</div>
+                <div class="db-stat-delta db-stat-delta-purple">View all</div>
+              </div>
             </div>
           </div>
 
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-calendar-event-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Events</div>
-              <div class="db-stat-value">24</div>
-              <div class="db-stat-delta db-stat-delta-blue">5 upcoming</div>
+          <!-- ===================== MANAGEMENT PANELS ===================== -->
+          <div class="db-panels-grid">
+
+            <div class="db-panel">
+              <div class="db-panel-title">Member Management</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>All Members</span><small>View, edit &amp; manage members</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Member</span><small>Create new member</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Member Reports</span><small>Statistics &amp; analytics</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Export Members</span><small>Download members list</small></div></a>
             </div>
+
+            <div class="db-panel">
+              <div class="db-panel-title">Events &amp; News</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-calendar3"></i><div><span>All Events</span><small>Manage all events</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-calendar-plus"></i><div><span>Add Event</span><small>Create new event</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-person-check"></i><div><span>Registered Users</span><small>See who registered</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-newspaper"></i><div><span>All News</span><small>Manage news &amp; updates</small></div></a>
+            </div>
+
+            <div class="db-panel">
+              <div class="db-panel-title">Job Postings</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-briefcase"></i><div><span>All Job Postings</span><small>View &amp; manage jobs</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Job Posting</span><small>Create new job</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-person-lines-fill"></i><div><span>Applications</span><small>View all applicants</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Applications</span><small>Export to Excel</small></div></a>
+            </div>
+
+            <div class="db-panel">
+              <div class="db-panel-title">Trainings</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-mortarboard"></i><div><span>All Trainings</span><small>Manage trainings</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Training</span><small>Create new training</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>Registrations</span><small>View registered members</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Registrations</span><small>Export to Excel</small></div></a>
+            </div>
+
+            <div class="db-panel">
+              <div class="db-panel-title">Payments &amp; Approvals</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-hourglass-split"></i><div><span>Pending Payments</span><small>Approve or reject</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-clock-history"></i><div><span>Payment History</span><small>View all payments</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Payment Reports</span><small>Statistics &amp; analytics</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Payments</span><small>Export to Excel</small></div></a>
+            </div>
+
+            <div class="db-panel">
+              <div class="db-panel-title">Admin Management</div>
+              <a href="#" class="db-panel-item"><i class="bi bi-shield"></i><div><span>All Admins</span><small>View, edit &amp; delete admins</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Admin</span><small>Create new admin</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-activity"></i><div><span>Admin Activity</span><small>View login &amp; actions</small></div></a>
+              <a href="#" class="db-panel-item"><i class="bi bi-envelope-check"></i><div><span>Send Credentials</span><small>Email login details</small></div></a>
+            </div>
+
           </div>
 
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-briefcase-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Job Postings</div>
-              <div class="db-stat-value">18</div>
-              <div class="db-stat-delta db-stat-delta-green">3 active</div>
-            </div>
-          </div>
+          <!-- ===================== BOTTOM ROW ===================== -->
+          <div class="db-bottom-grid">
 
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-mortarboard-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Trainings</div>
-              <div class="db-stat-value">16</div>
-              <div class="db-stat-delta db-stat-delta-orange">4 upcoming</div>
+            <div class="db-card db-chart-card">
+              <div class="db-panel-title">Registrations Overview</div>
+              <svg viewBox="0 0 300 140" class="db-chart-svg" preserveAspectRatio="none">
+                <polyline points="0,120 40,95 80,80 120,88 160,55 200,45 240,20 280,15"
+                  fill="none" stroke="#2E7D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="db-chart-labels">
+                <span>May 16</span><span>May 17</span><span>May 18</span><span>May 19</span>
+                <span>May 20</span><span>May 21</span><span>May 22</span>
+              </div>
             </div>
-          </div>
 
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-yellow"><i class="bi bi-hourglass-split"></i></div>
-            <div>
-              <div class="db-stat-label">Pending Payments</div>
-              <div class="db-stat-value">32</div>
-              <div class="db-stat-delta db-stat-delta-yellow">Your approval</div>
+            <div class="db-card">
+              <div class="db-panel-title">Recent Activities</div>
+              <div class="db-activity-item">
+                <i class="bi bi-person-plus-fill db-activity-icon db-activity-blue"></i>
+                <div><span>New member registered</span><small>John Doe joined &middot; 10 min ago</small></div>
+              </div>
+              <div class="db-activity-item">
+                <i class="bi bi-cash-coin db-activity-icon db-activity-green"></i>
+                <div><span>Payment submitted</span><small>Payment of TZS 50,000 &middot; 25 min ago</small></div>
+              </div>
+              <div class="db-activity-item">
+                <i class="bi bi-calendar-plus-fill db-activity-icon db-activity-purple"></i>
+                <div><span>New event created</span><small>Youth Leadership Summit &middot; 1 hr ago</small></div>
+              </div>
+              <div class="db-activity-item">
+                <i class="bi bi-briefcase-fill db-activity-icon db-activity-orange"></i>
+                <div><span>Job application received</span><small>Software Developer &middot; 2 hrs ago</small></div>
+              </div>
+              <a href="#" class="db-view-all">View all activities <i class="bi bi-arrow-right"></i></a>
             </div>
-          </div>
 
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-shield-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Admins</div>
-              <div class="db-stat-value">6</div>
-              <div class="db-stat-delta db-stat-delta-purple">View all</div>
+            <div class="db-card db-events-card">
+              <div class="db-panel-title">Upcoming Events</div>
+              <table class="db-table">
+                <thead>
+                  <tr><th>Event</th><th>Date</th><th>Location</th><th>Registrations</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Youth Leadership Summit</td><td>25 May 2024</td><td>Dar es Salaam</td>
+                    <td>120 / 200</td><td><span class="db-badge-open">Open</span></td>
+                  </tr>
+                  <tr>
+                    <td>Digital Skills Workshop</td><td>02 Jun 2024</td><td>Online</td>
+                    <td>85 / 150</td><td><span class="db-badge-open">Open</span></td>
+                  </tr>
+                  <tr>
+                    <td>Entrepreneurship Bootcamp</td><td>10 Jun 2024</td><td>Arusha</td>
+                    <td>60 / 100</td><td><span class="db-badge-open">Open</span></td>
+                  </tr>
+                  <tr>
+                    <td>ICT Innovation Expo</td><td>15 Jun 2024</td><td>Mwanza</td>
+                    <td>45 / 100</td><td><span class="db-badge-open">Open</span></td>
+                  </tr>
+                </tbody>
+              </table>
+              <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
             </div>
+
+            <div class="db-card">
+              <div class="db-panel-title">Pending Approvals</div>
+
+              <div class="db-approval-item">
+                <span class="db-approval-avatar">JD</span>
+                <div class="db-approval-info">
+                  <span>John Doe</span>
+                  <small>Payment for Event Registration</small>
+                  <small class="db-approval-amount">TZS 50,000</small>
+                </div>
+                <div class="db-approval-actions">
+                  <button type="button" class="db-btn-approve">Approve</button>
+                  <button type="button" class="db-btn-reject">Reject</button>
+                </div>
+              </div>
+
+              <div class="db-approval-item">
+                <span class="db-approval-avatar">JS</span>
+                <div class="db-approval-info">
+                  <span>Jane Smith</span>
+                  <small>Payment for Training</small>
+                  <small class="db-approval-amount">TZS 75,000</small>
+                </div>
+                <div class="db-approval-actions">
+                  <button type="button" class="db-btn-approve">Approve</button>
+                  <button type="button" class="db-btn-reject">Reject</button>
+                </div>
+              </div>
+
+              <div class="db-approval-item">
+                <span class="db-approval-avatar">RM</span>
+                <div class="db-approval-info">
+                  <span>Robert Mwita</span>
+                  <small>Membership Payment</small>
+                  <small class="db-approval-amount">TZS 30,000</small>
+                </div>
+                <div class="db-approval-actions">
+                  <button type="button" class="db-btn-approve">Approve</button>
+                  <button type="button" class="db-btn-reject">Reject</button>
+                </div>
+              </div>
+
+              <a href="#" class="db-view-all">View all payments <i class="bi bi-arrow-right"></i></a>
+            </div>
+
           </div>
+          <!-- end db-bottom-grid -->
+
         </div>
+        <!-- end #dbMainContent -->
 
-        <!-- ===================== MANAGEMENT PANELS ===================== -->
-        <div class="db-panels-grid">
-
-          <div class="db-panel">
-            <div class="db-panel-title">Member Management</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>All Members</span><small>View, edit &amp; manage members</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Member</span><small>Create new member</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Member Reports</span><small>Statistics &amp; analytics</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Export Members</span><small>Download members list</small></div></a>
+        <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->
+        <div id="changePasswordPanel" class="db-card" style="display:none; max-width: 480px; margin: 0 auto;">
+          <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+            <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-key"></i></div>
+            <h2>Change Password</h2>
+            <p>Keep your account secure by updating your password</p>
           </div>
 
-          <div class="db-panel">
-            <div class="db-panel-title">Events &amp; News</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-calendar3"></i><div><span>All Events</span><small>Manage all events</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-calendar-plus"></i><div><span>Add Event</span><small>Create new event</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-person-check"></i><div><span>Registered Users</span><small>See who registered</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-newspaper"></i><div><span>All News</span><small>Manage news &amp; updates</small></div></a>
-          </div>
+          <form action="/account/change-password" method="POST" class="auth-form" id="changePasswordForm">
 
-          <div class="db-panel">
-            <div class="db-panel-title">Job Postings</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-briefcase"></i><div><span>All Job Postings</span><small>View &amp; manage jobs</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Job Posting</span><small>Create new job</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-person-lines-fill"></i><div><span>Applications</span><small>View all applicants</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Applications</span><small>Export to Excel</small></div></a>
-          </div>
+            <div class="form-field"id="passwordField">
+              <label for="password">Current Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="currentPassword" name="current_password" autocomplete="current-password" placeholder="Enter your current password" required>
+                <i class="bi bi-eye toggle-visibility" data-target="currentPassword"></i>
+              </div>
+            </div>
 
-          <div class="db-panel">
-            <div class="db-panel-title">Trainings</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-mortarboard"></i><div><span>All Trainings</span><small>Manage trainings</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Training</span><small>Create new training</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>Registrations</span><small>View registered members</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Registrations</span><small>Export to Excel</small></div></a>
-          </div>
+            <div class="form-field">
+              <label>New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="newPassword" name="new_password" placeholder="Create a new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="newPassword"></i>
+              </div>
+              <small class="field-hint">At least 8 characters, with uppercase, lowercase, a number, and a symbol.</small>
+            </div>
 
-          <div class="db-panel">
-            <div class="db-panel-title">Payments &amp; Approvals</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-hourglass-split"></i><div><span>Pending Payments</span><small>Approve or reject</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-clock-history"></i><div><span>Payment History</span><small>View all payments</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Payment Reports</span><small>Statistics &amp; analytics</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Payments</span><small>Export to Excel</small></div></a>
-          </div>
+            <div class="form-field">
+              <label>Confirm New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="confirmNewPassword" name="confirm_new_password" placeholder="Confirm your new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="confirmNewPassword"></i>
+              </div>
+              <div id="newPasswordMatchError" class="field-error"></div>
+            </div>
 
-          <div class="db-panel">
-            <div class="db-panel-title">Admin Management</div>
-            <a href="#" class="db-panel-item"><i class="bi bi-shield"></i><div><span>All Admins</span><small>View, edit &amp; delete admins</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Admin</span><small>Create new admin</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-activity"></i><div><span>Admin Activity</span><small>View login &amp; actions</small></div></a>
-            <a href="#" class="db-panel-item"><i class="bi bi-envelope-check"></i><div><span>Send Credentials</span><small>Email login details</small></div></a>
-          </div>
+            <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+              Update Password
+            </button>
 
+            <div class="auth-switch" style="margin-top:20px;text-align:center;">
+              <a href="#" id="cancelChangePassword"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+            </div>
+
+          </form>
         </div>
-
-        <!-- ===================== BOTTOM ROW ===================== -->
-        <div class="db-bottom-grid">
-
-          <div class="db-card db-chart-card">
-            <div class="db-panel-title">Registrations Overview</div>
-            <svg viewBox="0 0 300 140" class="db-chart-svg" preserveAspectRatio="none">
-              <polyline points="0,120 40,95 80,80 120,88 160,55 200,45 240,20 280,15"
-                fill="none" stroke="#2E7D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <div class="db-chart-labels">
-              <span>May 16</span><span>May 17</span><span>May 18</span><span>May 19</span>
-              <span>May 20</span><span>May 21</span><span>May 22</span>
-            </div>
-          </div>
-
-          <div class="db-card">
-            <div class="db-panel-title">Recent Activities</div>
-            <div class="db-activity-item">
-              <i class="bi bi-person-plus-fill db-activity-icon db-activity-blue"></i>
-              <div><span>New member registered</span><small>John Doe joined &middot; 10 min ago</small></div>
-            </div>
-            <div class="db-activity-item">
-              <i class="bi bi-cash-coin db-activity-icon db-activity-green"></i>
-              <div><span>Payment submitted</span><small>Payment of TZS 50,000 &middot; 25 min ago</small></div>
-            </div>
-            <div class="db-activity-item">
-              <i class="bi bi-calendar-plus-fill db-activity-icon db-activity-purple"></i>
-              <div><span>New event created</span><small>Youth Leadership Summit &middot; 1 hr ago</small></div>
-            </div>
-            <div class="db-activity-item">
-              <i class="bi bi-briefcase-fill db-activity-icon db-activity-orange"></i>
-              <div><span>Job application received</span><small>Software Developer &middot; 2 hrs ago</small></div>
-            </div>
-            <a href="#" class="db-view-all">View all activities <i class="bi bi-arrow-right"></i></a>
-          </div>
-
-          <div class="db-card db-events-card">
-            <div class="db-panel-title">Upcoming Events</div>
-            <table class="db-table">
-              <thead>
-                <tr><th>Event</th><th>Date</th><th>Location</th><th>Registrations</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Youth Leadership Summit</td><td>25 May 2024</td><td>Dar es Salaam</td>
-                  <td>120 / 200</td><td><span class="db-badge-open">Open</span></td>
-                </tr>
-                <tr>
-                  <td>Digital Skills Workshop</td><td>02 Jun 2024</td><td>Online</td>
-                  <td>85 / 150</td><td><span class="db-badge-open">Open</span></td>
-                </tr>
-                <tr>
-                  <td>Entrepreneurship Bootcamp</td><td>10 Jun 2024</td><td>Arusha</td>
-                  <td>60 / 100</td><td><span class="db-badge-open">Open</span></td>
-                </tr>
-                <tr>
-                  <td>ICT Innovation Expo</td><td>15 Jun 2024</td><td>Mwanza</td>
-                  <td>45 / 100</td><td><span class="db-badge-open">Open</span></td>
-                </tr>
-              </tbody>
-            </table>
-            <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
-          </div>
-
-          <div class="db-card">
-            <div class="db-panel-title">Pending Approvals</div>
-
-            <div class="db-approval-item">
-              <span class="db-approval-avatar">JD</span>
-              <div class="db-approval-info">
-                <span>John Doe</span>
-                <small>Payment for Event Registration</small>
-                <small class="db-approval-amount">TZS 50,000</small>
-              </div>
-              <div class="db-approval-actions">
-                <button type="button" class="db-btn-approve">Approve</button>
-                <button type="button" class="db-btn-reject">Reject</button>
-              </div>
-            </div>
-
-            <div class="db-approval-item">
-              <span class="db-approval-avatar">JS</span>
-              <div class="db-approval-info">
-                <span>Jane Smith</span>
-                <small>Payment for Training</small>
-                <small class="db-approval-amount">TZS 75,000</small>
-              </div>
-              <div class="db-approval-actions">
-                <button type="button" class="db-btn-approve">Approve</button>
-                <button type="button" class="db-btn-reject">Reject</button>
-              </div>
-            </div>
-
-            <div class="db-approval-item">
-              <span class="db-approval-avatar">RM</span>
-              <div class="db-approval-info">
-                <span>Robert Mwita</span>
-                <small>Membership Payment</small>
-                <small class="db-approval-amount">TZS 30,000</small>
-              </div>
-              <div class="db-approval-actions">
-                <button type="button" class="db-btn-approve">Approve</button>
-                <button type="button" class="db-btn-reject">Reject</button>
-              </div>
-            </div>
-
-            <a href="#" class="db-view-all">View all payments <i class="bi bi-arrow-right"></i></a>
-          </div>
-
-        </div>
+        <!-- end #changePasswordPanel -->
 
       </div>
+      <!-- end db-content -->
     </div>
   </div>
 </body>

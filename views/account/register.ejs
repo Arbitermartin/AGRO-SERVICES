@@ -5,16 +5,7 @@
       <div class="step-progress" id="stepProgress"></div>
     </div>
 
-    <%- messages() %>
-    <%- messages() %>
 
-<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
-  <ul class="error-list" style="color:#c0392b; margin-bottom:20px;">
-    <% errors.forEach(err => { %>
-      <li><%= err.msg %></li>
-    <% }) %>
-  </ul>
-<% } %>
 
     <form
       action="/account/register"

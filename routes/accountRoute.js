@@ -65,6 +65,11 @@ router.get(
  * Logout
  * *************************************** */
 router.get("/logout", accountController.accountLogout);
+router.post(
+  "/change-password",
+  utilities.checkLogin,
+  utilities.handleErrors(accountController.changePassword)
+);
 
 
 

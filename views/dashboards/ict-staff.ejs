@@ -1,0 +1,306 @@
+
+<body class="db-body">
+
+  <div class="db-shell">
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="db-sidebar" id="dbSidebar">
+      <div class="db-brand">
+        <i class="bi bi-shield-fill-check"></i>
+        <div>
+          <div class="db-brand-name">PORTAL</div>
+          <div class="db-brand-sub">ICT Panel</div>
+        </div>
+      </div>
+
+      <nav class="db-nav">
+        <a href="/dashboard/ict" class="db-nav-link is-active">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-life-preserver"></i> Support Tickets
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-people"></i> All Members
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-exclamation-triangle"></i> System Issues
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-key"></i> Password Reset Requests
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-bar-chart"></i> Reports
+        </a>
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-person"></i> Profile
+        </a>
+
+        <div class="db-nav-footer">
+          <a href="#" class="db-nav-link"><i class="bi bi-gear"></i> Settings</a>
+          <a href="/login" class="db-nav-link"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="db-main">
+      <!-- ===================== TOP BAR (same as Admin Dashboard) ===================== -->
+      <header class="db-topbar">
+        <div class="db-topbar-left">
+          <button type="button" class="db-sidebar-toggle" id="dbSidebarToggle" aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+          <div>
+            <div class="db-welcome">Welcome, <%= account.full_name %></div>
+            <div class="db-role">Role: <%= account.account_type %></div>
+          </div>
+        </div>
+
+        <div class="db-topbar-right">
+          <div class="db-search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search tickets or users...">
+          </div>
+
+          <button type="button" class="db-icon-btn" aria-label="Notifications">
+            <i class="bi bi-bell"></i>
+            <span class="db-notif-dot"></span>
+          </button>
+
+          <!-- User menu (identical structure/behavior to Admin Dashboard) -->
+          <div class="db-user-menu">
+            <button type="button" class="db-user-toggle" id="dbUserToggle" aria-haspopup="true" aria-expanded="false">
+              <span class="db-avatar"><%=initials%></span>
+              <span class="db-user-name"><%=account.full_name%></span>
+              <i class="bi bi-chevron-down db-user-caret"></i>
+            </button>
+
+            <div class="db-user-dropdown" id="dbUserDropdown">
+              <div class="db-user-dropdown-head">
+                <span class="db-avatar db-avatar-lg"><%= initials %></span>
+                <div>
+                  <div class="db-user-dropdown-name"><%= account.full_name %></div>
+                  <div class="db-user-dropdown-email"><%= account.email %></div>
+                </div>
+              </div>
+              <div class="db-user-dropdown-divider"></div>
+              <a href="/dashboard/profile" class="db-user-dropdown-item">
+                <i class="bi bi-person"></i> Update Profile
+              </a>
+              <a href="#" id="changePasswordLink" class="db-user-dropdown-item">
+                <i class="bi bi-key"></i> Change Password
+              </a>
+              <div class="db-user-dropdown-divider"></div>
+              <a href="/login" class="db-user-dropdown-item db-user-dropdown-danger">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="db-content">
+           <!-- ✅ Everything that should be HIDDEN when Change Password is shown -->
+           <div id="dbMainContent">
+
+        <!-- ===================== STAT CARDS ===================== -->
+        <div class="db-stats-grid db-stats-grid-5">
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-life-preserver"></i></div>
+            <div>
+              <div class="db-stat-label">Open Tickets</div>
+              <div class="db-stat-value">34</div>
+              <div class="db-stat-delta db-stat-delta-blue">9 new today</div>
+            </div>
+          </div>
+
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+              <div class="db-stat-label">In Progress</div>
+              <div class="db-stat-value">12</div>
+              <div class="db-stat-delta db-stat-delta-orange">Being handled</div>
+            </div>
+          </div>
+
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+              <div class="db-stat-label">Resolved Today</div>
+              <div class="db-stat-value">18</div>
+              <div class="db-stat-delta db-stat-delta-green">&uarr; 12%</div>
+            </div>
+          </div>
+
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-people-fill"></i></div>
+            <div>
+              <div class="db-stat-label">Total Members</div>
+              <div class="db-stat-value">1,248</div>
+              <div class="db-stat-delta db-stat-delta-purple">View all members</div>
+            </div>
+          </div>
+
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-red"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div>
+              <div class="db-stat-label">System Issues</div>
+              <div class="db-stat-value">7</div>
+              <div class="db-stat-delta db-stat-delta-red">Active issues</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== OVERVIEW + RECENT TICKETS ===================== -->
+        <div class="db-ict-grid">
+
+          <div class="db-card">
+            <div class="db-panel-title">Tickets Overview</div>
+            <div class="db-donut-wrap">
+              <div class="db-donut" style="background: conic-gradient(
+                  #1976D2 0% 34%,
+                  #FB8C00 34% 53%,
+                  #43A047 53% 87%,
+                  #B0BEC5 87% 100%);">
+                <div class="db-donut-hole"></div>
+              </div>
+              <div class="db-donut-legend">
+                <div class="db-legend-item"><span class="db-legend-dot" style="background:#1976D2;"></span> Open <b>34 (34%)</b></div>
+                <div class="db-legend-item"><span class="db-legend-dot" style="background:#FB8C00;"></span> In Progress <b>12 (19%)</b></div>
+                <div class="db-legend-item"><span class="db-legend-dot" style="background:#43A047;"></span> Resolved <b>70 (34%)</b></div>
+                <div class="db-legend-item"><span class="db-legend-dot" style="background:#B0BEC5;"></span> Closed <b>13 (13%)</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="db-card db-recent-tickets-card">
+            <div class="db-panel-title">Recent Tickets</div>
+            <table class="db-table">
+              <tbody>
+                <tr>
+                  <td><b>#TKT-1025</b></td><td>Login issue</td><td>John Doe</td>
+                  <td class="db-table-muted">10 mins ago</td>
+                  <td><span class="db-badge-status db-badge-open">Open</span></td>
+                </tr>
+                <tr>
+                  <td><b>#TKT-1024</b></td><td>Forgot password</td><td>Jane Smith</td>
+                  <td class="db-table-muted">25 mins ago</td>
+                  <td><span class="db-badge-status db-badge-progress">In Progress</span></td>
+                </tr>
+                <tr>
+                  <td><b>#TKT-1023</b></td><td>Cannot access dashboard</td><td>Robert Mwita</td>
+                  <td class="db-table-muted">1 hr ago</td>
+                  <td><span class="db-badge-status db-badge-open">Open</span></td>
+                </tr>
+                <tr>
+                  <td><b>#TKT-1022</b></td><td>Event registration error</td><td>Asha Mohamed</td>
+                  <td class="db-table-muted">2 hrs ago</td>
+                  <td><span class="db-badge-status db-badge-resolved">Resolved</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <a href="#" class="db-view-all">View all tickets <i class="bi bi-arrow-right"></i></a>
+          </div>
+
+        </div>
+
+        <!-- ===================== SYSTEM ISSUES + QUICK ACTIONS ===================== -->
+        <div class="db-ict-bottom-grid">
+
+          <div class="db-card db-system-issues-card">
+            <div class="db-panel-title">System Issues</div>
+            <table class="db-table">
+              <thead>
+                <tr><th>Issue</th><th>Reported On</th><th>Status</th><th>Priority</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Email service not sending</td><td>22 May 2024</td>
+                  <td>Investigating</td><td><span class="db-badge-priority db-badge-high">High</span></td>
+                </tr>
+                <tr>
+                  <td>Payment gateway timeout</td><td>21 May 2024</td>
+                  <td>Identified</td><td><span class="db-badge-priority db-badge-medium">Medium</span></td>
+                </tr>
+                <tr>
+                  <td>File upload slow</td><td>20 May 2024</td>
+                  <td>Resolved</td><td><span class="db-badge-priority db-badge-low">Low</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <a href="#" class="db-view-all">View all issues <i class="bi bi-arrow-right"></i></a>
+          </div>
+
+          <div class="db-card">
+            <div class="db-panel-title">Quick Actions</div>
+            <a href="#" class="db-quick-action">
+              <i class="bi bi-megaphone"></i> Create Announcement
+            </a>
+            <a href="#" class="db-quick-action">
+              <i class="bi bi-arrow-repeat"></i> Clear System Cache
+            </a>
+            <a href="#" class="db-quick-action">
+              <i class="bi bi-cloud-arrow-up"></i> Backup Database
+            </a>
+            <a href="#" class="db-quick-action">
+              <i class="bi bi-sliders"></i> System Settings
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+      
+        <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->
+        <div id="changePasswordPanel" class="db-card" style="display:none; max-width: 480px; margin: 0 auto;">
+          <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+            <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-key"></i></div>
+            <h2>Change Password</h2>
+            <p>Keep your account secure by updating your password</p>
+          </div>
+
+          <form action="/account/change-password" method="POST" class="auth-form" id="changePasswordForm">
+
+            <div class="form-field"id="passwordField">
+              <label for="password">Current Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="currentPassword" name="current_password" autocomplete="current-password" placeholder="Enter your current password" required>
+                <i class="bi bi-eye toggle-visibility" data-target="currentPassword"></i>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="newPassword" name="new_password" placeholder="Create a new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="newPassword"></i>
+              </div>
+              <small class="field-hint">At least 8 characters, with uppercase, lowercase, a number, and a symbol.</small>
+            </div>
+
+            <div class="form-field">
+              <label>Confirm New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="confirmNewPassword" name="confirm_new_password" placeholder="Confirm your new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="confirmNewPassword"></i>
+              </div>
+              <div id="newPasswordMatchError" class="field-error"></div>
+            </div>
+
+            <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+              Update Password
+            </button>
+
+            <div class="auth-switch" style="margin-top:20px;text-align:center;">
+              <a href="#" id="cancelChangePassword"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+            </div>
+
+          </form>
+        </div>
+        <!-- end #changePasswordPanel -->
+    </div>
+  </div>
+</div>
+

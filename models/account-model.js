@@ -27,5 +27,15 @@ async function getAccountByEmail(email) {
   const accounts = await db("accounts").where({ email });
   return accounts[0];
 }
+async function getAccountById(id) {
+  const accounts = await db("accounts").where({ id });
+  return accounts[0];
+}
 
-module.exports = { registerAccount, checkExistingEmail, getAccountByEmail };
+async function updatePassword(id, hashedPassword) {
+  return await db("accounts").where({ id }).update({ password: hashedPassword });
+}
+
+
+
+module.exports = { registerAccount, checkExistingEmail, getAccountByEmail,getAccountById,updatePassword };
