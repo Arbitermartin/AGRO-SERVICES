@@ -645,6 +645,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =====================================================
+   TOAST NOTIFICATIONS — auto-dismiss flash messages
+===================================================== */
+const toastContainer = document.getElementById('toastContainer');
+if (toastContainer) {
+  const toastItems = toastContainer.querySelectorAll('.toast-msg');
+
+  toastItems.forEach((toast) => {
+    setTimeout(() => {
+      toast.classList.add('toast-hide');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
+  });
+}
+
+  /* =====================================================
      LOGIN PAGE INTERACTIVITY
   ===================================================== */
   const loginForm = document.getElementById('loginForm');
@@ -1040,6 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
+  
 
     /* ---------- Shared reference to the main dashboard content ---------- */
     const dbMainContent = document.getElementById('dbMainContent');
@@ -1153,6 +1169,35 @@ document.addEventListener('DOMContentLoaded', () => {
       if (updateProfilePanel) updateProfilePanel.style.display = 'none';
       if (dbMainContent) dbMainContent.style.display = 'block';
     }
+      // job posting
+      const addJobLink = document.getElementById('addJobLink');
+      const addJobPanel = document.getElementById('addJobPanel');
+      const cancelAddJob = document.getElementById('cancelAddJob');
+      
+      if (addJobLink && addJobPanel && dbMainContent) {
+        addJobLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          dbMainContent.style.display = 'none';
+          if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+          if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+          addJobPanel.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      
+      if (cancelAddJob && addJobPanel && dbMainContent) {
+        cancelAddJob.addEventListener('click', (e) => {
+          e.preventDefault();
+          addJobPanel.style.display = 'none';
+          dbMainContent.style.display = 'block';
+        });
+      }
+      
+      if (window.location.search.includes('jobPosted=true')) {
+        if (addJobPanel) addJobPanel.style.display = 'none';
+        if (dbMainContent) dbMainContent.style.display = 'block';
+      }
+      // end here job posting
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
@@ -1168,3 +1213,6 @@ document.addEventListener('DOMContentLoaded', () => {
   } // end if (dbSidebar)
 
 }); // end DOMContentLoaded
+
+
+

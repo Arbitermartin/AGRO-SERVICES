@@ -60,6 +60,15 @@ router.get(
   utilities.checkRole("member"),
   utilities.handleErrors(accountController.buildMemberDashboard)
 );
+/*********************
+ * 
+ * Delivery change password
+ */
+router.post(
+  "/change-password",
+  utilities.checkLogin,
+  utilities.handleErrors(accountController.changePassword)
+);
 
 /* ****************************************
  * Logout
@@ -74,6 +83,13 @@ router.post(
   "/update-profile",
   utilities.checkLogin,
   utilities.handleErrors(accountController.updateProfile)
+);
+// add job
+router.post(
+  "/jobs/create",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.handleErrors(accountController.createJob)
 );
 
 

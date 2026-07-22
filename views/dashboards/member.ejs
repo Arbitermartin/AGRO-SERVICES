@@ -87,7 +87,7 @@
                 </div>
               </div>
               <div class="db-user-dropdown-divider"></div>
-              <a href="/dashboard/profile" class="db-user-dropdown-item">
+              <a href="#" id="updateProfileLink" class="db-user-dropdown-item">
                 <i class="bi bi-person"></i> Update Profile
               </a>
               <a href="/dashboard/change-password" class="db-user-dropdown-item">
@@ -185,22 +185,18 @@
                 <tr><th>Job Title</th><th>Deadline</th><th>Location</th><th></th></tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Software Developer</td><td>30 May 2024</td><td>Dar es Salaam</td>
-                  <td><button type="button" class="db-btn-action">Apply</button></td>
-                </tr>
-                <tr>
-                  <td>Data Analyst</td><td>05 Jun 2024</td><td>Remote</td>
-                  <td><button type="button" class="db-btn-action">Apply</button></td>
-                </tr>
-                <tr>
-                  <td>Project Manager</td><td>12 Jun 2024</td><td>Arusha</td>
-                  <td><button type="button" class="db-btn-action">Apply</button></td>
-                </tr>
-                <tr>
-                  <td>UI/UX Designer</td><td>18 Jun 2024</td><td>Mwanza</td>
-                  <td><button type="button" class="db-btn-action">Apply</button></td>
-                </tr>
+                <% if (jobs && jobs.length > 0) { %>
+                  <% jobs.forEach(job => { %>
+                    <tr>
+                      <td><%= job.title %></td>
+                      <td><%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                      <td><%= job.region %></td>
+                      <td><a href="/jobs/<%= job.id %>/apply" class="db-btn-action">Apply</a></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="4" style="text-align:center; color:#9ca3af;">No open job postings right now.</td></tr>
+                <% } %>
               </tbody>
             </table>
             <a href="#" class="db-view-all">View all jobs <i class="bi bi-arrow-right"></i></a>

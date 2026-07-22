@@ -52,7 +52,10 @@
           </button>
           <div class="db-submenu">
             <a href="#" class="db-submenu-link">All Job Postings</a>
-            <a href="#" class="db-submenu-link">Add Job Posting</a>
+            <a href="#" id="addJobLink" class="db-submenu-link">
+              <div><span>Add Job Posting</span>
+            </div>
+          </a>
             <a href="#" class="db-submenu-link">Applications</a>
             <a href="#" class="db-submenu-link">Download Applications</a>
           </div>
@@ -177,8 +180,23 @@
       </header>
 
       <div class="db-content">
-
-        <%- messages() %>
+        <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
 
         <!-- ✅ Everything that should be HIDDEN when Change Password is shown -->
         <div id="dbMainContent">
@@ -262,7 +280,7 @@
             <div class="db-panel">
               <div class="db-panel-title">Job Postings</div>
               <a href="#" class="db-panel-item"><i class="bi bi-briefcase"></i><div><span>All Job Postings</span><small>View &amp; manage jobs</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Job Posting</span><small>Create new job</small></div></a>
+              <a href="#" id="addJobLink" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Job Posting</span><small>Create new job</small></div></a>
               <a href="#" class="db-panel-item"><i class="bi bi-person-lines-fill"></i><div><span>Applications</span><small>View all applicants</small></div></a>
               <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Applications</span><small>Export to Excel</small></div></a>
             </div>
@@ -591,6 +609,7 @@
   </form>
 </div>
 <!-- end #updateProfilePanel -->
+<%- include('add-job') %>
 
       </div>
       <!-- end db-content -->

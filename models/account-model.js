@@ -18,6 +18,20 @@ async function registerAccount(fullName, email, Phone_number, hashedPassword) {
   }
 }
 
+/****************************
+ * delivery change password by id
+ */
+
+async function getAccountById(id) {
+  const accounts = await db("accounts").where({ id });
+  return accounts[0];
+}
+
+async function updatePassword(id, hashedPassword) {
+  return await db("accounts").where({ id }).update({ password: hashedPassword });
+}
+// end here for password change
+
 async function checkExistingEmail(email) {
   const accounts = await db("accounts").where({ email });
   return accounts.length > 0;
@@ -92,10 +106,28 @@ async function upsertAdminDetails(profileId, data) {
   }
   return await db("admins").insert({ profile_id: profileId, ...data });
 }
+/****************
+ * Delivery create job 
+ */
+async function createJob(data){
+  const inserted = await db("jobs").insert(data).returning("*");
+  return inserted[0];
+}
+async function getAllOpenJobs() {
+  return await db("jobs")
+  .where("status","open")
+  .andWhere("end_date",">=",db.fn.now())
+  .orderBy("created_at","desc");
+  
+}
+
+
 module.exports = {
   registerAccount,
   checkExistingEmail,
   getAccountByEmail,
+  getAccountById,
+  updatePassword,
   updateFullName,
   getProfileByAccountId,
   upsertProfile,
@@ -103,4 +135,6 @@ module.exports = {
   upsertBirthPlace,
   getAdminDetailsByProfileId,
   upsertAdminDetails,
+  createJob,
+  getAllOpenJobs,
 };

@@ -5,6 +5,7 @@ const accountModel = require("../models/account-model");
 
 const db = require('../database/db');
 const { title } = require("process");
+const { error } = require("console");
 
 async function accountManagement(req,res,next){
     res.render("dashboards/index", {
@@ -33,7 +34,9 @@ async function buildLogin(req,res) {
   res.render("account/login"),{
     title: "Login",
     nav,
-    error: null
+    error: null,
+    success: req.flash("success"),
+    error: req.flash("error"),
   }
   
 }
@@ -142,11 +145,37 @@ async function buildAdminDashboard(req, res) {
     profile,
     birthPlace,
     adminDetails,
-     // Add these two lines 👇
-  showNav: false,
-  showFooter: false
+      // Add these two lines 👇
+    showNav: false,
+    showFooter: false,
+    success: req.flash("success"),   
+    error: req.flash("error"),       
   });
 }
+
+/****************************
+ *
+ * Delivery create job 
+ */
+async function createJob(req, res) {
+  try {
+    const { title, region, job_type, category, description, start_date, end_date } = req.body;
+    console.log("JOB BODY:", req.body);
+
+    await accountModel.createJob({ title, region, job_type, category, description, start_date, end_date });
+
+    req.flash("success", "Job posting published successfully.");
+    res.redirect("/account/dashboard/admin?jobPosted=true");
+  } catch (error) {
+    // console.error(error);
+    console.error("CREATE JOB ERROR:", error);
+    req.flash("error", "Failed to publish job posting.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+/***************************************
+ * Delivery Update profile page
+ *********************/
 async function updateProfile(req, res) {
   try {
     const accountId = req.session.account.id;
@@ -183,16 +212,53 @@ async function buildIctStaffDashboard(req, res) {
 
 async function buildMemberDashboard(req, res) {
   let nav = await utilities.getNav();
+  const jobs = await accountModel.getAllOpenJobs();
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
     account: req.session.account,
     initials: getInitials(req.session.account.full_name),
+    jobs,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
   });
 }
+/*****************************
+ * *****
+ * Delivery change password
+ * 
+ *********************/
+async function changePassword(req, res) {
+  try {
+    const { current_password, new_password, confirm_new_password } = req.body;
+    const accountId = req.session.account.id;
+
+    if (new_password !== confirm_new_password) {
+      req.flash("error", "New passwords do not match.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const account = await accountModel.getAccountById(accountId);
+    const currentMatch = await bcrypt.compare(current_password, account.password);
+
+    if (!currentMatch) {
+      req.flash("error", "Current password is incorrect.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const hashedNewPassword = await bcrypt.hash(new_password, 10);
+    await accountModel.updatePassword(accountId, hashedNewPassword);
+
+    req.flash("success", "Password updated successfully.");
+    res.redirect("/account/dashboard/admin?passwordChanged=true");
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Failed to update password.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
 
 /* ****************************************
  * Logout
@@ -211,6 +277,6 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile, buildIctStaffDashboard,buildMemberDashboard,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,accountLogout
 
 }

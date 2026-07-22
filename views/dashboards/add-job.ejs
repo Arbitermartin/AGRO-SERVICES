@@ -1,0 +1,103 @@
+<!-- ✅ Add Job Posting panel — sibling of #dbMainContent, hidden by default -->
+<div id="addJobPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-briefcase"></i></div>
+    <h2>Post a Job Opportunity</h2>
+    <p>Fill in the details below to publish a new job listing</p>
+  </div>
+
+  <form action="/account/jobs/create" method="POST" class="auth-form" id="addJobForm">
+
+    <div class="form-field">
+      <label>Job Title</label>
+      <div class="input-wrap">
+        <i class="bi bi-briefcase input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Field Extension Officer" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Region</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo-alt input-icon"></i>
+          <select name="region" required>
+            <option value="">Select region</option>
+            <option value="Dodoma">Dodoma Region</option>
+            <option value="Arusha">Arusha Region</option>
+            <option value="Mwanza">Mwanza Region</option>
+            <option value="Mbeya">Mbeya Region</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Job Type</label>
+        <div class="input-wrap">
+          <i class="bi bi-clock input-icon"></i>
+          <select name="job_type" required>
+            <option value="">Select type</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Internship">Internship</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Category</label>
+        <div class="input-wrap">
+          <i class="bi bi-building input-icon"></i>
+          <input type="text" name="category" placeholder="e.g. Field Operations" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Job Description &amp; Qualifications</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+        <textarea
+          name="description"
+          rows="6"
+          placeholder="Describe responsibilities, required qualifications, education, experience, and skills..."
+          style="padding-left:44px;"
+          required
+        ></textarea>
+      </div>
+      <small class="field-hint">This appears when a job seeker clicks "Details" on the listing.</small>
+    </div>
+
+    <h3 class="profile-section-title">Application Window</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Posting Start Date</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-check input-icon"></i>
+          <input type="date" name="start_date" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Application Deadline</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-x input-icon"></i>
+          <input type="date" name="end_date" required>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+      Publish Job Posting
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAddJob"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+</div>
+<!-- end #addJobPanel -->

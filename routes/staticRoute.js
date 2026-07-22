@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const utilities = require("../utilities")
+const accountModel = require("../models/account-model");
 
 
 router.get("/about", utilities.handleErrors(async (req, res) => {
@@ -26,9 +27,11 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
   }))
   router.get("/jobs", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
+    const jobs = await accountModel.getAllOpenJobs()
     res.render("pages/jobs", { 
       title: "Job Opportunities", 
-      nav 
+      nav,
+      jobs
     })
   }))
   router.get("/training", utilities.handleErrors(async (req, res) => {

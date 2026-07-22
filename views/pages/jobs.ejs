@@ -41,61 +41,29 @@
           </select>
         </div>
       </div>
-
       <!-- ===================== JOB LIST ===================== -->
       <div class="jobs-list" id="jobsList">
 
-        <div class="job-card" data-title="Field Extension Officer" data-location="Dodoma Region" data-type="Full-time">
-          <div class="job-icon"><i class="bi bi-flower2"></i></div>
-          <div class="job-info">
-            <h3>Field Extension Officer</h3>
-            <div class="job-meta">
-              <span><i class="bi bi-geo-alt"></i> Dodoma Region</span>
-              <span><i class="bi bi-clock"></i> Full-time</span>
-              <span><i class="bi bi-building"></i> Field Operations</span>
+        <% if (jobs && jobs.length > 0) { %>
+          <% jobs.forEach(job => { %>
+            <div class="job-card" data-title="<%= job.title %>" data-location="<%= job.region %>" data-type="<%= job.job_type %>">
+              <div class="job-icon"><i class="bi bi-flower2"></i></div>
+              <div class="job-info">
+                <h3><%= job.title %></h3>
+                <div class="job-meta">
+                  <span><i class="bi bi-geo-alt"></i> <%= job.region %></span>
+                  <span><i class="bi bi-clock"></i> <%= job.job_type %></span>
+                  <span><i class="bi bi-building"></i> <%= job.category %></span>
+                </div>
+              </div>
+              <a href="/contact" class="btn btn-filled job-apply">Apply Now</a>
             </div>
-          </div>
-          <a href="/contact" class="btn btn-filled job-apply">Apply Now</a>
-        </div>
-
-        <div class="job-card" data-title="Agribusiness Advisor" data-location="Dar es Salaam" data-type="Full-time">
-          <div class="job-icon"><i class="bi bi-graph-up-arrow"></i></div>
-          <div class="job-info">
-            <h3>Agribusiness Advisor</h3>
-            <div class="job-meta">
-              <span><i class="bi bi-geo-alt"></i> Dar es Salaam</span>
-              <span><i class="bi bi-clock"></i> Full-time</span>
-              <span><i class="bi bi-building"></i> Advisory Services</span>
-            </div>
-          </div>
-          <a href="/contact" class="btn btn-filled job-apply">Apply Now</a>
-        </div>
-
-        <div class="job-card" data-title="Junior Software Developer" data-location="Remote" data-type="Contract">
-          <div class="job-icon"><i class="bi bi-laptop"></i></div>
-          <div class="job-info">
-            <h3>Junior Software Developer</h3>
-            <div class="job-meta">
-              <span><i class="bi bi-geo-alt"></i> Remote</span>
-              <span><i class="bi bi-clock"></i> Contract</span>
-              <span><i class="bi bi-building"></i> Technology</span>
-            </div>
-          </div>
-          <a href="/contact" class="btn btn-filled job-apply">Apply Now</a>
-        </div>
-
-        <div class="job-card" data-title="Youth Training Coordinator" data-location="Mbeya Region" data-type="Part-time">
-          <div class="job-icon"><i class="bi bi-people"></i></div>
-          <div class="job-info">
-            <h3>Youth Training Coordinator</h3>
-            <div class="job-meta">
-              <span><i class="bi bi-geo-alt"></i> Mbeya Region</span>
-              <span><i class="bi bi-clock"></i> Part-time</span>
-              <span><i class="bi bi-building"></i> Training &amp; Capacity</span>
-            </div>
-          </div>
-          <a href="/contact" class="btn btn-filled job-apply">Apply Now</a>
-        </div>
+          <% }) %>
+        <% } else { %>
+          <p style="text-align:center; color: var(--text-muted); padding: 40px 0;">
+            No job opportunities available right now. Please check back soon.
+          </p>
+        <% } %>
 
       </div>
 
@@ -132,3 +100,5 @@
 
     </div>
   </section>
+
+     
