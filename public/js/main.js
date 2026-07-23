@@ -938,6 +938,23 @@ if (toastContainer) {
     }
   }
 
+  // job application
+  /* =====================================================
+   JOB APPLICATION FORM — CV upload preview
+===================================================== */
+const cvUploadArea = document.getElementById('cvUploadArea');
+const cvUploadInput = document.getElementById('cvUpload');
+
+if (cvUploadArea && cvUploadInput) {
+  cvUploadArea.addEventListener('click', () => cvUploadInput.click());
+  cvUploadInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      document.getElementById('cvUploadedFile').style.display = 'block';
+      document.getElementById('cvFileName').textContent = e.target.files[0].name;
+    }
+  });
+}
+
   /* =====================================================
      GUIDANCE & TRAINING PAGE — CATEGORY FILTER
   ===================================================== */
@@ -1180,6 +1197,7 @@ if (toastContainer) {
           dbMainContent.style.display = 'none';
           if (changePasswordPanel) changePasswordPanel.style.display = 'none';
           if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+          if (allJobsPanel) allJobsPanel.style.display = 'none';
           addJobPanel.style.display = 'block';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
@@ -1197,8 +1215,293 @@ if (toastContainer) {
         if (addJobPanel) addJobPanel.style.display = 'none';
         if (dbMainContent) dbMainContent.style.display = 'block';
       }
+      
       // end here job posting
 
+      /* ---------- All Jobs panel toggle ---------- */
+const allJobsLink = document.getElementById('allJobsLink');
+const allJobsPanel = document.getElementById('allJobsPanel');
+const cancelAllJobs = document.getElementById('cancelAllJobs');
+
+if (allJobsLink && allJobsPanel && dbMainContent) {
+  allJobsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+    if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+    if (addJobPanel) addJobPanel.style.display = 'none';
+    allJobsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelAllJobs && allJobsPanel && dbMainContent) {
+  cancelAllJobs.addEventListener('click', (e) => {
+    e.preventDefault();
+    allJobsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+/* ---------- Applications panel toggle ---------- */
+const applicationsLink = document.getElementById('applicationsLink');
+const applicationsPanel = document.getElementById('applicationsPanel');
+const cancelApplications = document.getElementById('cancelApplications');
+
+if (applicationsLink && applicationsPanel && dbMainContent) {
+  applicationsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+    if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+    if (addJobPanel) addJobPanel.style.display = 'none';
+    if (allJobsPanel) allJobsPanel.style.display = 'none';
+    applicationsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelApplications && applicationsPanel && dbMainContent) {
+  cancelApplications.addEventListener('click', (e) => {
+    e.preventDefault();
+    applicationsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- Expand/collapse individual application details ---------- */
+document.querySelectorAll('.application-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.application-item');
+    item.classList.toggle('is-open');
+  });
+});
+/* =====================================================
+   MEMBER DASHBOARD — Job Opportunities & My Applications
+===================================================== */
+
+
+// Job Opportunities Panel
+const jobOpportunitiesLink = document.getElementById('jobOpportunitiesLink');
+const jobOpportunitiesPanel = document.getElementById('jobOpportunitiesPanel');
+const cancelJobOpportunities = document.getElementById('cancelJobOpportunities');
+
+if (jobOpportunitiesLink && jobOpportunitiesPanel && dbMainContent) {
+  jobOpportunitiesLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (myApplicationsPanel) myApplicationsPanel.style.display = 'none';
+    jobOpportunitiesPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelJobOpportunities && jobOpportunitiesPanel && dbMainContent) {
+  cancelJobOpportunities.addEventListener('click', (e) => {
+    e.preventDefault();
+    jobOpportunitiesPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+// My Applications Panel
+const myApplicationsLink = document.getElementById('myApplicationsLink');
+const myApplicationsPanel = document.getElementById('myApplicationsPanel');
+const cancelMyApplications = document.getElementById('cancelMyApplications');
+
+if (myApplicationsLink && myApplicationsPanel && dbMainContent) {
+  myApplicationsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
+    myApplicationsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelMyApplications && myApplicationsPanel && dbMainContent) {
+  cancelMyApplications.addEventListener('click', (e) => {
+    e.preventDefault();
+    myApplicationsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+// Job listing interactivity (works on both pages)
+document.querySelectorAll('.job-toggle-details').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.job-listing-card');
+    if (card) card.classList.toggle('is-open');
+  });
+});
+
+document.querySelectorAll('.job-open-apply-form').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.job-listing-card');
+    const formWrap = card ? card.querySelector('.job-apply-form-wrap') : null;
+    if (formWrap) {
+      const isVisible = formWrap.style.display === 'block';
+      formWrap.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) formWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+});
+
+document.querySelectorAll('.job-cancel-apply').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const formWrap = btn.closest('.job-apply-form-wrap');
+    if (formWrap) formWrap.style.display = 'none';
+  });
+});
+
+// CV upload preview per job
+document.querySelectorAll('.job-cv-upload-area').forEach((area) => {
+  const input = area.querySelector('.job-cv-upload-input');
+  const uploadedDiv = area.parentElement.querySelector('.job-cv-uploaded-file');
+  const fileNameSpan = area.parentElement.querySelector('.job-cv-file-name');
+
+  if (input && uploadedDiv && fileNameSpan) {
+    area.addEventListener('click', () => input.click());
+    input.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        uploadedDiv.style.display = 'block';
+        fileNameSpan.textContent = e.target.files[0].name;
+      }
+    });
+  }
+});
+
+// Handle redirect after successful application
+if (window.location.search.includes('applicationSubmitted=true')) {
+  if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
+  if (dbMainContent) dbMainContent.style.display = 'block';
+}
+/* ---------- Add News panel toggle ---------- */
+const addNewsLink = document.getElementById('addNewsLink');
+const addNewsPanel = document.getElementById('addNewsPanel');
+const cancelAddNews = document.getElementById('cancelAddNews');
+
+if (addNewsLink && addNewsPanel && dbMainContent) {
+  addNewsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (addEventPanel) addEventPanel.style.display = 'none';
+    addNewsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAddNews && addNewsPanel && dbMainContent) {
+  cancelAddNews.addEventListener('click', (e) => {
+    e.preventDefault();
+    addNewsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- Add Event panel toggle ---------- */
+const addEventLink = document.getElementById('addEventLink');
+const addEventPanel = document.getElementById('addEventPanel');
+const cancelAddEvent = document.getElementById('cancelAddEvent');
+
+if (addEventLink && addEventPanel && dbMainContent) {
+  addEventLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    if (addNewsPanel) addNewsPanel.style.display = 'none';
+    addEventPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAddEvent && addEventPanel && dbMainContent) {
+  cancelAddEvent.addEventListener('click', (e) => {
+    e.preventDefault();
+    addEventPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- News image upload preview ---------- */
+const newsImageUploadArea = document.getElementById('newsImageUploadArea');
+const newsImageUploadInput = document.getElementById('newsImageUpload');
+if (newsImageUploadArea && newsImageUploadInput) {
+  newsImageUploadArea.addEventListener('click', () => newsImageUploadInput.click());
+  newsImageUploadInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      document.getElementById('newsImageUploadedFile').style.display = 'block';
+      document.getElementById('newsImageFileName').textContent = e.target.files[0].name;
+    }
+  });
+}
+
+/* ---------- All News panel toggle ---------- */
+const allNewsLink = document.getElementById('allNewsLink');
+const allNewsPanel = document.getElementById('allNewsPanel');
+const cancelAllNews = document.getElementById('cancelAllNews');
+
+if (allNewsLink && allNewsPanel && dbMainContent) {
+  allNewsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    allNewsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAllNews && allNewsPanel && dbMainContent) {
+  cancelAllNews.addEventListener('click', (e) => {
+    e.preventDefault();
+    allNewsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- All Events panel toggle ---------- */
+const allEventsLink = document.getElementById('allEventsLink');
+const allEventsPanel = document.getElementById('allEventsPanel');
+const cancelAllEvents = document.getElementById('cancelAllEvents');
+
+if (allEventsLink && allEventsPanel && dbMainContent) {
+  allEventsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    allEventsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAllEvents && allEventsPanel && dbMainContent) {
+  cancelAllEvents.addEventListener('click', (e) => {
+    e.preventDefault();
+    allEventsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- Edit form toggle (news + events) ---------- */
+document.querySelectorAll('.manage-edit-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.manage-item');
+    const form = item.querySelector('.manage-edit-form');
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  });
+});
+
+const trackLoginsLink = document.getElementById('trackLoginsLink');
+const trackLoginsPanel = document.getElementById('trackLoginsPanel');
+const cancelTrackLogins = document.getElementById('cancelTrackLogins');
+
+if (trackLoginsLink && trackLoginsPanel && dbMainContent) {
+  trackLoginsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    trackLoginsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelTrackLogins && trackLoginsPanel && dbMainContent) {
+  cancelTrackLogins.addEventListener('click', (e) => {
+    e.preventDefault();
+    trackLoginsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

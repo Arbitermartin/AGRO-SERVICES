@@ -1,0 +1,123 @@
+<!-- ✅ Job Opportunities panel — sibling of #dbMainContent, hidden by default -->
+<div id="jobOpportunitiesPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-briefcase"></i></div>
+      <h2>Job Opportunities</h2>
+      <p>Browse and apply for open positions</p>
+    </div>
+  
+    <% if (jobs && jobs.length > 0) { %>
+      <% jobs.forEach(job => { %>
+        <div class="job-listing-card" data-job-id="<%= job.id %>">
+          <div class="job-listing-main">
+            <div class="job-listing-icon"><i class="bi bi-flower1"></i></div>
+  
+            <div class="job-listing-info">
+              <h3><%= job.title %></h3>
+              <div class="job-listing-meta">
+                <span><i class="bi bi-geo-alt"></i> <%= job.region %></span>
+                <span><i class="bi bi-clock"></i> <%= job.job_type %></span>
+                <span><i class="bi bi-building"></i> <%= job.category %></span>
+              </div>
+            </div>
+  
+            <div class="job-listing-actions">
+              <button type="button" class="btn-outline-sm job-toggle-details">
+                <i class="bi bi-chevron-down"></i> Details
+              </button>
+              <button type="button" class="btn btn-filled job-apply-btn job-open-apply-form">
+                Apply Now
+              </button>
+            </div>
+          </div>
+  
+          <div class="job-listing-details">
+            <div class="job-listing-details-inner">
+              <h4>Job Description &amp; Qualifications</h4>
+              <p><%= job.description %></p>
+              <div class="job-listing-dates">
+                <span><i class="bi bi-calendar-check"></i> Posted: <%= new Date(job.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                <span><i class="bi bi-calendar-x"></i> Apply by: <%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- ✅ Inline apply form, hidden until "Apply Now" is clicked -->
+          <div class="job-apply-form-wrap" style="display:none;">
+            <form action="/account/dashboard/member/jobs/<%= job.id %>/apply" method="POST" enctype="multipart/form-data" class="auth-form job-apply-form">
+  
+              <div class="form-field">
+                <label>Full Name</label>
+                <div class="input-wrap">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" name="applicant_name" value="<%= account.full_name %>" required>
+                </div>
+              </div>
+  
+              <div class="form-field">
+                <label>Email</label>
+                <div class="input-wrap">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" name="applicant_email" value="<%= account.email %>" required>
+                </div>
+              </div>
+  
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Phone Number</label>
+                  <div class="input-wrap">
+                    <i class="bi bi-telephone input-icon"></i>
+                    <input type="tel" name="applicant_phone" placeholder="Your phone number" required>
+                  </div>
+                </div>
+  
+                <div class="form-field">
+                  <label>Years of Experience</label>
+                  <div class="input-wrap">
+                    <i class="bi bi-briefcase input-icon"></i>
+                    <input type="number" name="years_experience" min="0" max="60" placeholder="e.g. 3" required>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-field">
+                <label>Cover Letter</label>
+                <div class="input-wrap" style="align-items:flex-start;">
+                  <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+                  <textarea name="cover_letter" rows="4" placeholder="Why are you a good fit for this role?" style="padding-left:44px;" required></textarea>
+                </div>
+              </div>
+  
+              <div class="form-field">
+                <label>Upload CV / Resume</label>
+                <div class="upload-area job-cv-upload-area">
+                  <i class="bi bi-cloud-upload" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+                  <p>Tap to upload your CV<br><small>PDF or DOCX (max 5MB)</small></p>
+                  <input type="file" class="job-cv-upload-input" name="cv_file" accept=".pdf,.doc,.docx" style="display:none;" required>
+                </div>
+                <div class="job-cv-uploaded-file" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+                  <i class="bi bi-file-earmark-check"></i> <span class="job-cv-file-name"></span>
+                </div>
+              </div>
+  
+              <button type="submit" class="btn btn-filled btn-block" style="margin-top: 10px;">
+                Submit Application
+              </button>
+              <button type="button" class="btn btn-outline btn-block job-cancel-apply" style="margin-top: 8px;">
+                Cancel
+              </button>
+  
+            </form>
+          </div>
+  
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">No open job postings right now.</p>
+    <% } %>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelJobOpportunities"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+  <!-- end #jobOpportunitiesPanel -->

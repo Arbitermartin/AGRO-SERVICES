@@ -230,6 +230,73 @@
   display:block;
   font-size:.9rem;
 }
+/*********************************************
+Deliverys style for manage news and events
+******************************/
+.manage-item {
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 0;
+}
+.manage-item:last-of-type { border-bottom: none; }
+
+.manage-item-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.manage-item-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.manage-item-thumb-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: var(--bg-light-green);
+  color: var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.manage-item-info { 
+  flex: 1; 
+  min-width: 180px; 
+}
+.manage-item-info h4 { 
+  font-size: 0.92rem; 
+  font-weight: 700; 
+  color: var(--text-primary); 
+  margin-bottom: 4px; 
+}
+.manage-item-info small { 
+  font-size: 0.78rem; 
+  color: var(--text-muted); 
+}
+
+.manage-item-actions { display: flex; gap: 8px; }
+
+.manage-delete-btn {
+  color: #c0392b;
+  border-color: #f5c6c6;
+}
+.manage-delete-btn:hover { background: #ffebee; border-color: #c0392b; }
+
+.manage-edit-form {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-light-green);
+  border-radius: 10px;
+}
+/* end here for style manage news and events */
 
 /* =====================================================
    JOB OPPORTUNITIES PAGE
@@ -470,6 +537,24 @@
   padding: 10px 22px;
   font-size: 0.85rem;
 }
+.job-listing-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* in the admin */
+.db-btn-action.btn-red {
+  background-color: #c0392b;
+  color: white;
+}
+
+.db-btn-action.btn-green {
+  background-color: #2e7d32;
+  color: white;
+}
+/* end here  */
 
 /* ---------- Empty state ---------- */
 .jobs-empty {
@@ -1789,6 +1874,194 @@
 .db-btn-action:hover {
   background: #256428;
 }
+/******************************************
+Delivery style for job view in admin dashboard
+****************************************/
+.application-item {
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 0;
+}
+
+.application-item:last-of-type {
+  border-bottom: none;
+}
+
+.application-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.application-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.application-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.application-info h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.application-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.application-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.application-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 9px 16px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.application-toggle:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.application-toggle i {
+  transition: transform 0.2s ease;
+}
+
+.application-item.is-open .application-toggle i {
+  transform: rotate(180deg);
+}
+
+/* ✅ This is the critical piece — without it, "Details" never expands */
+.application-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.application-item.is-open .application-details {
+  max-height: 2000px;
+}
+
+.application-details-inner {
+  padding: 18px 0 4px 56px;
+}
+
+.application-contact-grid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.application-contact-grid div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.application-details-inner h5 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.application-cover-letter {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  white-space: pre-line;
+  background: var(--bg-light-green);
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.application-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-outline-sm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 9px 16px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-outline-sm:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.application-status-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.application-status-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.application-status-form select {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: var(--font-base);
+}
+
+
 
 /* =====================================================
    MEMBER DASHBOARD — APPLICATIONS / EVENTS / PROFILE
@@ -2286,6 +2559,7 @@
     text-align: center;
     order: 3;
   }
+  
   /* training page */
   .training-grid {
     grid-template-columns: 1fr;
@@ -2354,6 +2628,10 @@
   .db-search {
     display: none;
   }
+  /* for admin application view */
+    .application-details-inner {
+      padding-left: 0;
+    }
 }
 @media (max-width:480px){
 

@@ -1,0 +1,55 @@
+<div id="trackLoginsPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-clock-history"></i></div>
+      <h2>Login &amp; Activity Tracking</h2>
+      <p>Monitor member logins and system activity</p>
+    </div>
+  
+    <h3 class="profile-section-title">Login Sessions</h3>
+    <table class="db-table">
+      <thead>
+        <tr><th>Name</th><th>Role</th><th>Login Time</th><th>Logout Time</th><th>IP Address</th></tr>
+      </thead>
+      <tbody>
+        <% if (loginLogs && loginLogs.length > 0) { %>
+          <% loginLogs.forEach(log => { %>
+            <tr>
+              <td><%= log.full_name %></td>
+              <td><%= log.account_type %></td>
+              <td><%= new Date(log.login_time).toLocaleString('en-GB') %></td>
+              <td><%= log.logout_time ? new Date(log.logout_time).toLocaleString('en-GB') : '— still active —' %></td>
+              <td><%= log.ip_address %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" style="text-align:center; color:#9ca3af;">No login records yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  
+    <h3 class="profile-section-title" style="margin-top: 30px;">Recent Activity</h3>
+    <table class="db-table">
+      <thead>
+        <tr><th>Name</th><th>Action</th><th>Method</th><th>Route</th><th>Time</th></tr>
+      </thead>
+      <tbody>
+        <% if (activityLogs && activityLogs.length > 0) { %>
+          <% activityLogs.forEach(log => { %>
+            <tr>
+              <td><%= log.full_name %></td>
+              <td><%= log.action %></td>
+              <td><%= log.method %></td>
+              <td><%= log.route %></td>
+              <td><%= new Date(log.created_at).toLocaleString('en-GB') %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr><td colspan="5" style="text-align:center; color:#9ca3af;">No activity recorded yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelTrackLogins"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>

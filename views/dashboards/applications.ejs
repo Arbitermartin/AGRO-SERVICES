@@ -1,0 +1,85 @@
+<!-- ✅ Applications panel — sibling of #dbMainContent, hidden by default -->
+<div id="applicationsPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-lines-fill"></i></div>
+      <h2>Job Applications</h2>
+      <p>Review submitted applications for all job postings</p>
+    </div>
+  
+    <% if (allApplications && allApplications.length > 0) { %>
+      <% allApplications.forEach(app => { %>
+        <div class="application-item" data-app-id="<%= app.id %>">
+  
+          <div class="application-summary">
+            <div class="application-avatar">
+              <%= app.applicant_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() %>
+            </div>
+  
+            <div class="application-info">
+              <h4><%= app.applicant_name %></h4>
+              <div class="application-meta">
+                <span><i class="bi bi-briefcase"></i> <%= app.job_title %></span>
+                <span><i class="bi bi-clock-history"></i> <%= app.years_experience %> yrs experience</span>
+                <span><i class="bi bi-calendar"></i> <%= new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+              </div>
+            </div>
+  
+            <span class="db-badge-status
+              <%= app.status === 'submitted' ? 'db-badge-progress' : '' %>
+              <%= app.status === 'under_review' ? 'db-badge-progress' : '' %>
+              <%= app.status === 'shortlisted' ? 'db-badge-shortlisted' : '' %>
+              <%= app.status === 'hired' ? 'db-badge-open' : '' %>
+              <%= app.status === 'rejected' ? 'db-badge-priority db-badge-high' : '' %>
+            ">
+              <%= app.status.replace('_', ' ') %>
+            </span>
+  
+            <button type="button" class="btn-outline-sm application-toggle">
+              <i class="bi bi-chevron-down"></i> Details
+            </button>
+          </div>
+  
+          <div class="application-details">
+            <div class="application-details-inner">
+  
+              <div class="application-contact-grid">
+                <div><i class="bi bi-envelope"></i> <%= app.applicant_email %></div>
+                <div><i class="bi bi-telephone"></i> <%= app.applicant_phone %></div>
+              </div>
+  
+              <h5>Cover Letter</h5>
+              <p class="application-cover-letter"><%= app.cover_letter %></p>
+  
+              <div class="application-actions-row">
+                <a href="<%= app.cv_file_path %>" target="_blank" rel="noopener" class="btn-outline-sm">
+                  <i class="bi bi-file-earmark-text"></i> View CV
+                </a>
+                <a href="<%= app.cv_file_path %>" download class="btn-outline-sm">
+                  <i class="bi bi-download"></i> Download CV
+                </a>
+              </div>
+  
+              <form action="/account/applications/<%= app.id %>/status" method="POST" class="application-status-form">
+                <label>Update Status:</label>
+                <select name="status" onchange="this.form.submit()">
+                  <option value="submitted" <%= app.status === 'submitted' ? 'selected' : '' %>>Submitted</option>
+                  <option value="under_review" <%= app.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
+                  <option value="shortlisted" <%= app.status === 'shortlisted' ? 'selected' : '' %>>Shortlisted</option>
+                  <option value="hired" <%= app.status === 'hired' ? 'selected' : '' %>>Hired</option>
+                  <option value="rejected" <%= app.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                </select>
+              </form>
+  
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">No applications received yet.</p>
+    <% } %>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelApplications"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+  <!-- end #applicationsPanel -->

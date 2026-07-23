@@ -38,10 +38,21 @@
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
-            <a href="#" class="db-submenu-link">All Events</a>
-            <a href="#" class="db-submenu-link">Add Event</a>
+            <a href="#" id="addEventLink" class="db-submenu-link">
+            <div><span>Add Event</span>
+            </div>
+          </a>
+          <a href="#" id="addNewsLink" class="db-submenu-link">
+            <div><span>Add News</span>
+          </div>
+        </a>
+        <a href="#" id="allEventsLink" class="db-submenu-link"><div><span>All Events</span>
+        </div>
+      </a>
             <a href="#" class="db-submenu-link">Registered Users</a>
-            <a href="#" class="db-submenu-link">All News</a>
+            <a href="#" id="allNewsLink" class="db-submenu-link"><div><span>All News</span>
+            </div>
+          </a>
           </div>
         </div>
 
@@ -51,13 +62,12 @@
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
-            <a href="#" class="db-submenu-link">All Job Postings</a>
+            <a href="#" id="allJobsLink" class="db-submenu-link"><div><span>All Job Postings</span></div></a>
             <a href="#" id="addJobLink" class="db-submenu-link">
               <div><span>Add Job Posting</span>
             </div>
           </a>
-            <a href="#" class="db-submenu-link">Applications</a>
-            <a href="#" class="db-submenu-link">Download Applications</a>
+          <a href="#" id="applicationsLink" class="db-submenu-link"><div><span>Applications</span></div></a>
           </div>
         </div>
 
@@ -216,8 +226,8 @@
               <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-calendar-event-fill"></i></div>
               <div>
                 <div class="db-stat-label">Events</div>
-                <div class="db-stat-value">24</div>
-                <div class="db-stat-delta db-stat-delta-blue">5 upcoming</div>
+                <div class="db-stat-value"><%= eventCount %></div>
+                <div class="db-stat-delta db-stat-delta-blue"><%= upcomingEventCount %> upcoming</div>
               </div>
             </div>
 
@@ -225,8 +235,8 @@
               <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-briefcase-fill"></i></div>
               <div>
                 <div class="db-stat-label">Job Postings</div>
-                <div class="db-stat-value">18</div>
-                <div class="db-stat-delta db-stat-delta-green">3 active</div>
+                <div class="db-stat-value"><%= jobCount %></div>
+                <div class="db-stat-delta db-stat-delta-green"><%= openJobCount %> active</div>
               </div>
             </div>
 
@@ -610,6 +620,67 @@
 </div>
 <!-- end #updateProfilePanel -->
 <%- include('add-job') %>
+<%- include('applications') %>
+<%- include('add-news') %>
+<%- include('add-event') %>
+<%- include('all-news') %>
+<%- include('all-events') %>
+<!-- ✅ All Job Postings panel — sibling of #dbMainContent, hidden by default -->
+<div id="allJobsPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-briefcase"></i></div>
+    <h2>All Job Postings</h2>
+    <p>Manage all published job opportunities</p>
+  </div>
+
+  <table class="db-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Region</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Deadline</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (allJobs && allJobs.length > 0) { %>
+        <% allJobs.forEach(job => { %>
+          <tr>
+            <td><b><%= job.title %></b></td>
+            <td><%= job.region %></td>
+            <td><%= job.job_type %></td>
+            <td><%= job.category %></td>
+            <td><%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+            <td>
+              <span class="db-badge-status <%= job.status === 'open' ? 'db-badge-open' : 'db-badge-priority db-badge-high' %>">
+                <%= job.status === 'open' ? 'Open' : 'Closed' %>
+              </span>
+            </td>
+            <td>
+              <form action="/account/jobs/<%= job.id %>/toggle-status" method="POST" style="display:inline;">
+                <button 
+                type="submit" 
+                class="db-btn-action <%= job.status === 'open' ? 'btn-red' : 'btn-green' %>">
+                <%= job.status === 'open' ? 'Close' : 'Reopen' %>
+            </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="7" style="text-align:center; color:#9ca3af; padding: 24px;">No job postings yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelAllJobs"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>
+<!-- end #allJobsPanel -->
 
       </div>
       <!-- end db-content -->

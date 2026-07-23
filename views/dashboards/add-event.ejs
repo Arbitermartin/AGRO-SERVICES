@@ -1,0 +1,66 @@
+<!-- ✅ Add Event panel — sibling of #dbMainContent, hidden by default -->
+<div id="addEventPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-calendar-event"></i></div>
+      <h2>Create Event</h2>
+      <p>Add a new event for members to see</p>
+    </div>
+  
+    <form action="/account/events/create" method="POST" class="auth-form" id="addEventForm">
+  
+      <div class="form-field">
+        <label>Event Title</label>
+        <div class="input-wrap">
+          <i class="bi bi-card-heading input-icon"></i>
+          <input type="text" name="title" placeholder="e.g. Youth Leadership Summit" required>
+        </div>
+      </div>
+  
+      <div class="form-field">
+        <label>Description</label>
+        <div class="input-wrap" style="align-items:flex-start;">
+          <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+          <textarea name="description" rows="4" placeholder="Describe the event..." style="padding-left:44px;"></textarea>
+        </div>
+      </div>
+  
+      <div class="form-field">
+        <label>Location</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo-alt input-icon"></i>
+          <input type="text" name="location" placeholder="e.g. Dar es Salaam">
+        </div>
+      </div>
+  
+      <h3 class="profile-section-title">Event Dates</h3>
+  
+      <div class="form-row">
+        <div class="form-field">
+          <label>Starting Date</label>
+          <div class="input-wrap">
+            <i class="bi bi-calendar-check input-icon"></i>
+            <input type="date" name="event_date" required>
+          </div>
+        </div>
+  
+        <div class="form-field">
+          <label>End Date</label>
+          <div class="input-wrap">
+            <i class="bi bi-calendar-x input-icon"></i>
+            <input type="date" name="end_date" required>
+          </div>
+        </div>
+      </div>
+      <small class="field-hint">This event will automatically disappear from the home page after the end date.</small>
+  
+      <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 16px;">
+        Publish Event
+      </button>
+  
+      <div class="auth-switch" style="margin-top:20px;text-align:center;">
+        <a href="#" id="cancelAddEvent"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+      </div>
+  
+    </form>
+  </div>
+  <!-- end #addEventPanel -->

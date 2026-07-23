@@ -1,0 +1,76 @@
+<div id="allEventsPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-calendar-event"></i></div>
+      <h2>All Events</h2>
+      <p>Manage all created events</p>
+    </div>
+  
+    <% if (allEvents && allEvents.length > 0) { %>
+      <% allEvents.forEach(item => { %>
+        <div class="manage-item" data-item-id="<%= item.event_id %>">
+          <div class="manage-item-summary">
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-calendar-event"></i></div>
+            <div class="manage-item-info">
+              <h4><%= item.title %></h4>
+              <small><%= item.location || 'No location set' %> &middot; <%= new Date(item.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %> - <%= new Date(item.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+            </div>
+            <div class="manage-item-actions">
+              <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
+              <form action="/account/events/<%= item.event_id %>/delete" method="POST" onsubmit="return confirm('Delete this event permanently?');">
+                <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+              </form>
+            </div>
+          </div>
+  
+          <div class="manage-edit-form" style="display:none;">
+            <form action="/account/events/<%= item.event_id %>/update" method="POST" class="auth-form">
+              <div class="form-field">
+                <label>Title</label>
+                <div class="input-wrap">
+                  <i class="bi bi-card-heading input-icon"></i>
+                  <input type="text" name="title" value="<%= item.title %>" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Description</label>
+                <div class="input-wrap" style="align-items:flex-start;">
+                  <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+                  <textarea name="description" rows="4" style="padding-left:44px;"><%= item.description %></textarea>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Location</label>
+                <div class="input-wrap">
+                  <i class="bi bi-geo-alt input-icon"></i>
+                  <input type="text" name="location" value="<%= item.location %>">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-field">
+                  <label>Starting Date</label>
+                  <div class="input-wrap">
+                    <i class="bi bi-calendar-check input-icon"></i>
+                    <input type="date" name="event_date" value="<%= new Date(item.event_date).toISOString().split('T')[0] %>" required>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label>End Date</label>
+                  <div class="input-wrap">
+                    <i class="bi bi-calendar-x input-icon"></i>
+                    <input type="date" name="end_date" value="<%= new Date(item.end_date).toISOString().split('T')[0] %>" required>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-filled" style="margin-top:10px;">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">No events created yet.</p>
+    <% } %>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAllEvents"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>

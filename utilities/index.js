@@ -57,4 +57,28 @@ utilities.checkRole = (allowedRole) => {
   };
 };
 
+/*********************
+ * 
+ * Delivery track activities
+ */
+
+utilities.trackActivity = (actionDescription) => {
+  return async (req, res, next) => {
+    try {
+      if (req.session.account) {
+        const accountModel = require("../models/account-model");
+        await accountModel.createActivityLog(
+          req.session.account.id,
+          req.session.account.full_name,
+          actionDescription,
+          req.method,
+          req.originalUrl
+        );
+      }
+    } catch (err) {
+      console.error("ACTIVITY LOG ERROR:", err);
+    }
+    next();
+  };
+};
 module.exports = utilities

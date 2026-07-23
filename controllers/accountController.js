@@ -89,6 +89,10 @@ async function accountLogin(req, res) {
       req.flash("error", "Your account is not active yet. Please contact support.");
       return res.redirect("/account/login");
     }
+     // ✅ Create a login log entry
+     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+     const loginLog = await accountModel.createLoginLog(account.id, account.full_name, account.account_type, ip);
+ 
 
     // Store minimal account info in session (never store the password hash)
     req.session.account = {
@@ -96,6 +100,7 @@ async function accountLogin(req, res) {
       full_name: account.full_name,
       email: account.email,
       account_type: account.account_type,
+      loginLogId: loginLog.id,
     };
 
     switch (account.account_type) {
@@ -136,6 +141,14 @@ async function buildAdminDashboard(req, res) {
   const profile = (await accountModel.getProfileByAccountId(account.id)) || {};
   const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id)) || {} : {};
   const adminDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
+  const allJobs = await accountModel.getAllJobs();
+  const allApplications = await accountModel.getAllApplications();
+  const jobCount = await accountModel.countAllJobs();       // ✅ new
+  const openJobCount = await accountModel.countOpenJobs();
+  const eventCount = await accountModel.countAllEvents();           // ✅ new
+  const upcomingEventCount = await accountModel.countUpcomingEvents();
+  const allNews = await accountModel.getAllNews();
+  const allEvents = await accountModel.getAllEventsAdmin();
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -145,12 +158,51 @@ async function buildAdminDashboard(req, res) {
     profile,
     birthPlace,
     adminDetails,
+    allJobs,
+    allApplications,
+    jobCount,
+    openJobCount,
+    eventCount,
+    upcomingEventCount,
+    allNews,
+    allEvents,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
     success: req.flash("success"),   
     error: req.flash("error"),       
   });
+}
+/***********************
+ * 
+ * delivery application status
+ */
+async function updateApplicationStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await accountModel.updateApplicationStatus(id, status);
+
+    req.flash("success", "Application status updated.");
+    res.redirect("/account/dashboard/admin?jobPosted=true");
+  } catch (error) {
+    console.error("UPDATE APPLICATION STATUS ERROR:", error);
+    req.flash("error", "Failed to update application status.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+async function toggleJobStatus(req, res) {
+  try {
+    const jobId = req.params.id;
+    await accountModel.toggleJobStatus(jobId);
+
+    req.flash("success", "Job status updated.");
+    res.redirect("/account/dashboard/admin?jobPosted=true");
+  } catch (error) {
+    console.error("TOGGLE JOB STATUS ERROR:", error);
+    req.flash("error", "Failed to update job status.");
+    res.redirect("/account/dashboard/admin");
+  }
 }
 
 /****************************
@@ -199,11 +251,15 @@ async function updateProfile(req, res) {
 
 async function buildIctStaffDashboard(req, res) {
   let nav = await utilities.getNav();
+  const loginLogs = await accountModel.getAllLoginLogs();
+  const activityLogs = await accountModel.getAllActivityLogs();
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
     account: req.session.account,
     initials: getInitials(req.session.account.full_name),
+    loginLogs,
+    activityLogs,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
@@ -212,17 +268,71 @@ async function buildIctStaffDashboard(req, res) {
 
 async function buildMemberDashboard(req, res) {
   let nav = await utilities.getNav();
+  const account = req.session.account;   // ← This line MUST exist
+
+    if (!account || !account.id) {
+      req.flash("error", "Please log in to access the dashboard.");
+      return res.redirect("/account/login");
+    }
   const jobs = await accountModel.getAllOpenJobs();
+  const myApplications = await accountModel.getApplicationsByAccountId(account.id);
+  const profile = await accountModel.getProfileByAccountId(account.id) || {};
+  const birthPlace = profile.id 
+    ? (await accountModel.getBirthPlaceByProfileId(profile.id) || {}) 
+    : {};
+    const memberDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
+    const myApplicationsCount = await accountModel.countApplicationsByAccountId(account.id);
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
-    account: req.session.account,
+    account,
     initials: getInitials(req.session.account.full_name),
+    profile,
+    birthPlace,
+    memberDetails,
     jobs,
+    myApplications,
+    myApplicationsCount,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
   });
+}
+/***************************************
+ * 
+ * Delivery member submit application
+ */
+async function submitMemberJobApplication(req, res) {
+  try {
+    const jobId = req.params.id;
+    const { applicant_name, applicant_email, applicant_phone, cover_letter, years_experience } = req.body;
+
+    if (!req.file) {
+      req.flash("error", "Please upload your CV/Resume.");
+      return res.redirect("/account/dashboard/member");
+    }
+
+    const accountId = req.session.account.id;
+    const cvFilePath = `/uploads/cvs/${req.file.filename}`;
+
+    await accountModel.createJobApplication({
+      job_id: jobId,
+      account_id: accountId,
+      applicant_name,
+      applicant_email,
+      applicant_phone,
+      cover_letter,
+      years_experience: parseInt(years_experience, 10) || 0,
+      cv_file_path: cvFilePath,
+    });
+
+    req.flash("success", "Your application has been submitted successfully!");
+    res.redirect("/account/dashboard/member?applicationSubmitted=true");
+  } catch (error) {
+    console.error("SUBMIT MEMBER APPLICATION ERROR:", error);
+    req.flash("error", "Failed to submit your application. Please try again.");
+    res.redirect("/account/dashboard/member");
+  }
 }
 /*****************************
  * *****
@@ -259,11 +369,182 @@ async function changePassword(req, res) {
   }
 }
 
+/***********************************
+ * 
+ * Delivery build job application
+ ******************/
+async function buildApplyJob(req, res) {
+  try {
+    const jobId = req.params.id;
+    const job = await accountModel.getJobById(jobId);
+
+    if (!job) {
+      req.flash("error", "Job posting not found.");
+      return res.redirect("/jobs");
+    }
+
+    let nav = await utilities.getNav();
+    res.render("account/apply-job", {
+      title: `Apply — ${job.title}`,
+      nav,
+      job,
+      errors: null,
+      success: req.flash("success"),
+      error: req.flash("error"),
+    });
+  } catch (error) {
+    console.error("BUILD APPLY JOB ERROR:", error);
+    req.flash("error", "Something went wrong. Please try again.");
+    res.redirect("/jobs");
+  }
+}
+async function submitJobApplication(req, res) {
+  try {
+    const jobId = req.params.id;
+    const { applicant_name, applicant_email, applicant_phone, cover_letter, years_experience } = req.body;
+
+    if (!req.file) {
+      req.flash("error", "Please upload your CV/Resume.");
+      return res.redirect(`/account/jobs/${jobId}/apply`);
+    }
+
+    const accountId = req.session.account ? req.session.account.id : null;
+    const cvFilePath = `/uploads/cvs/${req.file.filename}`;
+
+    await accountModel.createJobApplication({
+      job_id: jobId,
+      account_id: accountId,
+      applicant_name,
+      applicant_email,
+      applicant_phone,
+      cover_letter,
+      years_experience: parseInt(years_experience, 10) || 0,   // ✅ new field
+      cv_file_path: cvFilePath,
+    });
+
+    req.flash("success", "Your application has been submitted successfully!");
+    res.redirect("/jobs");
+  } catch (error) {
+    console.error("SUBMIT JOB APPLICATION ERROR:", error);
+    req.flash("error", "Failed to submit your application. Please try again.");
+    res.redirect(`/account/jobs/${req.params.id}/apply`);
+  }
+}
+//end here
+
+/*************************************
+ * 
+ * Delivery latest news and events
+ */
+async function createNewsPost(req, res) {
+  try {
+    const { title, description, news_date } = req.body;
+    const profile_image = req.file ? `/images/news/${req.file.filename}` : null;
+
+    await accountModel.createNews({ title, description, news_date, profile_image });
+
+    req.flash("success", "News posted successfully.");
+    res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
+  } catch (error) {
+    console.error("CREATE NEWS ERROR:", error);
+    req.flash("error", "Failed to post news.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function createEventPost(req, res) {
+  try {
+    const { title, description, location, event_date, end_date } = req.body;
+
+    await accountModel.createEvent({ title, description, location, event_date, end_date });
+
+    req.flash("success", "Event created successfully.");
+    res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
+  } catch (error) {
+    console.error("CREATE EVENT ERROR:", error);
+    req.flash("error", "Failed to create event.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here news and latest events
+
+/*****************************************
+ * 
+ * Delivery news get and events all and delete
+ */
+async function updateNewsPost(req, res) {
+  try {
+    const { news_id } = req.params;
+    const { title, description, news_date } = req.body;
+    const updateData = { title, description, news_date };
+
+    if (req.file) {
+      updateData.profile_image = `/images/news/${req.file.filename}`;
+    }
+
+    await accountModel.updateNews(news_id, updateData);
+
+    req.flash("success", "News updated successfully.");
+    res.redirect("/account/dashboard/admin?newsPosted=true");
+  } catch (error) {
+    console.error("UPDATE NEWS ERROR:", error);
+    req.flash("error", "Failed to update news.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteNewsPost(req, res) {
+  try {
+    const { news_id } = req.params;
+    await accountModel.deleteNews(news_id);
+
+    req.flash("success", "News deleted successfully.");
+    res.redirect("/account/dashboard/admin?newsPosted=true");
+  } catch (error) {
+    console.error("DELETE NEWS ERROR:", error);
+    req.flash("error", "Failed to delete news.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function updateEventPost(req, res) {
+  try {
+    const { event_id } = req.params;
+    const { title, description, location, event_date, end_date } = req.body;
+
+    await accountModel.updateEvent(event_id, { title, description, location, event_date, end_date });
+
+    req.flash("success", "Event updated successfully.");
+    res.redirect("/account/dashboard/admin?eventPosted=true");
+  } catch (error) {
+    console.error("UPDATE EVENT ERROR:", error);
+    req.flash("error", "Failed to update event.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteEventPost(req, res) {
+  try {
+    const { event_id } = req.params;
+    await accountModel.deleteEvent(event_id);
+
+    req.flash("success", "Event deleted successfully.");
+    res.redirect("/account/dashboard/admin?eventPosted=true");
+  } catch (error) {
+    console.error("DELETE EVENT ERROR:", error);
+    req.flash("error", "Failed to delete event.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
 
 /* ****************************************
  * Logout
  * *************************************** */
-function accountLogout(req, res) {
+async function accountLogout(req, res) {
+  try {
+    if (req.session.account && req.session.account.loginLogId) {
+      await accountModel.recordLogout(req.session.account.loginLogId);
+    }
   req.flash("success","You have been logged out successfully.");
   const flashMessages =req.session.flash;
 
@@ -272,11 +553,16 @@ function accountLogout(req, res) {
     req.session.flash =flashMessages;
     res.redirect("/account/login")
   }) 
+} catch (error) {
+  console.error("LOGOUT ERROR:", error);
+  res.redirect("/account/login");
+}
 }
 
 
 
+
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,accountLogout
 
 }

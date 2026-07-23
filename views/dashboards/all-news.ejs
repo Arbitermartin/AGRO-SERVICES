@@ -1,0 +1,71 @@
+<div id="allNewsPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-newspaper"></i></div>
+      <h2>All News</h2>
+      <p>Manage all posted news updates</p>
+    </div>
+  
+    <% if (allNews && allNews.length > 0) { %>
+      <% allNews.forEach(item => { %>
+        <div class="manage-item" data-item-id="<%= item.news_id %>">
+          <div class="manage-item-summary">
+            <% if (item.profile_image) { %>
+              <img src="<%= item.profile_image %>" alt="" class="manage-item-thumb">
+            <% } else { %>
+              <div class="manage-item-thumb-placeholder"><i class="bi bi-newspaper"></i></div>
+            <% } %>
+            <div class="manage-item-info">
+              <h4><%= item.title %></h4>
+              <small><%= new Date(item.news_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+            </div>
+            <div class="manage-item-actions">
+              <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
+              <form action="/account/news/<%= item.news_id %>/delete" method="POST" onsubmit="return confirm('Delete this news post permanently?');">
+                <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+              </form>
+            </div>
+          </div>
+  
+          <div class="manage-edit-form" style="display:none;">
+            <form action="/account/news/<%= item.news_id %>/update" method="POST" enctype="multipart/form-data" class="auth-form">
+              <div class="form-field">
+                <label>Title</label>
+                <div class="input-wrap">
+                  <i class="bi bi-card-heading input-icon"></i>
+                  <input type="text" name="title" value="<%= item.title %>" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Description</label>
+                <div class="input-wrap" style="align-items:flex-start;">
+                  <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+                  <textarea name="description" rows="4" style="padding-left:44px;" required><%= item.description %></textarea>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>News Date</label>
+                <div class="input-wrap">
+                  <i class="bi bi-calendar-event input-icon"></i>
+                  <input type="date" name="news_date" value="<%= new Date(item.news_date).toISOString().split('T')[0] %>" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Replace Image (optional)</label>
+                <div class="input-wrap">
+                  <i class="bi bi-image input-icon"></i>
+                  <input type="file" name="profile_image" accept="image/jpeg,image/png">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-filled" style="margin-top:10px;">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">No news posted yet.</p>
+    <% } %>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAllNews"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>

@@ -1,0 +1,35 @@
+<!-- ✅ My Applications panel — sibling of #dbMainContent, hidden by default -->
+<div id="myApplicationsPanel" class="db-card" style="display:none;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-file-earmark-person"></i></div>
+      <h2>My Applications</h2>
+      <p>Track the status of jobs you've applied for</p>
+    </div>
+  
+    <% if (myApplications && myApplications.length > 0) { %>
+      <% myApplications.forEach(app => { %>
+        <div class="db-application-item">
+          <div>
+            <span><%= app.job_title %></span>
+            <small>Applied on <%= new Date(app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %> &middot; <%= app.job_region %></small>
+          </div>
+          <span class="db-badge-status
+            <%= app.status === 'submitted' ? 'db-badge-progress' : '' %>
+            <%= app.status === 'under_review' ? 'db-badge-progress' : '' %>
+            <%= app.status === 'shortlisted' ? 'db-badge-shortlisted' : '' %>
+            <%= app.status === 'hired' ? 'db-badge-open' : '' %>
+            <%= app.status === 'rejected' ? 'db-badge-priority db-badge-high' : '' %>
+          ">
+            <%= app.status.replace('_', ' ') %>
+          </span>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">You haven't applied to any jobs yet.</p>
+    <% } %>
+  
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelMyApplications"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+  <!-- end #myApplicationsPanel -->

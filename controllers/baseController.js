@@ -4,8 +4,8 @@ const accountModel = require('../models/account-model');
 const baseController = {}
 baseController.buildHome = async function(req, res) {
   try {
-    const latestNews = await accountModel.getLatestNews(5);
-    const upcomingEvents = await accountModel.getUpcomingEvents(5);
+    const latestNews = await accountModel.getLatestNews();
+    const upcomingEvents = await accountModel.getUpcomingEvents();
 
     let nav = await utilities.getNav();
     res.render("pages/index", {

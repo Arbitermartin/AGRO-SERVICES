@@ -1,4 +1,3 @@
-
 <body class="db-body">
 
   <div class="db-shell">
@@ -13,18 +12,17 @@
       </div>
 
       <nav class="db-nav">
-        <a href="/dashboard/member" class="db-nav-link is-active">
+        <a href="/account/dashboard/member" class="db-nav-link is-active">
           <i class="bi bi-speedometer2"></i> Dashboard
         </a>
         <a href="#" class="db-nav-link">
           <i class="bi bi-mortarboard"></i> Trainings
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-briefcase"></i> Job Opportunities
+        <a href="#" id="jobOpportunitiesLink" class="db-nav-link">
+          <i class="bi bi-briefcase"></i>Job Opportunities
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-file-earmark-text"></i> My Applications
-        </a>
+        <a href="#" id="myApplicationsLink" class="db-nav-link">
+          <i class="bi bi-file-earmark-text"></i> My Applications</a>
         <a href="#" class="db-nav-link">
           <i class="bi bi-calendar-check"></i> My Registrations
         </a>
@@ -45,7 +43,7 @@
     </aside>
 
     <div class="db-main">
-      <!-- ===================== TOP BAR (same as Admin Dashboard) ===================== -->
+      <!-- ===================== TOP BAR ===================== -->
       <header class="db-topbar">
         <div class="db-topbar-left">
           <button type="button" class="db-sidebar-toggle" id="dbSidebarToggle" aria-label="Toggle sidebar">
@@ -70,7 +68,6 @@
             <span class="db-notif-dot"></span>
           </button>
 
-          <!-- User menu (identical structure/behavior to Admin Dashboard) -->
           <div class="db-user-menu">
             <button type="button" class="db-user-toggle" id="dbUserToggle" aria-haspopup="true" aria-expanded="false">
               <span class="db-avatar"><%=initials%></span>
@@ -90,7 +87,7 @@
               <a href="#" id="updateProfileLink" class="db-user-dropdown-item">
                 <i class="bi bi-person"></i> Update Profile
               </a>
-              <a href="/dashboard/change-password" class="db-user-dropdown-item">
+              <a href="#" id="changePasswordLink" class="db-user-dropdown-item">
                 <i class="bi bi-key"></i> Change Password
               </a>
               <div class="db-user-dropdown-divider"></div>
@@ -103,181 +100,389 @@
       </header>
 
       <div class="db-content">
-
-        <!-- ===================== STAT CARDS ===================== -->
-        <div class="db-stats-grid db-stats-grid-4">
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-mortarboard-fill"></i></div>
-            <div>
-              <div class="db-stat-label">My Trainings</div>
-              <div class="db-stat-value">5</div>
-              <div class="db-stat-delta db-stat-delta-green">Registered</div>
-            </div>
-          </div>
-
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-briefcase-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Job Applications</div>
-              <div class="db-stat-value">3</div>
-              <div class="db-stat-delta db-stat-delta-blue">Submitted</div>
-            </div>
-          </div>
-
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-red"><i class="bi bi-calendar-check-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Event Registrations</div>
-              <div class="db-stat-value">2</div>
-              <div class="db-stat-delta db-stat-delta-red">Upcoming</div>
-            </div>
-          </div>
-
-          <div class="db-stat-card">
-            <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-person-check-fill"></i></div>
-            <div>
-              <div class="db-stat-label">Profile Completion</div>
-              <div class="db-stat-value">85%</div>
-              <div class="db-stat-delta db-stat-delta-orange">Complete</div>
-            </div>
-          </div>
+        <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
         </div>
 
-        <!-- ===================== TRAININGS + JOB OPPORTUNITIES ===================== -->
-        <div class="db-member-panels-grid">
 
-          <div class="db-card">
-            <div class="db-panel-title">Upcoming Trainings</div>
-            <table class="db-table">
-              <thead>
-                <tr><th>Training</th><th>Date</th><th>Location</th><th>Status</th><th></th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Digital Marketing Basics</td><td>25 May 2024</td><td>Online</td>
-                  <td><span class="db-badge-status db-badge-open">Open</span></td>
-                  <td><button type="button" class="db-btn-action">Register</button></td>
-                </tr>
-                <tr>
-                  <td>Advanced Excel</td><td>02 Jun 2024</td><td>Dar es Salaam</td>
-                  <td><span class="db-badge-status db-badge-open">Open</span></td>
-                  <td><button type="button" class="db-btn-action">Register</button></td>
-                </tr>
-                <tr>
-                  <td>Entrepreneurship Skills</td><td>10 Jun 2024</td><td>Arusha</td>
-                  <td><span class="db-badge-status db-badge-open">Open</span></td>
-                  <td><button type="button" class="db-btn-action">Register</button></td>
-                </tr>
-                <tr>
-                  <td>Cybersecurity Basics</td><td>15 Jun 2024</td><td>Online</td>
-                  <td><span class="db-badge-status db-badge-open">Open</span></td>
-                  <td><button type="button" class="db-btn-action">Register</button></td>
-                </tr>
-              </tbody>
-            </table>
-            <a href="#" class="db-view-all">View all trainings <i class="bi bi-arrow-right"></i></a>
+        <!-- ===================== MAIN DASHBOARD CONTENT ===================== -->
+        <div id="dbMainContent">
+
+          <!-- ===================== STAT CARDS ===================== -->
+          <div class="db-stats-grid db-stats-grid-4">
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-mortarboard-fill"></i></div>
+              <div>
+                <div class="db-stat-label">My Trainings</div>
+                <div class="db-stat-value">5</div>
+                <div class="db-stat-delta db-stat-delta-green">Registered</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-briefcase-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Jobs Applied</div>
+                <div class="db-stat-value"><%= myApplicationsCount %></div>
+                <div class="db-stat-delta db-stat-delta-purple">Total applications</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-red"><i class="bi bi-calendar-check-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Event Registrations</div>
+                <div class="db-stat-value">2</div>
+                <div class="db-stat-delta db-stat-delta-red">Upcoming</div>
+              </div>
+            </div>
+
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-person-check-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Profile Completion</div>
+                <div class="db-stat-value">85%</div>
+                <div class="db-stat-delta db-stat-delta-orange">Complete</div>
+              </div>
+            </div>
           </div>
 
-          <div class="db-card">
-            <div class="db-panel-title">Job Opportunities</div>
-            <table class="db-table">
-              <thead>
-                <tr><th>Job Title</th><th>Deadline</th><th>Location</th><th></th></tr>
-              </thead>
-              <tbody>
-                <% if (jobs && jobs.length > 0) { %>
-                  <% jobs.forEach(job => { %>
-                    <tr>
-                      <td><%= job.title %></td>
-                      <td><%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
-                      <td><%= job.region %></td>
-                      <td><a href="/jobs/<%= job.id %>/apply" class="db-btn-action">Apply</a></td>
-                    </tr>
-                  <% }) %>
-                <% } else { %>
-                  <tr><td colspan="4" style="text-align:center; color:#9ca3af;">No open job postings right now.</td></tr>
-                <% } %>
-              </tbody>
-            </table>
-            <a href="#" class="db-view-all">View all jobs <i class="bi bi-arrow-right"></i></a>
+          <!-- ===================== TRAININGS + JOB OPPORTUNITIES ===================== -->
+          <div class="db-member-panels-grid">
+
+            <div class="db-card">
+              <div class="db-panel-title">Upcoming Trainings</div>
+              <table class="db-table">
+                <thead>
+                  <tr><th>Training</th><th>Date</th><th>Location</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Digital Marketing Basics</td><td>25 May 2024</td><td>Online</td>
+                    <td><span class="db-badge-status db-badge-open">Open</span></td>
+                    <td><button type="button" class="db-btn-action">Register</button></td>
+                  </tr>
+                  <tr>
+                    <td>Advanced Excel</td><td>02 Jun 2024</td><td>Dar es Salaam</td>
+                    <td><span class="db-badge-status db-badge-open">Open</span></td>
+                    <td><button type="button" class="db-btn-action">Register</button></td>
+                  </tr>
+                  <tr>
+                    <td>Entrepreneurship Skills</td><td>10 Jun 2024</td><td>Arusha</td>
+                    <td><span class="db-badge-status db-badge-open">Open</span></td>
+                    <td><button type="button" class="db-btn-action">Register</button></td>
+                  </tr>
+                  <tr>
+                    <td>Cybersecurity Basics</td><td>15 Jun 2024</td><td>Online</td>
+                    <td><span class="db-badge-status db-badge-open">Open</span></td>
+                    <td><button type="button" class="db-btn-action">Register</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <a href="#" class="db-view-all">View all trainings <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="db-card">
+              <div class="db-panel-title">Job Opportunities</div>
+              <table class="db-table">
+                <thead>
+                  <tr><th>Job Title</th><th>Deadline</th><th>Location</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <% if (jobs && jobs.length > 0) { %>
+                    <% jobs.forEach(job => { %>
+                      <tr>
+                        <td><%= job.title %></td>
+                        <td><%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                        <td><%= job.region %></td>
+                        <td><a href="/jobs/<%= job.id %>/apply" class="db-btn-action">Apply</a></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="4" style="text-align:center; color:#9ca3af;">No open job postings right now.</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+              <a href="#" class="db-view-all">View all jobs <i class="bi bi-arrow-right"></i></a>
+            </div>
+
           </div>
 
+          <!-- ===================== APPLICATIONS + EVENTS + PROFILE SUMMARY ===================== -->
+          <div class="db-member-bottom-grid">
+
+            <div class="db-card">
+              <div class="db-panel-title">My Applications</div>
+              <div class="db-application-item">
+                <div>
+                  <span>Software Developer</span>
+                  <small>Applied on 20 May 2024</small>
+                </div>
+                <span class="db-badge-status db-badge-progress">Under Review</span>
+              </div>
+              <div class="db-application-item">
+                <div>
+                  <span>Data Analyst</span>
+                  <small>Applied on 18 May 2024</small>
+                </div>
+                <span class="db-badge-status db-badge-shortlisted">Shortlisted</span>
+              </div>
+              <div class="db-application-item">
+                <div>
+                  <span>Project Manager</span>
+                  <small>Applied on 15 May 2024</small>
+                </div>
+                <span class="db-badge-status db-badge-progress">Under Review</span>
+              </div>
+              <a href="#" class="db-view-all">View all applications <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="db-card">
+              <div class="db-panel-title">My Upcoming Events</div>
+              <div class="db-event-item">
+                <i class="bi bi-calendar-event db-event-icon"></i>
+                <div>
+                  <span>Youth Leadership Summit</span>
+                  <small>25 May 2024 &middot; Dar es Salaam</small>
+                </div>
+              </div>
+              <div class="db-event-item">
+                <i class="bi bi-calendar-event db-event-icon"></i>
+                <div>
+                  <span>ICT Innovation Expo</span>
+                  <small>15 Jun 2024 &middot; Mwanza</small>
+                </div>
+              </div>
+              <div class="db-event-item">
+                <i class="bi bi-calendar-event db-event-icon"></i>
+                <div>
+                  <span>Entrepreneurship Bootcamp</span>
+                  <small>10 Jun 2024 &middot; Arusha</small>
+                </div>
+              </div>
+              <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="db-card db-profile-summary-card">
+              <div class="db-panel-title">Profile Summary</div>
+              <div class="db-profile-summary-body">
+                <div class="db-profile-summary-info">
+                  <div class="db-profile-row"><span>Full Name</span><b>John Doe</b></div>
+                  <div class="db-profile-row"><span>Email</span><b>john.doe@example.com</b></div>
+                  <div class="db-profile-row"><span>Phone</span><b>+255 712 345 678</b></div>
+                  <div class="db-profile-row"><span>Location</span><b>Dar es Salaam</b></div>
+                  <a href="#" class="db-view-all">Complete Profile <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="db-progress-ring" style="background: conic-gradient(#43A047 0% 85%, #E0E0E0 85% 100%);">
+                  <div class="db-progress-ring-hole">85%</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div> <!-- End of #dbMainContent -->
+         <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->
+         <div id="changePasswordPanel" class="db-card" style="display:none; max-width: 480px; margin: 0 auto;">
+          <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+            <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-key"></i></div>
+            <h2>Change Password</h2>
+            <p>Keep your account secure by updating your password</p>
+          </div>
+
+          <form action="/account/change-password" method="POST" class="auth-form" id="changePasswordForm">
+
+            <div class="form-field"id="passwordField">
+              <label for="password">Current Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="currentPassword" name="current_password" autocomplete="current-password" placeholder="Enter your current password" required>
+                <i class="bi bi-eye toggle-visibility" data-target="currentPassword"></i>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="newPassword" name="new_password" placeholder="Create a new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="newPassword"></i>
+              </div>
+              <small class="field-hint">At least 8 characters, with uppercase, lowercase, a number, and a symbol.</small>
+            </div>
+
+            <div class="form-field">
+              <label>Confirm New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" id="confirmNewPassword" name="confirm_new_password" placeholder="Confirm your new password" pattern="^.{8,}$" required>
+                <i class="bi bi-eye toggle-visibility" data-target="confirmNewPassword"></i>
+              </div>
+              <div id="newPasswordMatchError" class="field-error"></div>
+            </div>
+
+            <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+              Update Password
+            </button>
+
+            <div class="auth-switch" style="margin-top:20px;text-align:center;">
+              <a href="#" id="cancelChangePassword"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+            </div>
+
+          </form>
         </div>
+        <!-- end #changePasswordPanel -->
+         <!-- ✅ Update Profile panel — sibling of #dbMainContent, hidden by default -->
+<div id="updateProfilePanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-gear"></i></div>
+    <h2>Update Profile</h2>
+    <p>Keep your personal and work details up to date</p>
+  </div>
 
-        <!-- ===================== APPLICATIONS + EVENTS + PROFILE SUMMARY ===================== -->
-        <div class="db-member-bottom-grid">
+  <form action="/account/update-profile" method="POST" class="auth-form" id="updateProfileForm">
 
-          <div class="db-card">
-            <div class="db-panel-title">My Applications</div>
-            <div class="db-application-item">
-              <div>
-                <span>Software Developer</span>
-                <small>Applied on 20 May 2024</small>
-              </div>
-              <span class="db-badge-status db-badge-progress">Under Review</span>
-            </div>
-            <div class="db-application-item">
-              <div>
-                <span>Data Analyst</span>
-                <small>Applied on 18 May 2024</small>
-              </div>
-              <span class="db-badge-status db-badge-shortlisted">Shortlisted</span>
-            </div>
-            <div class="db-application-item">
-              <div>
-                <span>Project Manager</span>
-                <small>Applied on 15 May 2024</small>
-              </div>
-              <span class="db-badge-status db-badge-progress">Under Review</span>
-            </div>
-            <a href="#" class="db-view-all">View all applications <i class="bi bi-arrow-right"></i></a>
-          </div>
+    <h3 class="profile-section-title">Personal Information</h3>
 
-          <div class="db-card">
-            <div class="db-panel-title">My Upcoming Events</div>
-            <div class="db-event-item">
-              <i class="bi bi-calendar-event db-event-icon"></i>
-              <div>
-                <span>Youth Leadership Summit</span>
-                <small>25 May 2024 &middot; Dar es Salaam</small>
-              </div>
-            </div>
-            <div class="db-event-item">
-              <i class="bi bi-calendar-event db-event-icon"></i>
-              <div>
-                <span>ICT Innovation Expo</span>
-                <small>15 Jun 2024 &middot; Mwanza</small>
-              </div>
-            </div>
-            <div class="db-event-item">
-              <i class="bi bi-calendar-event db-event-icon"></i>
-              <div>
-                <span>Entrepreneurship Bootcamp</span>
-                <small>10 Jun 2024 &middot; Arusha</small>
-              </div>
-            </div>
-            <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
-          </div>
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" name="full_name" value="<%= account.full_name %>" required>
+      </div>
+    </div>
 
-          <div class="db-card db-profile-summary-card">
-            <div class="db-panel-title">Profile Summary</div>
-            <div class="db-profile-summary-body">
-              <div class="db-profile-summary-info">
-                <div class="db-profile-row"><span>Full Name</span><b>John Doe</b></div>
-                <div class="db-profile-row"><span>Email</span><b>john.doe@example.com</b></div>
-                <div class="db-profile-row"><span>Phone</span><b>+255 712 345 678</b></div>
-                <div class="db-profile-row"><span>Location</span><b>Dar es Salaam</b></div>
-                <a href="#" class="db-view-all">Complete Profile <i class="bi bi-arrow-right"></i></a>
-              </div>
-              <div class="db-progress-ring" style="background: conic-gradient(#43A047 0% 85%, #E0E0E0 85% 100%);">
-                <div class="db-progress-ring-hole">85%</div>
-              </div>
-            </div>
-          </div>
+    <div class="form-field">
+      <label>Email</label>
+      <div class="input-wrap">
+        <i class="bi bi-envelope input-icon"></i>
+        <input type="email" value="<%= account.email %>" disabled>
+      </div>
+      <small class="field-hint">Email cannot be changed. Contact ICT support if this needs to update.</small>
+    </div>
 
+    <div class="form-field">
+      <label>Date of Birth</label>
+      <div class="input-wrap">
+        <i class="bi bi-calendar-event input-icon"></i>
+        <input type="date" name="date_of_birth" value="<%= profile.date_of_birth || '' %>">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Gender</label>
+      <div class="input-wrap">
+        <i class="bi bi-person-badge input-icon"></i>
+        <select name="gender">
+          <option value="">Select gender</option>
+          <option value="male" <%= profile.gender === 'male' ? 'selected' : '' %>>Male</option>
+          <option value="female" <%= profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+          <option value="other" <%= profile.gender === 'other' ? 'selected' : '' %>>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Nationality</label>
+      <div class="input-wrap">
+        <i class="bi bi-flag input-icon"></i>
+        <input type="text" name="nationality" value="<%= profile.nationality || '' %>" placeholder="e.g. Tanzanian">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Bio</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+        <textarea name="bio" rows="3" placeholder="A short bio about yourself" style="padding-left:44px;"><%= profile.bio || '' %></textarea>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Place of Birth</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Region</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo-alt input-icon"></i>
+          <input type="text" name="region" value="<%= birthPlace.region || '' %>">
         </div>
+      </div>
+
+      <div class="form-field">
+        <label>District</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo input-icon"></i>
+          <input type="text" name="district" value="<%= birthPlace.district || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Ward</label>
+        <div class="input-wrap">
+          <i class="bi bi-pin-map input-icon"></i>
+          <input type="text" name="ward" value="<%= birthPlace.ward || '' %>">
+        </div>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Work Details</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Department</label>
+        <div class="input-wrap">
+          <i class="bi bi-building input-icon"></i>
+          <input type="text" name="department" value="<%= memberDetails.department || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Office</label>
+        <div class="input-wrap">
+          <i class="bi bi-building-gear input-icon"></i>
+          <input type="text" name="office" value="<%= memberDetails.office || '' %>">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Member Role</label>
+        <div class="input-wrap">
+          <i class="bi bi-award input-icon"></i>
+          <input type="text" name="admin_role" value="<%= memberDetails.member_role || '' %>" placeholder="e.g. Super Administrator">
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 20px;">
+      Save Changes
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelUpdateProfile"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+</div>
+
+        <!-- ===================== FULL PANELS (Outside main content) ===================== -->
+        <%- include('job-opportunities') %>
+        <%- include('my-applications') %>
 
       </div>
     </div>
   </div>
-

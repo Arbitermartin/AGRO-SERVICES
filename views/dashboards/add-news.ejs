@@ -1,0 +1,57 @@
+<!-- ✅ Add News panel — sibling of #dbMainContent, hidden by default -->
+<div id="addNewsPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+    <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+      <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-newspaper"></i></div>
+      <h2>Post News Update</h2>
+      <p>Share the latest updates with your community</p>
+    </div>
+  
+    <form action="/account/news/create" method="POST" enctype="multipart/form-data" class="auth-form" id="addNewsForm">
+  
+      <div class="form-field">
+        <label>Title</label>
+        <div class="input-wrap">
+          <i class="bi bi-card-heading input-icon"></i>
+          <input type="text" name="title" placeholder="e.g. New Training Program Launched" required>
+        </div>
+      </div>
+  
+      <div class="form-field">
+        <label>Description</label>
+        <div class="input-wrap" style="align-items:flex-start;">
+          <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+          <textarea name="description" rows="5" placeholder="Write the full news update..." style="padding-left:44px;" required></textarea>
+        </div>
+      </div>
+  
+      <div class="form-field">
+        <label>News Date</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-event input-icon"></i>
+          <input type="date" name="news_date" required>
+        </div>
+      </div>
+  
+      <div class="form-field">
+        <label>Cover Image (optional)</label>
+        <div class="upload-area" id="newsImageUploadArea">
+          <i class="bi bi-image" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+          <p>Tap to upload an image<br><small>JPG or PNG (max 3MB)</small></p>
+          <input type="file" id="newsImageUpload" name="profile_image" accept="image/jpeg,image/png" style="display:none;">
+        </div>
+        <div id="newsImageUploadedFile" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+          <i class="bi bi-file-earmark-check"></i> <span id="newsImageFileName"></span>
+        </div>
+      </div>
+  
+      <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+        Publish News
+      </button>
+  
+      <div class="auth-switch" style="margin-top:20px;text-align:center;">
+        <a href="#" id="cancelAddNews"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+      </div>
+  
+    </form>
+  </div>
+  <!-- end #addNewsPanel -->
