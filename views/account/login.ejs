@@ -29,22 +29,29 @@
       <!-- ===================== RIGHT FORM PANEL ===================== -->
       <div class="auth-form-panel">
         <div class="auth-form-card">
+          <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
 
           <div class="auth-form-head">
             <h2>Sign in</h2>
             <p>Enter your details to continue</p>
           </div>
-          <%- messages() %>
-   
-
-          <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
-            <ul class="error-list" style="color:#c0392b; margin-bottom:20px;">
-              <% errors.forEach(err => { %>
-                <li><%= err.msg %></li>
-              <% }) %>
-            </ul>
-          <% } %>
-
+        
           <form class="auth-form" id="loginForm" action="/account/login" method="POST" novalidate>
 
             <!-- Email -->

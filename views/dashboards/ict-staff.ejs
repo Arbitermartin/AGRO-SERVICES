@@ -112,6 +112,23 @@
       </header>
 
       <div class="db-content">
+        <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
            <!-- ✅ Everything that should be HIDDEN when Change Password is shown -->
            <div id="dbMainContent">
 

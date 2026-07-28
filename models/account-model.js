@@ -1,12 +1,24 @@
 const db = require("../database/config/knex");
 
+// ====================== SECURITY HELPER ======================
+function sanitizeInput(input) {
+  if (typeof input === 'string') {
+    return input.trim().replace(/<script.*?>.*?<\/script>/gi, '')
+                     .replace(/javascript:/gi, '');
+  }
+  return input;
+}
+
 async function registerAccount(fullName, email, Phone_number, hashedPassword) {
   try {
+    const safeFullName = sanitizeInput(fullName);
+    const safeEmail = sanitizeInput(email).toLowerCase();
+    const safePhone = sanitizeInput(Phone_number);
     const account = await db("accounts")
       .insert({
-        full_name: fullName,
-        email,
-        phone_number: Phone_number,
+        full_name:safeFullName,
+        email:safeEmail,
+        phone_number: safePhone,
         password: hashedPassword,
         account_type: "member",
       })

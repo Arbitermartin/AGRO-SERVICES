@@ -3,46 +3,53 @@
  * whole project for agro-services Tanzania
  * ***************************/ 
 
-const express = require("express")
-const app = express()
+const express = require("express");
+const app = express();
 const path = require("path");
 const env = require("dotenv").config();
-const accountRoute = require("./routes/accountRoute")
-const expressLayouts = require("express-ejs-layouts")
-const static = require("./routes/static")
-const staticRoute = require("./routes/staticRoute")
-const utilities = require("./utilities")
-const baseController = require("./controllers/baseController")
-const session = require("express-session")
-const flash =require("connect-flash")
-const cookieParser = require("cookie-parser")
+
+// Delivery security package
+const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const flash =require("connect-flash");
+
+// ROUTES AND UTILITIES.
+const accountRoute = require("./routes/accountRoute");
+const expressLayouts = require("express-ejs-layouts");
+const static = require("./routes/static");
+const staticRoute = require("./routes/staticRoute");
+const utilities = require("./utilities");
+const baseController = require("./controllers/baseController");
 const db = require("./database/db");
 
 
+// ================MIDDLEWARE SETUP====================
 
-
-/*************************
- * Delivery security page
- */
-
-
-
-
+// 1: Body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// 2: Cookie Parser (needed for CSRF later)
+app.use(cookieParser());
 
-/*********************************
- * This is view template engine
- * **************************/ 
-app.set("view engine","ejs")
-app.use(expressLayouts)
-app.set("layout","./layouts/layout")
+// 3: Rate limiting.
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 150,
+  message: "Too many requests from this IP. Please try again later.",
+});
 
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  message: "Too many login attempts. Please try again after 10 minutes.",
+});
 
-/* ***********************
- * Middleware
- * ************************/
+app.use(generalLimiter);
+app.use("/account/login", loginLimiter);
+
+//4: Session Configuration (Improved Security)
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -50,50 +57,33 @@ app.use(session({
   name: 'sessionId',
 }));
 
+// 5: The Flash Message
 app.use(flash());
 // Express Messages Middleware
-app.use(require('connect-flash')())
+app.use(require('connect-flash')());
 app.use(function(req, res, next){
   res.locals.messages = require('express-messages')(req, res)
-  next()
-})
-
-
-//Delivery  login activity.
-app.use(cookieParser())
-
-
-/****************************************
- * static route
- * ***************************/
-
-app.use("/account", accountRoute);
-app.use(static)
-app.use("/", staticRoute)
-
+  next();
+});
 
 /*********************************
- * 
- * build home view here.
- * ******************/ 
-app.use(express.static(path.join(__dirname, 'public'))) 
+ * This is view template engine
+ * **************************/ 
+app.set("view engine","ejs");
+app.use(expressLayouts);
+app.set("layout","./layouts/layout");
 
-// /* ***********************
-//  * Routes (MUST come after middleware)
-//  *************************/)
-app.get("/", utilities.handleErrors(baseController.buildHome))
+//Static file
+app.use(express.static(path.join(__dirname, 'public'))) ;
 
-// db connection here.
-app.get("/db-test",async(req,res)=>{
-  try{
-    await db.raw("SELECT NOW()");
-    res.send("Database connected successfully"); 
-  }
-  catch(error){
-    console.error(error);
-    res.status(500).send("x Database connection failed")
-  }
-})
+// Routes
+app.use("/account", accountRoute);
+app.use(static);
+app.use("/", staticRoute);
+
+// Build Home View.
+
+app.get("/", utilities.handleErrors(baseController.buildHome));
 
 
 /* ***********************

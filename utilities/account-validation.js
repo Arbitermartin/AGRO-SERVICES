@@ -27,106 +27,81 @@ validate.loginRules = () => {
 
 /* Check Login Data */
 validate.checkLoginData = async (req, res, next) => {
-  const { account_email } = req.body
-  let errors = []
-  errors = validationResult(req)
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    let nav = await utilities.getNav()
-    res.render("/login", {
-      errors,
+    let nav = await utilities.getNav();
+    return res.render("account/login", {
       title: "Login",
       nav,
-      account_email,
-    })
-    return
+      errors: errors.array(),
+      account_email: req.body.email,
+      success: req.flash("success"),
+      error: req.flash("error"),
+    });
   }
-  next()
-}
+  next();
+};
 /* **********************************
  * Registration Data Validation Rules
  * ********************************** */
-validate.registrationRules = () => {
-  return [
-    // Full Name
-    body("fullName")
-      .trim()
-      .escape()
-      .notEmpty()
-      .isLength({ min: 3 })
-      .withMessage("Please provide your full name."),
+validate.registrationRules = () => [
+  body("fullName")
+    .trim()
+    .escape()
+    .isLength({ min: 3, max: 100 })
+    .withMessage("Full name must be between 3 and 100 characters."),
 
-    // Email
-    body("email")
-      .trim()
-      .isEmail()
-      .normalizeEmail()
-      .withMessage("A valid email is required.")
-      .custom(async (email) => {
-        const emailExists = await accountModel.checkExistingEmail(email);
-
-        if (emailExists) {
-          throw new Error(
-            "Email already exists. Please log in or use another email."
-          );
-        }
-      }),
-
+  body("email")
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please enter a valid email.")
+    .custom(async (email) => {
+      const exists = await accountModel.checkExistingEmail(email);
+      if (exists) throw new Error("Email already exists. Please login.");
+      return true;
+    }),
     // Phone Number
-    body("Phone_number")
-      .trim()
-      .notEmpty()
-      .isMobilePhone("any")
-      .withMessage("Please provide a valid phone number."),
+   body("Phone_number")
+    .trim()
+    .isMobilePhone("any")
+    .withMessage("Please provide a valid phone number."),
 
-    // Password
-    body("password")
-      .trim()
-      .notEmpty()
-      .isStrongPassword({
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-      .withMessage(
-        "Password must contain at least 8 characters, including uppercase, lowercase, number and symbol."
-      ),
+  body("password")
+    .trim()
+    .isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })
+    .withMessage("Password must be strong (8+ chars, upper, lower, number, symbol)."),
 
-    // ✅ NEW: Confirm Password
-    body("confirm_password")
-      .trim()
-      .notEmpty()
-      .withMessage("Please confirm your password.")
-      .custom((confirm_password, { req }) => {
-        if (confirm_password !== req.body.password) {
-          throw new Error("Passwords do not match.");
-        }
-        return true;
-      }),
-  ];
-};
+  body("confirm_password")
+    .trim()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) throw new Error("Passwords do not match.");
+      return true;
+    }),
+];
 /* ******************************
  * Check data and return errors or continue to registration
  * ***************************** */
 validate.checkRegData = async (req, res, next) => {
-  const { fullName, email, Phone_number } = req.body;
-
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
-    let nav = await utilities.getNav();   // ✅ needed since your layout likely uses nav
+    let nav = await utilities.getNav();
     return res.render("account/register", {
       title: "Registration",
-      nav,                                 // ✅ added
-      errors: errors.array(),              // ✅ so you can loop with err.msg in EJS
-      fullName,
-      email,
-      Phone_number,
+      nav,
+      errors: errors.array(),
+      fullName: req.body.fullName,
+      email: req.body.email,
+      Phone_number: req.body.Phone_number,
     });
-  }
-
+  };
   next();
-};
+}
 
 module.exports = validate

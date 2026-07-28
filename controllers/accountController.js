@@ -304,7 +304,9 @@ async function buildIctStaffDashboard(req, res) {
     recentTickets,
      // Add these two lines 👇
      showNav: false,
-     showFooter: false
+     showFooter: false,
+     success: req.flash("success"),   
+     error: req.flash("error"),
   });
 }
 
@@ -373,7 +375,9 @@ async function buildMemberDashboard(req, res) {
     profileCompletion,
      // Add these two lines 👇
      showNav: false,
-     showFooter: false
+     showFooter: false,
+     success: req.flash("success"),   // ← ADD THIS
+     error: req.flash("error"),
   });
 }
 /***************************************
@@ -405,7 +409,7 @@ async function submitMemberJobApplication(req, res) {
     });
 
     req.flash("success", "Your application has been submitted successfully!");
-    res.redirect("/account/dashboard/member?applicationSubmitted=true");
+    res.redirect("/account/dashboard/member");
   } catch (error) {
     console.error("SUBMIT MEMBER APPLICATION ERROR:", error);
     req.flash("error", "Failed to submit your application. Please try again.");
@@ -678,7 +682,7 @@ async function uploadTrainingGuide(req, res) {
     });
 
     req.flash("success", "Guide uploaded successfully.");
-    res.redirect("/account/dashboard/ict-staff?guidePosted=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("UPLOAD GUIDE ERROR:", error);
     req.flash("error", "Failed to upload guide.");
@@ -692,7 +696,7 @@ async function deleteTrainingGuide(req, res) {
     await accountModel.deleteTrainingGuide(id);
 
     req.flash("success", "Guide deleted.");
-    res.redirect("/account/dashboard/ict-staff?guidePosted=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("DELETE GUIDE ERROR:", error);
     req.flash("error", "Failed to delete guide.");
@@ -708,7 +712,7 @@ async function createLessonPost(req, res) {
     await accountModel.createLesson({ training_id, title, description, lesson_order: parseInt(lesson_order, 10) || 1 });
 
     req.flash("success", "Lesson added successfully.");
-    res.redirect("/account/dashboard/ict-staff?lessonPosted=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("CREATE LESSON ERROR:", error);
     req.flash("error", "Failed to add lesson.");
@@ -739,7 +743,7 @@ async function uploadLessonMaterial(req, res) {
     });
 
     req.flash("success", "Material uploaded successfully.");
-    res.redirect("/account/dashboard/ict-staff?materialPosted=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("UPLOAD MATERIAL ERROR:", error);
     req.flash("error", "Failed to upload material.");
@@ -753,7 +757,7 @@ async function deleteLessonMaterialPost(req, res) {
     await accountModel.deleteLessonMaterial(id);
 
     req.flash("success", "Material deleted.");
-    res.redirect("/account/dashboard/ict-staff?materialPosted=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("DELETE MATERIAL ERROR:", error);
     req.flash("error", "Failed to delete material.");
@@ -847,7 +851,7 @@ async function updateTicketStatusPost(req, res) {
     await accountModel.updateTicketStatus(id, status);
 
     req.flash("success", "Ticket status updated.");
-    res.redirect("/account/dashboard/ict-staff?ticketUpdated=true");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("UPDATE TICKET STATUS ERROR:", error);
     req.flash("error", "Failed to update ticket.");
@@ -864,7 +868,7 @@ async function replyToTicket(req, res) {
     req.flash("success", "Reply sent.");
     const account = req.session.account;
     const redirectTo = account.account_type === "ict_staff" ? "/account/dashboard/ict-staff" : "/account/dashboard/member";
-    res.redirect(`${redirectTo}?ticketReplied=true`);
+    res.redirect(`${redirectTo}`);
   } catch (error) {
     console.error("REPLY TICKET ERROR:", error);
     req.flash("error", "Failed to send reply.");
