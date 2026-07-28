@@ -556,6 +556,264 @@ Deliverys style for manage news and events
 }
 /* end here  */
 
+/* =====================================================
+   JOB OPPORTUNITIES PANEL
+   ===================================================== */
+
+#jobOpportunitiesPanel {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+}
+
+#jobOpportunitiesPanel .step-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+#jobOpportunitiesPanel .step-header p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* ---------- Individual Job Card ---------- */
+.job-listing-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.job-listing-card:hover {
+  border-color: #c8e6c9;
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.08);
+}
+
+/* Main row (always visible) */
+.job-listing-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.job-listing-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background: #e8f5e9;
+  color: var(--primary-green, #2e7d32);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.job-listing-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-listing-info h3 {
+  font-size: 1.1rem;
+  font-weight: 650;
+  color: #111827;
+  margin: 0 0 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-listing-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  font-size: 0.84rem;
+  color: #6b7280;
+}
+
+.job-listing-meta i {
+  margin-right: 4px;
+  color: #9ca3af;
+}
+
+/* Action buttons */
+.job-listing-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-outline-sm {
+  background: transparent;
+  border: 1.5px solid #d1d5db;
+  color: #374151;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-outline-sm:hover {
+  border-color: var(--primary-green, #2e7d32);
+  color: var(--primary-green, #2e7d32);
+  background: #f0fdf4;
+}
+
+.job-apply-btn {
+  padding: 7px 16px !important;
+  font-size: 0.84rem !important;
+  border-radius: 8px !important;
+}
+
+/* ---------- Expandable Details ---------- */
+.job-listing-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  background: #f9fafb;
+  border-top: 1px solid transparent;
+}
+
+.job-listing-card.is-open .job-listing-details {
+  max-height: 600px;
+  border-top-color: #e5e7eb;
+}
+
+.job-listing-details-inner {
+  padding: 18px 22px 22px;
+}
+
+.job-listing-details-inner h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.job-listing-details-inner p {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #4b5563;
+  margin: 0 0 14px 0;
+  white-space: pre-line;
+}
+
+.job-listing-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+.job-listing-dates i {
+  margin-right: 5px;
+  color: #9ca3af;
+}
+
+/* Chevron rotation when open */
+.job-listing-card.is-open .job-toggle-details i {
+  transform: rotate(180deg);
+}
+.job-toggle-details i {
+  transition: transform 0.25s ease;
+}
+
+/* ---------- Inline Apply Form ---------- */
+.job-apply-form-wrap {
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 22px 22px 26px;
+}
+
+.job-apply-form .form-field {
+  margin-bottom: 16px;
+}
+
+.job-apply-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* CV Upload area */
+.job-cv-upload-area {
+  border: 2px dashed #c8e6c9;
+  border-radius: 12px;
+  padding: 22px 16px;
+  text-align: center;
+  cursor: pointer;
+  background: #f0fdf4;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.job-cv-upload-area:hover {
+  border-color: var(--primary-green, #2e7d32);
+  background: #e8f5e9;
+}
+
+.job-cv-upload-area p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.job-cv-upload-area small {
+  color: #9ca3af;
+}
+
+.job-cv-uploaded-file {
+  font-weight: 500;
+}
+
+/* Cancel / Back link */
+#cancelJobOpportunities {
+  color: #6b7280;
+  font-size: 0.92rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#cancelJobOpportunities:hover {
+  color: var(--primary-green, #2e7d32);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .job-listing-main {
+    flex-wrap: wrap;
+  }
+
+  .job-listing-actions {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .job-listing-actions .btn-outline-sm,
+  .job-listing-actions .job-apply-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .job-apply-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+/* end here jobopportunity panael */
+
 /* job apply form */
 /* ===================== JOB APPLY FORM ===================== */
 

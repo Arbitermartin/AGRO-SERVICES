@@ -661,6 +661,7 @@ module.exports = {
   markLessonComplete,
   getProgressForTraining,
   getTrainingProgressSummary,
+  createTicket,
   generateTicketNumber,
   getAllTickets,
   getTicketsByAccountId,
