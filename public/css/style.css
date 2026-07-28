@@ -688,6 +688,7 @@ Deliverys style for manage news and events
 }
 
 .training-thumb {
+  background: linear-gradient(135deg, var(--btn-primary-hover));
   height: 100px;
   display: flex;
   align-items: center;
@@ -1794,6 +1795,91 @@ Deliverys style for manage news and events
     max-width: none;
   }
 }
+
+/* yastnet portal style */
+.portal-hero {
+  background: var(--bg-light-green);
+  text-align: center;
+  padding: 60px 24px 30px;
+}
+
+.portal-hero h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--text-primary);
+  border-bottom: 3px solid var(--primary-green);
+  display: inline-block;
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+.portal-hero-sub {
+  color: var(--primary-green);
+  font-size: 1.05rem;
+}
+
+.portal-intro {
+  text-align: center;
+  padding: 20px 24px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.portal-services {
+  background: var(--bg-main);
+  padding: 40px 0 70px;
+}
+
+.portal-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.portal-service-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.portal-service-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--bg-light-green);
+  color: var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 14px;
+}
+
+.portal-service-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.portal-service-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+}
+
+@media (max-width: 900px) {
+  .portal-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .portal-services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* yasnet portal end here style */
 
 
 /* =====================================================

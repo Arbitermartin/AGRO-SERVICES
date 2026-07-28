@@ -1,0 +1,114 @@
+<div id="addTrainingPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-mortarboard"></i></div>
+    <h2>Add Training Program</h2>
+    <p>Create a new training program for members</p>
+  </div>
+
+  <form action="/account/trainings/create" method="POST" class="auth-form" id="addTrainingForm">
+
+    <div class="form-field">
+      <label>Training Title</label>
+      <div class="input-wrap">
+        <i class="bi bi-card-heading input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Modern Soil & Crop Management" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Category</label>
+        <div class="input-wrap">
+          <i class="bi bi-tags input-icon"></i>
+          <select name="category" required>
+            <option value="">Select category</option>
+            <option value="crop">Crop Production</option>
+            <option value="livestock">Livestock</option>
+            <option value="agribusiness">Agribusiness</option>
+            <option value="finance">Financial Literacy</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Level</label>
+        <div class="input-wrap">
+          <i class="bi bi-bar-chart input-icon"></i>
+          <select name="level" required>
+            <option value="">Select level</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Duration</label>
+        <div class="input-wrap">
+          <i class="bi bi-clock input-icon"></i>
+          <input type="text" name="duration" placeholder="e.g. 6 weeks" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Description</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+        <textarea name="description" rows="4" placeholder="Describe what this training covers..." style="padding-left:44px;"></textarea>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Icon (Bootstrap Icon class)</label>
+      <div class="input-wrap">
+        <i class="bi bi-emoji-smile input-icon"></i>
+        <input type="text" name="icon" placeholder="e.g. bi-flower3" value="bi-mortarboard">
+      </div>
+      <small class="field-hint">Browse icons at icons.getbootstrap.com — enter the class name only (e.g. bi-egg).</small>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Card Color (start)</label>
+        <div class="input-wrap">
+          <input type="color" name="gradient_start" value="#66BB6A" style="width:100%; padding: 6px;">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Card Color (end)</label>
+        <div class="input-wrap">
+          <input type="color" name="gradient_end" value="#2E7D32" style="width:100%; padding: 6px;">
+        </div>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Program Dates</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Starting Date</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-check input-icon"></i>
+          <input type="date" name="start_date" required>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>End Date</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-x input-icon"></i>
+          <input type="date" name="end_date" required>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+      Publish Training
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAddTraining"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+</div>

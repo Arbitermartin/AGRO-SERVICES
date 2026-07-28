@@ -149,6 +149,7 @@ async function buildAdminDashboard(req, res) {
   const upcomingEventCount = await accountModel.countUpcomingEvents();
   const allNews = await accountModel.getAllNews();
   const allEvents = await accountModel.getAllEventsAdmin();
+  const allTrainingRegistrations = await accountModel.getAllTrainingRegistrations();
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -166,12 +167,33 @@ async function buildAdminDashboard(req, res) {
     upcomingEventCount,
     allNews,
     allEvents,
+    allTrainingRegistrations,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
     success: req.flash("success"),   
     error: req.flash("error"),       
   });
+}
+
+/************************************
+ * 
+ * Delivery training update
+ */
+
+async function updateTrainingRegistrationStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await accountModel.updateTrainingRegistrationStatus(id, status);
+
+    req.flash("success", "Registration status updated.");
+    res.redirect("/account/dashboard/admin?trainingPosted=true");
+  } catch (error) {
+    console.error("UPDATE TRAINING REG STATUS ERROR:", error);
+    req.flash("error", "Failed to update registration status.");
+    res.redirect("/account/dashboard/admin");
+  }
 }
 /***********************
  * 
@@ -253,6 +275,7 @@ async function buildIctStaffDashboard(req, res) {
   let nav = await utilities.getNav();
   const loginLogs = await accountModel.getAllLoginLogs();
   const activityLogs = await accountModel.getAllActivityLogs();
+   const allGuides = await accountModel.getAllTrainingGuides();
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -260,6 +283,7 @@ async function buildIctStaffDashboard(req, res) {
     initials: getInitials(req.session.account.full_name),
     loginLogs,
     activityLogs,
+    allGuides,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
@@ -282,6 +306,9 @@ async function buildMemberDashboard(req, res) {
     : {};
     const memberDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
     const myApplicationsCount = await accountModel.countApplicationsByAccountId(account.id);
+    const activeTrainings = await accountModel.getActiveTrainings();
+    const myTrainings = await accountModel.getMyTrainingRegistrations(account.id);
+    const myTrainingIds = myTrainings.map(t => t.training_id);
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
@@ -293,6 +320,9 @@ async function buildMemberDashboard(req, res) {
     jobs,
     myApplications,
     myApplicationsCount,
+    activeTrainings,
+    myTrainings,
+    myTrainingIds,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
@@ -537,6 +567,47 @@ async function deleteEventPost(req, res) {
   }
 }
 
+/*****************************************
+ * 
+ * delivery training
+ */
+async function createTrainingPost(req, res) {
+  try {
+    const { title, category, description, duration, level, icon, gradient_start, gradient_end, start_date, end_date } = req.body;
+
+    await accountModel.createTraining({
+      title, category, description, duration, level,
+      icon: icon || 'bi-mortarboard',
+      gradient_start: gradient_start || '#66BB6A',
+      gradient_end: gradient_end || '#2E7D32',
+      start_date, end_date,
+    });
+
+    req.flash("success", "Training program added successfully.");
+    res.redirect("/account/dashboard/admin?trainingPosted=true");
+  } catch (error) {
+    console.error("CREATE TRAINING ERROR:", error);
+    req.flash("error", "Failed to add training program.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function registerTraining(req, res) {
+  try {
+    const trainingId = req.params.id;
+    const accountId = req.session.account.id;
+
+    await accountModel.registerForTraining(trainingId, accountId);
+
+    req.flash("success", "You have successfully registered for this training!");
+    res.redirect("/account/dashboard/member?trainingRegistered=true");
+  } catch (error) {
+    console.error("REGISTER TRAINING ERROR:", error);
+    req.flash("error", "Failed to register for training.");
+    res.redirect("/account/dashboard/member");
+  }
+}
+
 /* ****************************************
  * Logout
  * *************************************** */
@@ -559,10 +630,56 @@ async function accountLogout(req, res) {
 }
 }
 
+/*********************
+ * 
+ * Delivery uplaod training guides
+ */
+async function uploadTrainingGuide(req, res) {
+  try {
+    const { title, page_count } = req.body;
+
+    if (!req.file) {
+      req.flash("error", "Please select a PDF file to upload.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    const file_path = `/uploads/guides/${req.file.filename}`;
+
+    await accountModel.createTrainingGuide({
+      title,
+      file_path,
+      page_count: parseInt(page_count, 10) || null,
+      uploaded_by: req.session.account.id,
+    });
+
+    req.flash("success", "Guide uploaded successfully.");
+    res.redirect("/account/dashboard/ict-staff?guidePosted=true");
+  } catch (error) {
+    console.error("UPLOAD GUIDE ERROR:", error);
+    req.flash("error", "Failed to upload guide.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function deleteTrainingGuide(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteTrainingGuide(id);
+
+    req.flash("success", "Guide deleted.");
+    res.redirect("/account/dashboard/ict-staff?guidePosted=true");
+  } catch (error) {
+    console.error("DELETE GUIDE ERROR:", error);
+    req.flash("error", "Failed to delete guide.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+// end here
+
 
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,uploadTrainingGuide,deleteTrainingGuide,accountLogout
 
 }

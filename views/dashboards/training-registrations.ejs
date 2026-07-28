@@ -1,0 +1,65 @@
+<div id="trainingRegistrationsPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-people"></i></div>
+    <h2>Training Registrations</h2>
+    <p>See who has registered for each training program</p>
+  </div>
+
+  <table class="db-table">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Training</th>
+        <th>Category</th>
+        <th>Dates</th>
+        <th>Registered On</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (allTrainingRegistrations && allTrainingRegistrations.length > 0) { %>
+        <% allTrainingRegistrations.forEach(reg => { %>
+          <tr>
+            <td>
+              <b><%= reg.full_name %></b><br>
+              <small class="db-table-muted"><%= reg.email %></small>
+            </td>
+            <td><%= reg.training_title %></td>
+            <td><%= reg.category.charAt(0).toUpperCase() + reg.category.slice(1) %></td>
+            <td>
+              <%= new Date(reg.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %>
+              &mdash;
+              <%= new Date(reg.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+            </td>
+            <td><%= new Date(reg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+            <td>
+              <span class="db-badge-status
+                <%= reg.status === 'registered' ? 'db-badge-progress' : '' %>
+                <%= reg.status === 'attended' ? 'db-badge-open' : '' %>
+                <%= reg.status === 'cancelled' ? 'db-badge-priority db-badge-high' : '' %>
+              ">
+                <%= reg.status %>
+              </span>
+            </td>
+            <td>
+              <form action="/account/training-registrations/<%= reg.id %>/status" method="POST" style="display:flex; gap:6px; align-items:center;">
+                <select name="status" onchange="this.form.submit()" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border-color); font-size:0.8rem;">
+                  <option value="registered" <%= reg.status === 'registered' ? 'selected' : '' %>>Registered</option>
+                  <option value="attended" <%= reg.status === 'attended' ? 'selected' : '' %>>Attended</option>
+                  <option value="cancelled" <%= reg.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="7" style="text-align:center; color:#9ca3af; padding: 24px;">No training registrations yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelTrainingRegistrations"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

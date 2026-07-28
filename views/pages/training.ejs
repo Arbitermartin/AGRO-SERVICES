@@ -24,114 +24,31 @@
       </div>
 
       <!-- ===================== PROGRAM GRID ===================== -->
-      <div class="training-grid" id="trainingGrid">
+      <!-- ===================== PROGRAM GRID ===================== -->
+<div class="training-grid" id="trainingGrid">
 
-        <div class="training-card" data-category="crop">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#66BB6A,#2E7D32);"><i class="bi bi-flower3"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Crop Production</span>
-            <h3>Modern Soil &amp; Crop Management</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 6 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Beginner</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
+  <% if (trainings && trainings.length > 0) { %>
+    <% trainings.forEach(t => { %>
+      <div class="training-card" data-category="<%= t.category %>">
+        <div class="training-thumb"(<%= t.gradient_start %>,<%= t.gradient_end %>);>
+          <i class="bi <%= t.icon %>"></i>
         </div>
-
-        <div class="training-card" data-category="crop">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#8bc34a,#1B5E20);"><i class="bi bi-bug"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Crop Production</span>
-            <h3>Organic Pest Management</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 3 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Intermediate</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
+        <div class="training-body">
+          <span class="training-tag"><%= t.category.charAt(0).toUpperCase() + t.category.slice(1) %></span>
+          <h3><%= t.title %></h3>
+          <div class="training-meta">
+            <span><i class="bi bi-clock"></i> <%= t.duration %></span>
+            <span><i class="bi bi-bar-chart"></i> <%= t.level %></span>
           </div>
+          <a href="/account/login" class="btn btn-filled training-enroll">Enroll Now</a>
         </div>
-
-        <div class="training-card" data-category="livestock">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#4CAF50,#123d15);"><i class="bi bi-clipboard2-pulse"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Livestock</span>
-            <h3>Livestock Health &amp; Record Keeping</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 4 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Intermediate</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
-        <div class="training-card" data-category="livestock">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#66BB6A,#1B5E20);"><i class="bi bi-egg"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Livestock</span>
-            <h3>Poultry Farming Basics</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 3 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Beginner</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
-        <div class="training-card" data-category="agribusiness">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#2E7D32,#123d15);"><i class="bi bi-graph-up-arrow"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Agribusiness</span>
-            <h3>Agribusiness Planning Fundamentals</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 5 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Beginner</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
-        <div class="training-card" data-category="agribusiness">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#388E3C,#1B5E20);"><i class="bi bi-shop"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Agribusiness</span>
-            <h3>Market Linkage Strategies</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 4 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Intermediate</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
-        <div class="training-card" data-category="finance">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#66BB6A,#2E7D32);"><i class="bi bi-piggy-bank"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Financial Literacy</span>
-            <h3>Savings &amp; Micro-Finance for Farmers</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 3 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Beginner</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
-        <div class="training-card" data-category="finance">
-          <div class="training-thumb" style="background:linear-gradient(135deg,#4CAF50,#1B5E20);"><i class="bi bi-calculator"></i></div>
-          <div class="training-body">
-            <span class="training-tag">Financial Literacy</span>
-            <h3>Budgeting for Small Farms</h3>
-            <div class="training-meta">
-              <span><i class="bi bi-clock"></i> 2 weeks</span>
-              <span><i class="bi bi-bar-chart"></i> Beginner</span>
-            </div>
-            <a href="/contact" class="btn btn-filled training-enroll">Enroll Now</a>
-          </div>
-        </div>
-
       </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color: var(--text-muted); padding: 40px 0;">No training programs available right now.</p>
+  <% } %>
 
+</div>
       <!-- ===================== NO RESULTS ===================== -->
       <div class="training-empty" id="trainingEmpty">
         <i class="bi bi-emoji-frown"></i>
@@ -140,34 +57,21 @@
       </div>
 
       <!-- ===================== DOWNLOADABLE GUIDES ===================== -->
-      <div class="training-guides">
-        <h2><i class="bi bi-book"></i> Downloadable Guides</h2>
-        <div class="training-guides-list">
-          <a href="#" class="training-guide-item">
-            <i class="bi bi-file-earmark-text"></i>
-            <div>
-              <h4>Climate-Resilient Farming Practices</h4>
-              <span>PDF Guide &middot; 12 pages</span>
-            </div>
-            <i class="bi bi-download guide-download-icon"></i>
-          </a>
-          <a href="#" class="training-guide-item">
-            <i class="bi bi-file-earmark-text"></i>
-            <div>
-              <h4>Beginner's Guide to Agribusiness Planning</h4>
-              <span>PDF Guide &middot; 18 pages</span>
-            </div>
-            <i class="bi bi-download guide-download-icon"></i>
-          </a>
-          <a href="#" class="training-guide-item">
-            <i class="bi bi-file-earmark-text"></i>
-            <div>
-              <h4>Seasonal Planting Calendar</h4>
-              <span>PDF Guide &middot; 4 pages</span>
-            </div>
-            <i class="bi bi-download guide-download-icon"></i>
-          </a>
-        </div>
+      <div class="training-guides-list">
+        <% if (guides && guides.length > 0) { %>
+          <% guides.forEach(g => { %>
+            <a href="<%= g.file_path %>" target="_blank" class="training-guide-item">
+              <i class="bi bi-file-earmark-text"></i>
+              <div>
+                <h4><%= g.title %></h4>
+                <span>PDF Guide<%= g.page_count ? ' &middot; ' + g.page_count + ' pages' : '' %></span>
+              </div>
+              <i class="bi bi-download guide-download-icon"></i>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <p style="color: var(--text-muted); padding: 20px 0;">No guides uploaded yet.</p>
+        <% } %>
       </div>
 
       <!-- ===================== REQUEST TRAINING CTA ===================== -->

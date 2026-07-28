@@ -77,10 +77,14 @@
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
+            
+            <a href="#" id="addTrainingLink" class="db-submenu-link"><div><span>Add Training</span>
+            </div>
             <a href="#" class="db-submenu-link">All Trainings</a>
-            <a href="#" class="db-submenu-link">Add Training</a>
-            <a href="#" class="db-submenu-link">Registrations</a>
-            <a href="#" class="db-submenu-link">Download Registrations</a>
+          </a>
+          <a href="#" id="trainingRegistrationsLink" class="db-submenu-link"><div><span>Registrations</span>
+          </div>
+        </a>
           </div>
         </div>
 
@@ -625,6 +629,8 @@
 <%- include('add-event') %>
 <%- include('all-news') %>
 <%- include('all-events') %>
+<%- include('add-training') %>
+<%- include('training-registrations') %>
 <!-- ✅ All Job Postings panel — sibling of #dbMainContent, hidden by default -->
 <div id="allJobsPanel" class="db-card" style="display:none;">
   <div class="step-header" style="text-align:center; margin-bottom: 24px;">

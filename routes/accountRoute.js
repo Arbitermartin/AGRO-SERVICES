@@ -10,10 +10,37 @@ const utilities =require("../utilities")
 const regValidate = require('../utilities/account-validation')
 const multer = require("multer");
 const path =require("path");
+const fs = require("fs");
 
 const upload = multer({
   dest: "public/images/site/"
 });
+
+const guidesUploadPath = path.join(__dirname, "..", "public", "uploads", "guides");
+if (!fs.existsSync(guidesUploadPath)) {
+  fs.mkdirSync(guidesUploadPath, { recursive: true });
+}
+
+const guideStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, guidesUploadPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `guide-${Date.now()}${ext}`);
+  },
+});
+
+const uploadGuide = multer({
+  storage: guideStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const ok = path.extname(file.originalname).toLowerCase() === ".pdf";
+    cb(ok ? null : new Error("Only PDF files are allowed."), ok);
+  },
+});
+
+
 
 const cvStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -214,6 +241,57 @@ router.post(
   utilities.checkRole("admin"),
   utilities.handleErrors(accountController.toggleJobStatus)
 );
+
+/***********************************
+ * 
+ * Delivery training
+ */
+router.post(
+  "/trainings/create",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.trackActivity("Added a training program"),
+  utilities.handleErrors(accountController.createTrainingPost)
+);
+
+router.post(
+  "/trainings/:id/register",
+  utilities.checkLogin,
+  utilities.handleErrors(accountController.registerTraining)
+);
+
+/*******************************
+ * 
+ * Delivery training registrations
+ */
+router.post(
+  "/training-registrations/:id/status",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.handleErrors(accountController.updateTrainingRegistrationStatus)
+);
+// end here
+
+/*****************
+ * 
+ * Delivery training guide
+ */
+router.post(
+  "/training-guides/upload",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  uploadGuide.single("guide_file"),
+  utilities.trackActivity("Uploaded a training guide"),
+  utilities.handleErrors(accountController.uploadTrainingGuide)
+);
+
+router.post(
+  "/training-guides/:id/delete",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  utilities.handleErrors(accountController.deleteTrainingGuide)
+);
+// end here
 
 
 

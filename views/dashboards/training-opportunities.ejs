@@ -1,0 +1,42 @@
+<div id="trainingOpportunitiesPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-mortarboard"></i></div>
+    <h2>Training Programs</h2>
+    <p>Browse and register for available training</p>
+  </div>
+
+  <% if (activeTrainings && activeTrainings.length > 0) { %>
+    <div class="training-grid">
+      <% activeTrainings.forEach(t => { %>
+        <div class="training-card">
+          <div class="training-thumb"<%= t.gradient_start %>,<%= t.gradient_end %>;>
+            <i class="bi <%= t.icon %>"></i>
+          </div>
+          <div class="training-body">
+            <span class="training-tag"><%= t.category.charAt(0).toUpperCase() + t.category.slice(1) %></span>
+            <h3><%= t.title %></h3>
+            <div class="training-meta">
+              <span><i class="bi bi-clock"></i> <%= t.duration %></span>
+              <span><i class="bi bi-bar-chart"></i> <%= t.level %></span>
+            </div>
+            <% if (myTrainingIds.includes(t.training_id)) { %>
+              <button type="button" class="btn btn-outline training-enroll" disabled>
+                <i class="bi bi-check-circle"></i> Already Registered
+              </button>
+            <% } else { %>
+              <form action="/account/trainings/<%= t.training_id %>/register" method="POST">
+                <button type="submit" class="btn btn-filled training-enroll" style="width:100%;">Register Now</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding: 24px;">No training programs available right now.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelTrainingOpportunities"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

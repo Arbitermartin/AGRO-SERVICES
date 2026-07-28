@@ -1,0 +1,68 @@
+<div id="uploadGuidesPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-file-earmark-pdf"></i></div>
+    <h2>Upload Training Guide</h2>
+    <p>Add a downloadable PDF guide for members</p>
+  </div>
+
+  <form action="/account/training-guides/upload" method="POST" enctype="multipart/form-data" class="auth-form" id="uploadGuideForm">
+
+    <div class="form-field">
+      <label>Guide Title</label>
+      <div class="input-wrap">
+        <i class="bi bi-card-heading input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Climate-Resilient Farming Practices" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Number of Pages</label>
+      <div class="input-wrap">
+        <i class="bi bi-file-earmark-text input-icon"></i>
+        <input type="number" name="page_count" min="1" placeholder="e.g. 12">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>PDF File</label>
+      <div class="upload-area" id="guideUploadArea">
+        <i class="bi bi-cloud-upload" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+        <p>Tap to upload PDF<br><small>PDF only (max 10MB)</small></p>
+        <input type="file" id="guideUploadInput" name="guide_file" accept="application/pdf" style="display:none;" required>
+      </div>
+      <div id="guideUploadedFile" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+        <i class="bi bi-file-earmark-check"></i> <span id="guideFileName"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+      Upload Guide
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelUploadGuide"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+
+  <% if (allGuides && allGuides.length > 0) { %>
+    <h3 class="profile-section-title" style="margin-top: 30px;">Uploaded Guides</h3>
+    <% allGuides.forEach(g => { %>
+      <div class="manage-item">
+        <div class="manage-item-summary">
+          <div class="manage-item-thumb-placeholder"><i class="bi bi-file-earmark-pdf"></i></div>
+          <div class="manage-item-info">
+            <h4><%= g.title %></h4>
+            <small>PDF Guide <%= g.page_count ? '&middot; ' + g.page_count + ' pages' : '' %></small>
+          </div>
+          <div class="manage-item-actions">
+            <a href="<%= g.file_path %>" target="_blank" class="btn-outline-sm"><i class="bi bi-eye"></i> View</a>
+            <form action="/account/training-guides/<%= g.id %>/delete" method="POST" onsubmit="return confirm('Delete this guide permanently?');">
+              <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>

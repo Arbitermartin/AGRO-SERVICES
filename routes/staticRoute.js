@@ -36,15 +36,26 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
   }))
   router.get("/training", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
+    const trainings = await accountModel.getActiveTrainings();
+    const guides = await accountModel.getAllTrainingGuides();
     res.render("pages/training", { 
       title: "Training", 
-      nav 
+      nav ,
+      trainings,
+      guides,
     })
   }))
   router.get("/member", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("dashboards/member", { 
       title: "Training", 
+      nav 
+    })
+  }))
+  router.get("/yasnet-portal", utilities.handleErrors(async (req, res) => {
+    let nav = await utilities.getNav()
+    res.render("pages/yasnet-portal", { 
+      title: "YASNET PORTAL", 
       nav 
     })
   }))

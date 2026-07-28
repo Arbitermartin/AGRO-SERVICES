@@ -320,6 +320,101 @@ async function getAllActivityLogs() {
   return await db("activity_logs").orderBy("created_at", "desc").limit(200);
 }
 
+/********************************************
+ * Delivery training and registration
+ */
+/* Trainings */
+async function createTraining(data) {
+  const inserted = await db("trainings").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getAllTrainings() {
+  return await db("trainings").orderBy("created_at", "desc");
+}
+
+async function getActiveTrainings() {
+  return await db("trainings").where("end_date", ">=", db.fn.now()).orderBy("start_date", "asc");
+}
+
+async function getTrainingById(trainingId) {
+  return await db("trainings").where({ training_id: trainingId }).first();
+}
+
+async function updateTraining(trainingId, data) {
+  return await db("trainings").where({ training_id: trainingId }).update(data);
+}
+
+async function deleteTraining(trainingId) {
+  return await db("trainings").where({ training_id: trainingId }).del();
+}
+
+/* Training registrations */
+async function registerForTraining(trainingId, accountId) {
+  const existing = await db("training_registrations").where({ training_id: trainingId, account_id: accountId }).first();
+  if (existing) return existing;
+  const inserted = await db("training_registrations").insert({ training_id: trainingId, account_id: accountId }).returning("*");
+  return inserted[0];
+}
+
+async function getMyTrainingRegistrations(accountId) {
+  return await db("training_registrations as tr")
+    .join("trainings as t", "tr.training_id", "t.training_id")
+    .where("tr.account_id", accountId)
+    .select("tr.*", "t.title", "t.category", "t.duration", "t.level", "t.start_date", "t.end_date")
+    .orderBy("tr.created_at", "desc");
+}
+
+async function isRegisteredForTraining(trainingId, accountId) {
+  const row = await db("training_registrations").where({ training_id: trainingId, account_id: accountId }).first();
+  return !!row;
+}
+
+/****************************************************
+ * 
+ * Delivery get all training
+ */
+async function getAllTrainingRegistrations() {
+  return await db("training_registrations as tr")
+    .join("trainings as t", "tr.training_id", "t.training_id")
+    .join("accounts as a", "tr.account_id", "a.id")
+    .select(
+      "tr.id",
+      "tr.status",
+      "tr.created_at",
+      "t.title as training_title",
+      "t.category",
+      "t.start_date",
+      "t.end_date",
+      "a.full_name",
+      "a.email",
+      "a.phone_number"
+    )
+    .orderBy("tr.created_at", "desc");
+}
+
+async function updateTrainingRegistrationStatus(registrationId, status) {
+  return await db("training_registrations").where({ id: registrationId }).update({ status });
+}
+// end here
+
+/*******************
+ * Delivery training guide
+ */
+async function createTrainingGuide(data) {
+  const inserted = await db("training_guides").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getAllTrainingGuides() {
+  return await db("training_guides").orderBy("created_at", "desc");
+}
+
+async function deleteTrainingGuide(guideId) {
+  return await db("training_guides").where({ id: guideId }).del();
+}
+// end here
+
 module.exports = {
   registerAccount,
   checkExistingEmail,
@@ -364,6 +459,20 @@ module.exports = {
   recordLogout,
   getAllLoginLogs,
   createActivityLog,
-  getAllActivityLogs
+  getAllActivityLogs,
+  createTraining,
+  getAllTrainings,
+  getActiveTrainings,
+  getTrainingById,
+  updateTraining,
+  deleteTraining,
+  registerForTraining,
+  getMyTrainingRegistrations,
+  isRegisteredForTraining,
+  getAllTrainingRegistrations,
+  updateTrainingRegistrationStatus,
+  createTrainingGuide,
+  getAllTrainingGuides,
+  deleteTrainingGuide
 
 };
