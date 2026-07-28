@@ -1036,6 +1036,136 @@ if (guideUploadArea && guideUploadInput) {
 }
 // end here
 
+// Add Lesson
+const addLessonLink = document.getElementById('addLessonLink');
+const addLessonPanel = document.getElementById('addLessonPanel');
+const cancelAddLesson = document.getElementById('cancelAddLesson');
+if (addLessonLink && addLessonPanel && dbMainContent) {
+  addLessonLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; addLessonPanel.style.display='block'; });
+}
+if (cancelAddLesson) cancelAddLesson.addEventListener('click', (e) => { e.preventDefault(); addLessonPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+// Upload Material
+const uploadMaterialLink = document.getElementById('uploadMaterialLink');
+const uploadMaterialPanel = document.getElementById('uploadMaterialPanel');
+const cancelUploadMaterial = document.getElementById('cancelUploadMaterial');
+if (uploadMaterialLink && uploadMaterialPanel && dbMainContent) {
+  uploadMaterialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; uploadMaterialPanel.style.display='block'; });
+}
+if (cancelUploadMaterial) cancelUploadMaterial.addEventListener('click', (e) => { e.preventDefault(); uploadMaterialPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+const materialUploadArea = document.getElementById('materialUploadArea');
+const materialUploadInput = document.getElementById('materialUploadInput');
+if (materialUploadArea && materialUploadInput) {
+  materialUploadArea.addEventListener('click', () => materialUploadInput.click());
+  materialUploadInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      document.getElementById('materialUploadedFile').style.display = 'block';
+      document.getElementById('materialFileName').textContent = e.target.files[0].name;
+    }
+  });
+}
+// end here
+
+/* ---------- Create Ticket panel ---------- */
+const createTicketLink = document.getElementById('createTicketLink');
+const createTicketPanel = document.getElementById('createTicketPanel');
+const cancelCreateTicket = document.getElementById('cancelCreateTicket');
+if (createTicketLink && createTicketPanel && dbMainContent) {
+  createTicketLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; createTicketPanel.style.display='block'; });
+}
+if (cancelCreateTicket) cancelCreateTicket.addEventListener('click', (e) => { e.preventDefault(); createTicketPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+/* ---------- My Messages panel ---------- */
+const myMessagesLink = document.getElementById('myMessagesLink');
+const myMessagesPanel = document.getElementById('myMessagesPanel');
+const cancelMyMessages = document.getElementById('cancelMyMessages');
+if (myMessagesLink && myMessagesPanel && dbMainContent) {
+  myMessagesLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; myMessagesPanel.style.display='block'; });
+}
+if (cancelMyMessages) cancelMyMessages.addEventListener('click', (e) => { e.preventDefault(); myMessagesPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+/* ---------- Support Tickets panel (ICT) ---------- */
+const supportTicketsLink = document.getElementById('supportTicketsLink');
+const supportTicketsPanel = document.getElementById('supportTicketsPanel');
+const cancelSupportTickets = document.getElementById('cancelSupportTickets');
+if (supportTicketsLink && supportTicketsPanel && dbMainContent) {
+  supportTicketsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; supportTicketsPanel.style.display='block'; });
+}
+if (cancelSupportTickets) cancelSupportTickets.addEventListener('click', (e) => { e.preventDefault(); supportTicketsPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+const viewAllTicketsLink = document.getElementById('viewAllTicketsLink');
+if (viewAllTicketsLink && supportTicketsLink) {
+  viewAllTicketsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    supportTicketsLink.click();
+  });
+}
+
+
+/* ---------- Ticket expand/collapse + lazy-load messages ---------- */
+document.querySelectorAll('.ticket-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.ticket-item');
+    const ticketId = item.dataset.ticketId;
+    const wasOpen = item.classList.contains('is-open');
+    item.classList.toggle('is-open');
+
+    if (!wasOpen) {
+      fetch(`/account/tickets/${ticketId}/messages`)
+        .then(res => res.json())
+        .then(messages => {
+          const container = document.getElementById(`messages-${ticketId}`);
+          if (!container) return;
+          if (messages.length === 0) {
+            container.innerHTML = '<p style="font-size:0.8rem; color:#9ca3af;">No replies yet.</p>';
+            return;
+          }
+          container.innerHTML = messages.map(m => {
+            const isIct = m.account_type === 'ict_staff' || m.account_type === 'admin';
+            const cls = isIct ? 'ticket-msg-theirs' : 'ticket-msg-mine';
+            const time = new Date(m.created_at).toLocaleString('en-GB');
+            return `<div class="ticket-msg ${cls}">${m.message}<div class="ticket-msg-meta">${m.full_name} &middot; ${time}</div></div>`;
+          }).join('');
+        })
+        .catch(() => {
+          const container = document.getElementById(`messages-${ticketId}`);
+          if (container) container.innerHTML = '<p style="font-size:0.8rem; color:#c0392b;">Failed to load messages.</p>';
+        });
+    }
+  });
+});
+//end here
+
+/*****************
+ * 
+ * Delivery get all members
+ * 
+ */
+const allMembersLink = document.getElementById('allMembersLink');
+const allMembersPanel = document.getElementById('allMembersPanel');
+const cancelAllMembers = document.getElementById('cancelAllMembers');
+
+if (allMembersLink && allMembersPanel && dbMainContent) {
+  allMembersLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    allMembersPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAllMembers && allMembersPanel && dbMainContent) {
+  cancelAllMembers.addEventListener('click', (e) => {
+    e.preventDefault();
+    allMembersPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+// end here
+
+
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

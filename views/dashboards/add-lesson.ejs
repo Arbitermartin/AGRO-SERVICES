@@ -1,0 +1,46 @@
+<!-- add-lesson.ejs -->
+<div id="addLessonPanel" class="db-card" style="display:none; max-width: 600px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-journal-plus"></i></div>
+    <h2>Add Lesson</h2>
+    <p>Create a new lesson under a training program</p>
+  </div>
+  <form action="/account/lessons/create" method="POST" class="auth-form">
+    <div class="form-field">
+      <label>Training Program</label>
+      <div class="input-wrap">
+        <i class="bi bi-mortarboard input-icon"></i>
+        <select name="training_id" required>
+          <% allTrainings.forEach(t => { %>
+            <option value="<%= t.training_id %>"><%= t.title %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Lesson Title</label>
+      <div class="input-wrap">
+        <i class="bi bi-card-heading input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Irrigation basics" required>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Description</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+        <textarea name="description" rows="3" style="padding-left:44px;"></textarea>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Order</label>
+      <div class="input-wrap">
+        <i class="bi bi-sort-numeric-down input-icon"></i>
+        <input type="number" name="lesson_order" min="1" value="1" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-filled btn-block btn-lg">Add Lesson</button>
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAddLesson">Back to Dashboard</a>
+    </div>
+  </form>
+</div>

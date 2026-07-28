@@ -1,0 +1,27 @@
+<div id="createTicketPanel" class="db-card" style="display:none; max-width: 600px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-life-preserver"></i></div>
+    <h2>Create Support Ticket</h2>
+    <p>Describe your issue and our ICT team will assist you</p>
+  </div>
+  <form action="/account/tickets/create" method="POST" class="auth-form">
+    <div class="form-field">
+      <label>Subject</label>
+      <div class="input-wrap">
+        <i class="bi bi-card-heading input-icon"></i>
+        <input type="text" name="subject" placeholder="e.g. Cannot access dashboard" required>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Description</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+        <textarea name="description" rows="5" placeholder="Describe the issue in detail..." style="padding-left:44px;" required></textarea>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-filled btn-block btn-lg">Submit Ticket</button>
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelCreateTicket">Back to Dashboard</a>
+    </div>
+  </form>
+</div>

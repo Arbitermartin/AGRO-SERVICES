@@ -112,6 +112,33 @@ const newsImageStorage = multer.diskStorage({
 });
 const uploadNewsImage = multer({ storage: newsImageStorage, limits: { fileSize: 3 * 1024 * 1024 } });
 
+// Delivery upload materials
+const materialsUploadPath = path.join(__dirname, "..", "public", "uploads", "materials");
+if (!fs.existsSync(materialsUploadPath)) {
+  fs.mkdirSync(materialsUploadPath, { recursive: true });
+}
+
+const materialStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, materialsUploadPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `material-${Date.now()}${ext}`);
+  },
+});
+
+const uploadMaterial = multer({
+  storage: materialStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /pdf|doc|docx|mp4|mov/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only PDF, DOCX, or video files are allowed."), ok);
+  },
+});
+// end here
+
 router.post(
   "/news/create",
   utilities.checkLogin,
@@ -293,9 +320,70 @@ router.post(
 );
 // end here
 
+/**********************
+ * 
+ * Delivery lesson and materials
+ */
+router.post("/lessons/create", 
+  utilities.checkLogin, 
+  utilities.checkRole("ict_staff"), 
+  utilities.trackActivity("Added a lesson"), 
+  utilities.handleErrors(accountController.createLessonPost));
 
+router.post("/lesson-materials/upload",
+   utilities.checkLogin, 
+   utilities.checkRole("ict_staff"), 
+   uploadMaterial.single("material_file"), 
+   utilities.trackActivity("Uploaded lesson material"), 
+   utilities.handleErrors(accountController.uploadLessonMaterial));
 
+router.post("/lesson-materials/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkRole("ict_staff"), 
+  utilities.handleErrors(accountController.deleteLessonMaterialPost));
 
+router.get("/lessons/:lessonId", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.viewLesson));
 
+router.post("/lessons/:lessonId/complete", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.completeLesson));
+  //end here.
+
+  // ticket messages
+  router.post("/tickets/create", 
+    utilities.checkLogin, 
+    utilities.trackActivity("Created a support ticket"), 
+    utilities.handleErrors(accountController.createSupportTicket));
+
+router.post("/tickets/:id/status", 
+  utilities.checkLogin, 
+  utilities.checkRole("ict_staff"), 
+  utilities.handleErrors(accountController.updateTicketStatusPost));
+
+router.post("/tickets/:id/reply", 
+  utilities.checkLogin, 
+  utilities.trackActivity("Replied to a support ticket"), 
+  utilities.handleErrors(accountController.replyToTicket));
+
+  // get ticket message
+  router.get("/tickets/:id/messages", 
+    utilities.checkLogin,
+    utilities.handleErrors(accountController.getTicketMessagesJson));
+
+    /*********************
+     * 
+     * deactivate post and reactivate post
+     */
+    router.post("/accounts/:id/deactivate", 
+      utilities.checkLogin, 
+      utilities.checkRole("admin"), 
+      utilities.handleErrors(accountController.deactivateAccountPost));
+
+    router.post("/accounts/:id/reactivate", 
+      utilities.checkLogin, 
+      utilities.checkRole("admin"), 
+      utilities.handleErrors(accountController.reactivateAccountPost));
 
 module.exports= router

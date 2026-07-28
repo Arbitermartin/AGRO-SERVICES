@@ -25,7 +25,7 @@
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
-            <a href="#" class="db-submenu-link">All Members</a>
+            <a href="#" id="allMembersLink" class="db-submenu-link"> All Users</a>
             <a href="#" class="db-submenu-link">Add Member</a>
             <a href="#" class="db-submenu-link">Member Reports</a>
             <a href="#" class="db-submenu-link">Export Members</a>
@@ -221,8 +221,8 @@
               <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-people-fill"></i></div>
               <div>
                 <div class="db-stat-label">Total Members</div>
-                <div class="db-stat-value">1,248</div>
-                <div class="db-stat-delta db-stat-delta-green">&uarr; 35 this month</div>
+                <div class="db-stat-value"><%= totalMembers %></div>
+                <div class="db-stat-delta db-stat-delta-green">&uarr; <%= newMembersThisMonth %> this month</div>
               </div>
             </div>
 
@@ -266,8 +266,10 @@
               <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-shield-fill"></i></div>
               <div>
                 <div class="db-stat-label">Admins</div>
-                <div class="db-stat-value">6</div>
-                <div class="db-stat-delta db-stat-delta-purple">View all</div>
+                <div class="db-stat-value"><%= totalAdmins %></div>
+                <div class="db-stat-delta db-stat-delta-purple">
+                <a href="#" id="viewAllAdminsLink" style="color:inherit; text-decoration:none;">View all</a>
+               </div>
               </div>
             </div>
           </div>
@@ -631,6 +633,8 @@
 <%- include('all-events') %>
 <%- include('add-training') %>
 <%- include('training-registrations') %>
+<%- include('all-members') %>
+
 <!-- ✅ All Job Postings panel — sibling of #dbMainContent, hidden by default -->
 <div id="allJobsPanel" class="db-card" style="display:none;">
   <div class="step-header" style="text-align:center; margin-bottom: 24px;">

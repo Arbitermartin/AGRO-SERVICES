@@ -1,0 +1,43 @@
+<!-- upload-material.ejs -->
+<div id="uploadMaterialPanel" class="db-card" style="display:none; max-width: 600px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-cloud-upload"></i></div>
+    <h2>Upload Lesson Material</h2>
+    <p>Add notes, PDFs, or videos to a lesson</p>
+  </div>
+  <form action="/account/lesson-materials/upload" method="POST" enctype="multipart/form-data" class="auth-form">
+    <div class="form-field">
+      <label>Lesson</label>
+      <div class="input-wrap">
+        <i class="bi bi-journal-text input-icon"></i>
+        <select name="lesson_id" required>
+          <% allLessons.forEach(l => { %>
+            <option value="<%= l.lesson_id %>"><%= l.title %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Material Title</label>
+      <div class="input-wrap">
+        <i class="bi bi-card-heading input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Irrigation planning guide" required>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>File</label>
+      <div class="upload-area" id="materialUploadArea">
+        <i class="bi bi-cloud-upload" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+        <p>Tap to upload<br><small>PDF, DOCX, or video (max 50MB)</small></p>
+        <input type="file" id="materialUploadInput" name="material_file" accept=".pdf,.doc,.docx,.mp4,.mov" style="display:none;" required>
+      </div>
+      <div id="materialUploadedFile" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+        <i class="bi bi-file-earmark-check"></i> <span id="materialFileName"></span>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-filled btn-block btn-lg">Upload Material</button>
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelUploadMaterial">Back to Dashboard</a>
+    </div>
+  </form>
+</div>

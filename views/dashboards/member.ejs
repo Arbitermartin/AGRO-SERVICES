@@ -15,8 +15,8 @@
         <a href="/account/dashboard/member" class="db-nav-link is-active">
           <i class="bi bi-speedometer2"></i> Dashboard
         </a>
-        <a href="#" id="trainingOpportunitiesLink" class="db-nav-link">
-          <i class="bi bi-mortarboard"></i> Trainings
+        <a href="#" id="trainingOpportunitiesLink" class="db-nav-link"> 
+          <i class="bi bi-mortarboard"></i>Training
         </a>
         <a href="#" id="jobOpportunitiesLink" class="db-nav-link">
           <i class="bi bi-briefcase"></i>Job Opportunities
@@ -29,11 +29,11 @@
         <a href="#" class="db-nav-link">
           <i class="bi bi-person-gear"></i> Profile Update
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-envelope"></i> Messages
+        <a href="#" id="createTicketLink" class="db-nav-link">
+          <i class="bi bi-envelope"></i> support Tickets
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-life-preserver"></i> Support Tickets
+        <a href="#" id="myMessagesLink" class="db-nav-link">
+          <i class="bi bi-life-preserver"></i>Messages
         </a>
 
         <div class="db-nav-footer">
@@ -160,42 +160,108 @@
               </div>
             </div>
           </div>
+           <!-- ===================== MY LEARNING ===================== ✅ ADD HERE -->
+  <div class="db-card">
+    <div class="db-panel-title">My Learning</div>
+
+    <% if (myLearningProgress && myLearningProgress.length > 0) { %>
+      <div class="db-member-panels-grid">
+        <% myLearningProgress.forEach(item => { %>
+          <div class="training-card">
+            <div class="training-thumb" style="background:linear-gradient(135deg,#66BB6A,#2E7D32);">
+              <i class="bi bi-mortarboard"></i>
+            </div>
+            <div class="training-body">
+              <span class="training-tag"><%= item.category.charAt(0).toUpperCase() + item.category.slice(1) %></span>
+              <h3><%= item.title %></h3>
+
+              <div style="height:4px; background:#e0e0e0; border-radius:2px; margin:10px 0 6px;">
+                <div class="learning"<%= item.progress_percent %>%;></div>
+              </div>
+              <div class="training-meta" style="margin-bottom:14px;">
+                <span><%= item.completed_lessons %> of <%= item.total_lessons %> lessons complete</span>
+              </div>
+
+              <% if (!item.has_lessons) { %>
+                <button type="button" class="btn btn-outline training-enroll" disabled>No lessons yet</button>
+              <% } else if (item.progress_percent === 0) { %>
+                <a href="/account/lessons/<%= item.next_lesson_id %>" class="btn btn-filled training-enroll">Start Learning</a>
+              <% } else if (item.progress_percent === 100) { %>
+                <a href="/account/lessons/<%= item.next_lesson_id %>" class="btn btn-outline training-enroll">
+                  <i class="bi bi-check-circle"></i> Completed &mdash; Review
+                </a>
+              <% } else { %>
+                <a href="/account/lessons/<%= item.next_lesson_id %>" class="btn btn-filled training-enroll">Continue Learning</a>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding: 24px;">You haven't registered for any training yet.</p>
+    <% } %>
+  </div>
 
           <!-- ===================== TRAININGS + JOB OPPORTUNITIES ===================== -->
           <div class="db-member-panels-grid">
 
             <div class="db-card">
               <div class="db-panel-title">Upcoming Trainings</div>
+            
               <table class="db-table">
                 <thead>
-                  <tr><th>Training</th><th>Date</th><th>Location</th><th>Status</th><th></th></tr>
+                  <tr>
+                    <th>Training</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Digital Marketing Basics</td><td>25 May 2024</td><td>Online</td>
-                    <td><span class="db-badge-status db-badge-open">Open</span></td>
-                    <td><button type="button" class="db-btn-action">Register</button></td>
-                  </tr>
-                  <tr>
-                    <td>Advanced Excel</td><td>02 Jun 2024</td><td>Dar es Salaam</td>
-                    <td><span class="db-badge-status db-badge-open">Open</span></td>
-                    <td><button type="button" class="db-btn-action">Register</button></td>
-                  </tr>
-                  <tr>
-                    <td>Entrepreneurship Skills</td><td>10 Jun 2024</td><td>Arusha</td>
-                    <td><span class="db-badge-status db-badge-open">Open</span></td>
-                    <td><button type="button" class="db-btn-action">Register</button></td>
-                  </tr>
-                  <tr>
-                    <td>Cybersecurity Basics</td><td>15 Jun 2024</td><td>Online</td>
-                    <td><span class="db-badge-status db-badge-open">Open</span></td>
-                    <td><button type="button" class="db-btn-action">Register</button></td>
-                  </tr>
+                  <% if (typeof upcomingTrainings !== 'undefined' && upcomingTrainings.length > 0) { %>
+                    <% upcomingTrainings.forEach(training => { %>
+                      <tr>
+                        <td><%= training.title %></td>
+                        <td>
+                          <%= new Date(training.start_date).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          }) %>
+                        </td>
+                        <td><%= training.location || 'Online' %></td>
+                        <td>
+                          <span class="db-badge-status db-badge-open">
+                            <%= training.status || 'Open' %>
+                          </span>
+                        </td>
+                        <td>
+                          <% if (training.is_registered) { %>
+                            <button type="button" class="db-btn-action" disabled>Registered</button>
+                          <% } else { %>
+                            <a href="/account/trainings/<%= training.id %>/register" class="db-btn-action">
+                              Register
+                            </a>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="5" style="text-align:center; color:#9ca3af; padding: 1.5rem 0;">
+                        No upcoming trainings at the moment.
+                      </td>
+                    </tr>
+                  <% } %>
                 </tbody>
               </table>
-              <a href="#" class="db-view-all">View all trainings <i class="bi bi-arrow-right"></i></a>
+            
+              <a href="#" id="trainingOpportunitiesLink" class="db-view-all">
+                View all trainings <i class="bi bi-arrow-right"></i>
+              </a>
             </div>
-
+            
             <div class="db-card">
               <div class="db-panel-title">Job Opportunities</div>
               <table class="db-table">
@@ -227,73 +293,127 @@
 
             <div class="db-card">
               <div class="db-panel-title">My Applications</div>
-              <div class="db-application-item">
-                <div>
-                  <span>Software Developer</span>
-                  <small>Applied on 20 May 2024</small>
+            
+              <% if (typeof myApplications !== 'undefined' && myApplications.length > 0) { %>
+                <% myApplications.forEach(app => { %>
+                  <div class="db-application-item">
+                    <div>
+                      <span><%= app.job_title %></span>
+                      <small>
+                        Applied on 
+                        <%= new Date(app.created_at).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        }) %>
+                      </small>
+                    </div>
+            
+                    <% 
+                      let badgeClass = 'db-badge-progress';
+                      const status = (app.status || '').toLowerCase();
+            
+                      if (status === 'shortlisted')        badgeClass = 'db-badge-shortlisted';
+                      else if (status === 'rejected')      badgeClass = 'db-badge-rejected';
+                      else if (status === 'hired' || status === 'accepted') badgeClass = 'db-badge-hired';
+                      else if (status === 'under review' || status === 'pending') badgeClass = 'db-badge-progress';
+                    %>
+                    <span class="db-badge-status <%= badgeClass %>">
+                      <%= app.status %>
+                    </span>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <div style="padding: 1.8rem 0; text-align: center; color: #9ca3af;">
+                  <i class="bi bi-briefcase" style="font-size: 1.9rem; display: block; margin-bottom: 8px;"></i>
+                  No applications yet
                 </div>
-                <span class="db-badge-status db-badge-progress">Under Review</span>
-              </div>
-              <div class="db-application-item">
-                <div>
-                  <span>Data Analyst</span>
-                  <small>Applied on 18 May 2024</small>
-                </div>
-                <span class="db-badge-status db-badge-shortlisted">Shortlisted</span>
-              </div>
-              <div class="db-application-item">
-                <div>
-                  <span>Project Manager</span>
-                  <small>Applied on 15 May 2024</small>
-                </div>
-                <span class="db-badge-status db-badge-progress">Under Review</span>
-              </div>
-              <a href="#" class="db-view-all">View all applications <i class="bi bi-arrow-right"></i></a>
+              <% } %>
+            
+              <a href="#" id="myApplicationsLink" class="db-view-all">
+                View all applications <i class="bi bi-arrow-right"></i>
+              </a>
             </div>
-
             <div class="db-card">
               <div class="db-panel-title">My Upcoming Events</div>
-              <div class="db-event-item">
-                <i class="bi bi-calendar-event db-event-icon"></i>
-                <div>
-                  <span>Youth Leadership Summit</span>
-                  <small>25 May 2024 &middot; Dar es Salaam</small>
+            
+              <% if (typeof upcomingEvents !== 'undefined' && upcomingEvents.length > 0) { %>
+                <% upcomingEvents.forEach(event => { %>
+                  <div class="db-event-item">
+                    <i class="bi bi-calendar-event db-event-icon"></i>
+                    <div>
+                      <span><%= event.title %></span>
+                      <small>
+                        <%= new Date(event.event_date).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        }) %>
+                        &middot;
+                        <%= event.location || 'Online' %>
+                      </small>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <div style="padding: 1.8rem 0; text-align: center; color: #9ca3af;">
+                  <i class="bi bi-calendar-x" style="font-size: 1.9rem; display: block; margin-bottom: 8px;"></i>
+                  No upcoming events
                 </div>
-              </div>
-              <div class="db-event-item">
-                <i class="bi bi-calendar-event db-event-icon"></i>
-                <div>
-                  <span>ICT Innovation Expo</span>
-                  <small>15 Jun 2024 &middot; Mwanza</small>
-                </div>
-              </div>
-              <div class="db-event-item">
-                <i class="bi bi-calendar-event db-event-icon"></i>
-                <div>
-                  <span>Entrepreneurship Bootcamp</span>
-                  <small>10 Jun 2024 &middot; Arusha</small>
-                </div>
-              </div>
-              <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
+              <% } %>
+            
+              <a href="#" class="db-view-all">
+                View all events <i class="bi bi-arrow-right"></i>
+              </a>
             </div>
-
+            
             <div class="db-card db-profile-summary-card">
               <div class="db-panel-title">Profile Summary</div>
+            
               <div class="db-profile-summary-body">
                 <div class="db-profile-summary-info">
-                  <div class="db-profile-row"><span>Full Name</span><b>John Doe</b></div>
-                  <div class="db-profile-row"><span>Email</span><b>john.doe@example.com</b></div>
-                  <div class="db-profile-row"><span>Phone</span><b>+255 712 345 678</b></div>
-                  <div class="db-profile-row"><span>Location</span><b>Dar es Salaam</b></div>
-                  <a href="#" class="db-view-all">Complete Profile <i class="bi bi-arrow-right"></i></a>
+                  <div class="db-profile-row">
+                    <span>Full Name</span>
+                    <b><%= account.full_name || '—' %></b>
+                  </div>
+            
+                  <div class="db-profile-row">
+                    <span>Email</span>
+                    <b><%= account.email || '—' %></b>
+                  </div>
+            
+                  <div class="db-profile-row">
+                    <span>Phone</span>
+                    <b><%= profile.Phone || account.Phone || '—' %></b>
+                  </div>
+            
+                  <div class="db-profile-row">
+                    <span>Location</span>
+                    <b>
+                      <% 
+                        const locationParts = [
+                          birthPlace?.region,
+                          birthPlace?.district
+                        ].filter(Boolean);
+                      %>
+                      <%= locationParts.length > 0 ? locationParts.join(', ') : '—' %>
+                    </b>
+                  </div>
+            
+                  <a href="#" id="updateProfileLink" class="db-view-all">
+                    Complete Profile <i class="bi bi-arrow-right"></i>
+                  </a>
                 </div>
-                <div class="db-progress-ring" style="background: conic-gradient(#43A047 0% 85%, #E0E0E0 85% 100%);">
-                  <div class="db-progress-ring-hole">85%</div>
+            
+                <!-- Progress Ring -->
+                <div class="db-progress-ring" style="--progress: <%= profileCompletion %>%;">
+                  <div class="db-progress-ring-hole">
+                    <%= profileCompletion %>%
+                  </div>
                 </div>
               </div>
             </div>
-
-          </div>
+            </div>
 
         </div> <!-- End of #dbMainContent -->
          <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->
@@ -483,6 +603,8 @@
         <%- include('job-opportunities') %>
         <%- include('my-applications') %>
         <%- include('training-opportunities') %>
+        <%- include('create-ticket') %>
+        <%- include('my-messages') %>
 
       </div>
     </div>

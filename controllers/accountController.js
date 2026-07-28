@@ -150,6 +150,10 @@ async function buildAdminDashboard(req, res) {
   const allNews = await accountModel.getAllNews();
   const allEvents = await accountModel.getAllEventsAdmin();
   const allTrainingRegistrations = await accountModel.getAllTrainingRegistrations();
+  const allAccounts = await accountModel.getAllAccounts();
+  const totalMembers = await accountModel.countMembersOnly();
+  const newMembersThisMonth = await accountModel.countNewMembersThisMonth();
+  const totalAdmins = await accountModel.countAdminsOnly();
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -168,6 +172,10 @@ async function buildAdminDashboard(req, res) {
     allNews,
     allEvents,
     allTrainingRegistrations,
+    allAccounts,
+    totalMembers,
+    newMembersThisMonth,
+    totalAdmins,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -275,7 +283,12 @@ async function buildIctStaffDashboard(req, res) {
   let nav = await utilities.getNav();
   const loginLogs = await accountModel.getAllLoginLogs();
   const activityLogs = await accountModel.getAllActivityLogs();
-   const allGuides = await accountModel.getAllTrainingGuides();
+  const allGuides = await accountModel.getAllTrainingGuides();
+  const allTrainings = await accountModel.getAllTrainings();
+  const allLessons = await accountModel.getAllLessons();
+  const allTickets = await accountModel.getAllTickets();
+  const ticketCounts = await accountModel.countTicketsByStatus();
+  const recentTickets = allTickets.slice(0, 4);
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -284,6 +297,11 @@ async function buildIctStaffDashboard(req, res) {
     loginLogs,
     activityLogs,
     allGuides,
+    allTrainings,
+    allLessons,
+    allTickets,
+    ticketCounts,
+    recentTickets,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
@@ -309,6 +327,33 @@ async function buildMemberDashboard(req, res) {
     const activeTrainings = await accountModel.getActiveTrainings();
     const myTrainings = await accountModel.getMyTrainingRegistrations(account.id);
     const myTrainingIds = myTrainings.map(t => t.training_id);
+    const myLearningProgress = await accountModel.getTrainingProgressSummary(account.id);   
+    const myTickets = await accountModel.getTicketsByAccountId(account.id);
+
+  // For each training, figure out which lesson to jump to (first incomplete, or first lesson if none started)
+  for (const item of myLearningProgress) {
+    const lessons = await accountModel.getLessonsByTrainingId(item.training_id);
+    const completedIds = (await accountModel.getProgressForTraining(account.id, item.training_id)).map(p => p.lesson_id);
+    const nextLesson = lessons.find(l => !completedIds.includes(l.lesson_id));
+    item.next_lesson_id = nextLesson ? nextLesson.lesson_id : (lessons.length > 0 ? lessons[0].lesson_id : null);
+    item.has_lessons = lessons.length > 0;
+  }
+
+  // === Calculate profile completion (adjust fields to match your actual columns) ===
+  let completed = 0;
+  const totalFields = 8;   // change this number to match how many fields you check
+
+  if (account.full_name) completed++;
+  if (account.email) completed++;
+  if (account.phone) completed++;
+  if (account.profile_image || account.avatar) completed++;
+  if (account.address || account.location) completed++;
+  if (account.bio || account.about) completed++;
+  if (account.date_of_birth || account.dob) completed++;
+  if (account.gender) completed++;
+  // add/remove fields according to what exists in your users/accounts table
+
+  const profileCompletion = Math.round((completed / totalFields) * 100);
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
@@ -323,6 +368,9 @@ async function buildMemberDashboard(req, res) {
     activeTrainings,
     myTrainings,
     myTrainingIds,
+    myLearningProgress,
+    myTickets,
+    profileCompletion,
      // Add these two lines 👇
      showNav: false,
      showFooter: false
@@ -607,29 +655,6 @@ async function registerTraining(req, res) {
     res.redirect("/account/dashboard/member");
   }
 }
-
-/* ****************************************
- * Logout
- * *************************************** */
-async function accountLogout(req, res) {
-  try {
-    if (req.session.account && req.session.account.loginLogId) {
-      await accountModel.recordLogout(req.session.account.loginLogId);
-    }
-  req.flash("success","You have been logged out successfully.");
-  const flashMessages =req.session.flash;
-
-  req.session.regenerate((err)=>{
-    if(err) console.error(err);
-    req.session.flash =flashMessages;
-    res.redirect("/account/login")
-  }) 
-} catch (error) {
-  console.error("LOGOUT ERROR:", error);
-  res.redirect("/account/login");
-}
-}
-
 /*********************
  * 
  * Delivery uplaod training guides
@@ -676,10 +701,266 @@ async function deleteTrainingGuide(req, res) {
 }
 // end here
 
+/* ---------- ICT Staff: create lesson ---------- */
+async function createLessonPost(req, res) {
+  try {
+    const { training_id, title, description, lesson_order } = req.body;
+    await accountModel.createLesson({ training_id, title, description, lesson_order: parseInt(lesson_order, 10) || 1 });
+
+    req.flash("success", "Lesson added successfully.");
+    res.redirect("/account/dashboard/ict-staff?lessonPosted=true");
+  } catch (error) {
+    console.error("CREATE LESSON ERROR:", error);
+    req.flash("error", "Failed to add lesson.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+/* ---------- ICT Staff: upload material to a lesson ---------- */
+async function uploadLessonMaterial(req, res) {
+  try {
+    const { lesson_id, title } = req.body;
+
+    if (!req.file) {
+      req.flash("error", "Please select a file to upload.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    const ext = req.file.filename.split('.').pop().toLowerCase();
+    const file_type = ['mp4', 'mov'].includes(ext) ? 'video' : ext;
+    const file_path = `/uploads/materials/${req.file.filename}`;
+
+    await accountModel.createLessonMaterial({
+      lesson_id,
+      title,
+      file_path,
+      file_type,
+      uploaded_by: req.session.account.id,
+    });
+
+    req.flash("success", "Material uploaded successfully.");
+    res.redirect("/account/dashboard/ict-staff?materialPosted=true");
+  } catch (error) {
+    console.error("UPLOAD MATERIAL ERROR:", error);
+    req.flash("error", "Failed to upload material.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function deleteLessonMaterialPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteLessonMaterial(id);
+
+    req.flash("success", "Material deleted.");
+    res.redirect("/account/dashboard/ict-staff?materialPosted=true");
+  } catch (error) {
+    console.error("DELETE MATERIAL ERROR:", error);
+    req.flash("error", "Failed to delete material.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+/* ---------- Member: view a lesson (materials) ---------- */
+async function viewLesson(req, res) {
+  try {
+    const { lessonId } = req.params;
+    const lesson = await accountModel.getLessonById(lessonId);
+
+    if (!lesson) {
+      req.flash("error", "Lesson not found.");
+      return res.redirect("/account/dashboard/member");
+    }
+
+    const materials = await accountModel.getMaterialsByLessonId(lessonId);
+    const allLessons = await accountModel.getLessonsByTrainingId(lesson.training_id);
+    const completedLessonIds = (await accountModel.getProgressForTraining(req.session.account.id, lesson.training_id)).map(p => p.lesson_id);
+
+    let nav = await utilities.getNav();
+    res.render("account/lesson-view", {
+      title: lesson.title,
+      nav,
+      account: req.session.account,
+      lesson,
+      materials,
+      allLessons,
+      completedLessonIds,
+      success: req.flash("success"),
+      error: req.flash("error"),
+    });
+  } catch (error) {
+    console.error("VIEW LESSON ERROR:", error);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/account/dashboard/member");
+  }
+}
+
+/* ---------- Member: mark lesson complete ---------- */
+async function completeLesson(req, res) {
+  try {
+    const { lessonId } = req.params;
+    await accountModel.markLessonComplete(req.session.account.id, lessonId);
+
+    const lesson = await accountModel.getLessonById(lessonId);
+    const allLessons = await accountModel.getLessonsByTrainingId(lesson.training_id);
+    const currentIndex = allLessons.findIndex(l => l.lesson_id == lessonId);
+    const nextLesson = allLessons[currentIndex + 1];
+
+    req.flash("success", "Lesson marked as complete!");
+    if (nextLesson) {
+      res.redirect(`/account/lessons/${nextLesson.lesson_id}`);
+    } else {
+      res.redirect("/account/dashboard/member?trainingCompleted=true");
+    }
+  } catch (error) {
+    console.error("COMPLETE LESSON ERROR:", error);
+    req.flash("error", "Failed to update progress.");
+    res.redirect("/account/dashboard/member");
+  }
+}
+// end here
+
+
+
+/*********************************************
+ * 
+ * Delivery ticket
+ */
+async function createSupportTicket(req, res) {
+  try {
+    const { subject, description } = req.body;
+    const ticket = await accountModel.createTicket(req.session.account.id, subject, description);
+
+    req.flash("success", `Ticket ${ticket.ticket_number} created successfully.`);
+    res.redirect("/account/dashboard/member?ticketCreated=true");
+  } catch (error) {
+    console.error("CREATE TICKET ERROR:", error);
+    req.flash("error", "Failed to create ticket.");
+    res.redirect("/account/dashboard/member");
+  }
+}
+
+async function updateTicketStatusPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await accountModel.updateTicketStatus(id, status);
+
+    req.flash("success", "Ticket status updated.");
+    res.redirect("/account/dashboard/ict-staff?ticketUpdated=true");
+  } catch (error) {
+    console.error("UPDATE TICKET STATUS ERROR:", error);
+    req.flash("error", "Failed to update ticket.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function replyToTicket(req, res) {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+    await accountModel.createTicketMessage(id, req.session.account.id, message);
+
+    req.flash("success", "Reply sent.");
+    const account = req.session.account;
+    const redirectTo = account.account_type === "ict_staff" ? "/account/dashboard/ict-staff" : "/account/dashboard/member";
+    res.redirect(`${redirectTo}?ticketReplied=true`);
+  } catch (error) {
+    console.error("REPLY TICKET ERROR:", error);
+    req.flash("error", "Failed to send reply.");
+    res.redirect("back");
+  }
+}
+// end here
+
+/*******************************
+ * 
+ * Delivery json message
+ */
+
+async function getTicketMessagesJson(req, res) {
+  try {
+    const { id } = req.params;
+    const messages = await accountModel.getMessagesByTicketId(id);
+    res.json(messages);
+  } catch (error) {
+    console.error("GET MESSAGES ERROR:", error);
+    res.status(500).json([]);
+  }
+}
+// end here.
+
+/****************************
+ * Delivery deactivate and reactivate account
+ */
+async function deactivateAccountPost(req, res) {
+  try {
+    const { id } = req.params;
+    const targetAccount = await accountModel.getAccountById(id);
+
+    if (!targetAccount) {
+      req.flash("error", "Account not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    // ✅ The core rule: admins can never deactivate another admin
+    if (targetAccount.account_type === "admin") {
+      req.flash("error", "Administrator accounts cannot be deactivated by another admin.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    await accountModel.deactivateAccount(id);
+    req.flash("success", `${targetAccount.full_name}'s account has been deactivated.`);
+    res.redirect("/account/dashboard/admin?membersUpdated=true");
+  } catch (error) {
+    console.error("DEACTIVATE ACCOUNT ERROR:", error);
+    req.flash("error", "Failed to deactivate account.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function reactivateAccountPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.reactivateAccount(id);
+    req.flash("success", "Account reactivated.");
+    res.redirect("/account/dashboard/admin?membersUpdated=true");
+  } catch (error) {
+    console.error("REACTIVATE ACCOUNT ERROR:", error);
+    req.flash("error", "Failed to reactivate account.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+/* ****************************************
+ * Logout
+ * *************************************** */
+async function accountLogout(req, res) {
+  try {
+    if (req.session.account && req.session.account.loginLogId) {
+      await accountModel.recordLogout(req.session.account.loginLogId);
+    }
+  req.flash("success","You have been logged out successfully.");
+  const flashMessages =req.session.flash;
+
+  req.session.regenerate((err)=>{
+    if(err) console.error(err);
+    req.session.flash =flashMessages;
+    res.redirect("/account/login")
+  }) 
+} catch (error) {
+  console.error("LOGOUT ERROR:", error);
+  res.redirect("/account/login");
+}
+}
+
+
+
+
+
 
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,uploadTrainingGuide,deleteTrainingGuide,accountLogout
-
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,accountLogout
 }

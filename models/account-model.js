@@ -415,6 +415,183 @@ async function deleteTrainingGuide(guideId) {
 }
 // end here
 
+/***************************
+ * 
+ * Delivery lessons and materials
+ */
+/* Lessons */
+async function createLesson(data) {
+  const inserted = await db("lessons").insert(data).returning("*");
+  return inserted[0];
+}
+async function getAllLessons() {
+  return await db("lessons").orderBy("created_at", "desc");
+}
+
+async function getLessonsByTrainingId(trainingId) {
+  return await db("lessons").where({ training_id: trainingId }).orderBy("lesson_order", "asc");
+}
+
+async function getLessonById(lessonId) {
+  return await db("lessons").where({ lesson_id: lessonId }).first();
+}
+
+/* Materials */
+async function createLessonMaterial(data) {
+  const inserted = await db("lesson_materials").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getMaterialsByLessonId(lessonId) {
+  return await db("lesson_materials").where({ lesson_id: lessonId }).orderBy("created_at", "asc");
+}
+
+async function deleteLessonMaterial(materialId) {
+  return await db("lesson_materials").where({ material_id: materialId }).del();
+}
+
+/* Progress */
+async function markLessonComplete(accountId, lessonId) {
+  const existing = await db("lesson_progress").where({ account_id: accountId, lesson_id: lessonId }).first();
+  if (existing) {
+    return await db("lesson_progress").where({ id: existing.id }).update({ completed: true, completed_at: db.fn.now() });
+  }
+  return await db("lesson_progress").insert({ account_id: accountId, lesson_id: lessonId, completed: true, completed_at: db.fn.now() });
+}
+
+async function getProgressForTraining(accountId, trainingId) {
+  return await db("lesson_progress as lp")
+    .join("lessons as l", "lp.lesson_id", "l.lesson_id")
+    .where("l.training_id", trainingId)
+    .andWhere("lp.account_id", accountId)
+    .andWhere("lp.completed", true)
+    .select("lp.lesson_id");
+}
+
+async function getTrainingProgressSummary(accountId) {
+  return await db("training_registrations as tr")
+    .join("trainings as t", "tr.training_id", "t.training_id")
+    .where("tr.account_id", accountId)
+    .select("tr.training_id", "t.title", "t.category")
+    .then(async (regs) => {
+      for (const reg of regs) {
+        const totalLessons = await db("lessons").where({ training_id: reg.training_id }).count("lesson_id as count").first();
+        const completedLessons = await db("lesson_progress as lp")
+          .join("lessons as l", "lp.lesson_id", "l.lesson_id")
+          .where("l.training_id", reg.training_id)
+          .andWhere("lp.account_id", accountId)
+          .andWhere("lp.completed", true)
+          .count("lp.id as count")
+          .first();
+        reg.total_lessons = parseInt(totalLessons.count, 10);
+        reg.completed_lessons = parseInt(completedLessons.count, 10);
+        reg.progress_percent = reg.total_lessons > 0 ? Math.round((reg.completed_lessons / reg.total_lessons) * 100) : 0;
+      }
+      return regs;
+    });
+}
+// end here.
+/* Support Tickets */
+async function generateTicketNumber() {
+  const last = await db("support_tickets").orderBy("id", "desc").first();
+  const nextNum = last ? parseInt(last.ticket_number.split("-")[1], 10) + 1 : 1001;
+  return `TKT-${nextNum}`;
+}
+
+async function createTicket(accountId, subject, description) {
+  const ticket_number = await generateTicketNumber();
+  const inserted = await db("support_tickets")
+    .insert({ ticket_number, account_id: accountId, subject, description })
+    .returning("*");
+  return inserted[0];
+}
+
+async function getAllTickets() {
+  return await db("support_tickets as t")
+    .join("accounts as a", "t.account_id", "a.id")
+    .select("t.*", "a.full_name", "a.email")
+    .orderBy("t.created_at", "desc");
+}
+
+async function getTicketsByAccountId(accountId) {
+  return await db("support_tickets").where({ account_id: accountId }).orderBy("created_at", "desc");
+}
+
+async function getTicketById(ticketId) {
+  return await db("support_tickets as t")
+    .join("accounts as a", "t.account_id", "a.id")
+    .where("t.id", ticketId)
+    .select("t.*", "a.full_name", "a.email")
+    .first();
+}
+
+async function updateTicketStatus(ticketId, status) {
+  return await db("support_tickets").where({ id: ticketId }).update({ status });
+}
+
+async function countTicketsByStatus() {
+  const rows = await db("support_tickets").select("status").count("id as count").groupBy("status");
+  const result = { open: 0, in_progress: 0, resolved: 0, closed: 0 };
+  rows.forEach(r => { result[r.status] = parseInt(r.count, 10); });
+  return result;
+}
+
+/* Ticket Messages */
+async function createTicketMessage(ticketId, accountId, message) {
+  const inserted = await db("ticket_messages").insert({ ticket_id: ticketId, account_id: accountId, message }).returning("*");
+  return inserted[0];
+}
+
+async function getMessagesByTicketId(ticketId) {
+  return await db("ticket_messages as m")
+    .join("accounts as a", "m.account_id", "a.id")
+    .where("m.ticket_id", ticketId)
+    .select("m.*", "a.full_name", "a.account_type")
+    .orderBy("m.created_at", "asc");
+}
+// end here support tickets
+
+// GET ALL MEMBER
+async function getAllAccounts() {
+  return await db("accounts").orderBy("account_type", "asc").orderBy("full_name", "asc");
+}
+
+async function deactivateAccount(accountId) {
+  return await db("accounts").where({ id: accountId }).update({ status: "inactive" });
+}
+
+async function reactivateAccount(accountId) {
+  return await db("accounts").where({ id: accountId }).update({ status: "active" });
+}
+// end here
+
+/****************************************
+ * Delivery count members
+ */
+async function countMembersOnly() {
+  const result = await db("accounts").where("account_type", "member").count("id as count").first();
+  return parseInt(result.count, 10);
+}
+
+async function countNewMembersThisMonth() {
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const result = await db("accounts")
+    .where("account_type", "member")
+    .andWhere("created_at", ">=", startOfMonth)
+    .count("id as count")
+    .first();
+  return parseInt(result.count, 10);
+}
+
+async function countAdminsOnly() {
+  const result = await db("accounts").where("account_type", "admin").count("id as count").first();
+  return parseInt(result.count, 10);
+}
+// end here count member and admin
+
 module.exports = {
   registerAccount,
   checkExistingEmail,
@@ -473,6 +650,30 @@ module.exports = {
   updateTrainingRegistrationStatus,
   createTrainingGuide,
   getAllTrainingGuides,
-  deleteTrainingGuide
+  deleteTrainingGuide,
+  createLesson,
+  getAllLessons,
+  getLessonsByTrainingId,
+  getLessonById,
+  createLessonMaterial,
+  getMaterialsByLessonId,
+  deleteLessonMaterial,
+  markLessonComplete,
+  getProgressForTraining,
+  getTrainingProgressSummary,
+  generateTicketNumber,
+  getAllTickets,
+  getTicketsByAccountId,
+  getTicketById,
+  updateTicketStatus,
+  countTicketsByStatus,
+  createTicketMessage,
+  getMessagesByTicketId,
+  getAllAccounts,
+  deactivateAccount,
+  reactivateAccount,
+  countMembersOnly,
+  countNewMembersThisMonth,
+  countAdminsOnly
 
 };

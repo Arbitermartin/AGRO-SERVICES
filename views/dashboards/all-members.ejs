@@ -1,0 +1,54 @@
+<div id="allMembersPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-people"></i></div>
+    <h2>All Users</h2>
+    <p>View and manage members, ICT staff, and administrators</p>
+  </div>
+
+  <table class="db-table">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% if (allAccounts && allAccounts.length > 0) { %>
+        <% allAccounts.forEach(acc => { %>
+          <tr>
+            <td><%= acc.full_name %></td>
+            <td><%= acc.email %></td>
+            <td>
+              <span class="db-badge-status
+                <%= acc.account_type === 'admin' ? 'db-badge-priority db-badge-high' : '' %>
+                <%= acc.account_type === 'ict_staff' ? 'db-badge-progress' : '' %>
+                <%= acc.account_type === 'member' ? 'db-badge-open' : '' %>
+              "><%= acc.account_type %></span>
+            </td>
+            <td>
+              <span class="db-badge-status <%= acc.status === 'active' ? 'db-badge-open' : 'db-badge-priority db-badge-high' %>">
+                <%= acc.status %>
+              </span>
+            </td>
+            <td>
+              <% if (acc.account_type === 'admin') { %>
+                <span style="font-size:0.78rem; color:#9ca3af;">Protected</span>
+              <% } else if (acc.status === 'active') { %>
+                <form action="/account/accounts/<%= acc.id %>/deactivate" method="POST" onsubmit="return confirm('Deactivate this account?');">
+                  <button type="submit" class="btn-outline-sm manage-delete-btn">Deactivate</button>
+                </form>
+              <% } else { %>
+                <form action="/account/accounts/<%= acc.id %>/reactivate" method="POST">
+                  <button type="submit" class="btn-outline-sm">Reactivate</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="5" style="text-align:center; color:#9ca3af;">No accounts found.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelAllMembers"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

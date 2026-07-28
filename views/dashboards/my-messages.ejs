@@ -1,0 +1,48 @@
+<div id="myMessagesPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-chat-dots"></i></div>
+    <h2>My Support Tickets</h2>
+    <p>Track responses from our ICT team</p>
+  </div>
+
+  <% if (myTickets && myTickets.length > 0) { %>
+    <% myTickets.forEach(ticket => { %>
+      <div class="ticket-item" data-ticket-id="<%= ticket.id %>">
+        <div class="ticket-summary">
+          <div class="ticket-info">
+            <h4>#<%= ticket.ticket_number %> &middot; <%= ticket.subject %></h4>
+            <small><%= new Date(ticket.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+          </div>
+          <span class="db-badge-status
+            <%= ticket.status === 'open' ? 'db-badge-open' : '' %>
+            <%= ticket.status === 'in_progress' ? 'db-badge-progress' : '' %>
+            <%= ticket.status === 'resolved' ? 'db-badge-shortlisted' : '' %>
+            <%= ticket.status === 'closed' ? 'db-badge-priority db-badge-high' : '' %>
+          "><%= ticket.status.replace('_', ' ') %></span>
+          <button type="button" class="btn-outline-sm ticket-toggle"><i class="bi bi-chevron-down"></i> View</button>
+        </div>
+
+        <div class="ticket-thread" data-ticket-thread="<%= ticket.id %>">
+          <div class="ticket-thread-inner">
+            <p class="ticket-original-message"><%= ticket.description %></p>
+
+            <div class="ticket-messages-list" id="messages-<%= ticket.id %>">
+              <p style="font-size:0.8rem; color:#9ca3af;">Loading messages...</p>
+            </div>
+
+            <form action="/account/tickets/<%= ticket.id %>/reply" method="POST" class="ticket-reply-form">
+              <input type="text" name="message" placeholder="Type your reply..." required>
+              <button type="submit"><i class="bi bi-send"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:24px;">You haven't created any support tickets yet.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelMyMessages">Back to Dashboard</a>
+  </div>
+</div>
