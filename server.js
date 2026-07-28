@@ -7,6 +7,9 @@ const express = require("express")
 const app = express()
 const path = require("path");
 const env = require("dotenv").config();
+
+console.log("Loaded env keys:", Object.keys(process.env).filter(k => k.startsWith('SESSION') || k.startsWith('DB_')));
+console.log("SESSION_SECRET value:", process.env.SESSION_SECRET);
 const accountRoute = require("./routes/accountRoute")
 const expressLayouts = require("express-ejs-layouts")
 const static = require("./routes/static")

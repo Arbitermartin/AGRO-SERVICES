@@ -1,7 +1,6 @@
 {
   "name": "agro-services",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -34,5 +33,14 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arbitermartin/AGRO-SERVICES.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Arbitermartin/AGRO-SERVICES/issues"
+  },
+  "homepage": "https://github.com/Arbitermartin/AGRO-SERVICES#readme",
+  "description": ""
 }
