@@ -29,6 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', closeMobileNav);
     });
   }
+  // team page
+/* =====================================================
+   TEAM PAGE — bio toggle
+===================================================== */
+document.querySelectorAll('.team-bio-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.team-card');
+    card.classList.toggle('is-open');
+    const label = btn.querySelector('span');
+    label.textContent = card.classList.contains('is-open') ? 'Hide Bio' : 'Read Bio';
+  });
+});
+// end here
 
   /* ---------- Generic dropdown handling (About Us, Resources) ---------- */
   const allDropdownToggles = Array.from(document.querySelectorAll('.dropdown-toggle'));
@@ -1164,7 +1177,42 @@ if (cancelAllMembers && allMembersPanel && dbMainContent) {
 
 // end here
 
+/********************
+ * 
+ * Delivery team member
+ */
+const addTeamMemberLink = document.getElementById('addTeamMemberLink');
+const addTeamMemberPanel = document.getElementById('addTeamMemberPanel');
+const cancelAddTeamMember = document.getElementById('cancelAddTeamMember');
 
+if (addTeamMemberLink && addTeamMemberPanel && dbMainContent) {
+  addTeamMemberLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    addTeamMemberPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAddTeamMember && addTeamMemberPanel && dbMainContent) {
+  cancelAddTeamMember.addEventListener('click', (e) => {
+    e.preventDefault();
+    addTeamMemberPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+const teamPhotoUploadArea = document.getElementById('teamPhotoUploadArea');
+const teamPhotoUploadInput = document.getElementById('teamPhotoUploadInput');
+if (teamPhotoUploadArea && teamPhotoUploadInput) {
+  teamPhotoUploadArea.addEventListener('click', () => teamPhotoUploadInput.click());
+  teamPhotoUploadInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      document.getElementById('teamPhotoUploadedFile').style.display = 'block';
+      document.getElementById('teamPhotoFileName').textContent = e.target.files[0].name;
+    }
+  });
+}
+// end here team member.
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

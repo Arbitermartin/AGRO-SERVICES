@@ -1,0 +1,131 @@
+<div id="addTeamMemberPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-badge"></i></div>
+    <h2>Add Team Member</h2>
+    <p>Post a new team or advisory board member</p>
+  </div>
+
+  <form action="/account/team/create" method="POST" enctype="multipart/form-data" class="auth-form">
+
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" name="full_name" placeholder="e.g. Grace Mwakasege" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Title / Role</label>
+      <div class="input-wrap">
+        <i class="bi bi-briefcase input-icon"></i>
+        <input type="text" name="title" placeholder="e.g. Executive Director" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Category</label>
+        <div class="input-wrap">
+          <i class="bi bi-people input-icon"></i>
+          <select name="category" required>
+            <option value="leadership">Leadership Team</option>
+            <option value="advisory">Advisory Board</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Display Order</label>
+        <div class="input-wrap">
+          <i class="bi bi-sort-numeric-down input-icon"></i>
+          <input type="number" name="display_order" min="1" value="1" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Bio</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top: 12px;"></i>
+        <textarea name="bio" rows="4" placeholder="Short biography..." style="padding-left:44px;"></textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>LinkedIn URL</label>
+        <div class="input-wrap">
+          <i class="bi bi-linkedin input-icon"></i>
+          <input type="url" name="linkedin_url" placeholder="https://linkedin.com/in/...">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Twitter/X URL</label>
+        <div class="input-wrap">
+          <i class="bi bi-twitter-x input-icon"></i>
+          <input type="url" name="twitter_url" placeholder="https://x.com/...">
+        </div>
+      </div>
+       <div class="form-field">
+        <label>Instagram URL</label>
+        <div class="input-wrap">
+          <i class="bi bi-instagram input-icon"></i>
+          <input type="url" name="instagram_url" placeholder="https://instagram.com/in/...">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Email</label>
+        <div class="input-wrap">
+          <i class="bi bi-envelope input-icon"></i>
+          <input type="email" name="email" placeholder="name@agroservices.co.tz">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Photo</label>
+      <div class="upload-area" id="teamPhotoUploadArea">
+        <i class="bi bi-cloud-upload" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+        <p>Tap to upload photo<br><small>JPG or PNG (max 3MB)</small></p>
+        <input type="file" id="teamPhotoUploadInput" name="photo" accept="image/jpeg,image/png" style="display:none;">
+      </div>
+      <div id="teamPhotoUploadedFile" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+        <i class="bi bi-file-earmark-check"></i> <span id="teamPhotoFileName"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+      Post Team Member
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAddTeamMember"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+  </form>
+
+  <% if (allTeamMembers && allTeamMembers.length > 0) { %>
+    <h3 class="profile-section-title" style="margin-top: 30px;">Current Team Members</h3>
+    <% allTeamMembers.forEach(m => { %>
+      <div class="manage-item">
+        <div class="manage-item-summary">
+          <% if (m.photo_path) { %>
+            <img src="<%= m.photo_path %>" alt="" class="manage-item-thumb">
+          <% } else { %>
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+          <% } %>
+          <div class="manage-item-info">
+            <h4><%= m.full_name %></h4>
+            <small><%= m.title %> &middot; <%= m.category %></small>
+          </div>
+          <form action="/account/team/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Remove this team member?');">
+            <button type="submit" class="btn-outline-sm manage-delete-btn">Delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>

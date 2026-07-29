@@ -20,9 +20,13 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
   }))
   router.get("/team", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
+    const leadershipTeam = await accountModel.getTeamMembersByCategory("leadership");
+    const advisoryBoard = await accountModel.getTeamMembersByCategory("advisory");
     res.render("pages/team", { 
       title: "Our Team", 
-      nav 
+      nav,
+      leadershipTeam,
+      advisoryBoard, 
     })
   }))
   router.get("/jobs", utilities.handleErrors(async (req, res) => {

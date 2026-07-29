@@ -604,6 +604,27 @@ async function countAdminsOnly() {
 }
 // end here count member and admin
 
+/************************
+ * 
+ * Delivery team page
+ */
+async function createTeamMember(data) {
+  const inserted = await db("team_members").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getAllTeamMembers() {
+  return await db("team_members").orderBy("category", "asc").orderBy("display_order", "asc");
+}
+
+async function getTeamMembersByCategory(category) {
+  return await db("team_members").where({ category }).orderBy("display_order", "asc");
+}
+
+async function deleteTeamMember(id) {
+  return await db("team_members").where({ id }).del();
+}
+
 module.exports = {
   registerAccount,
   checkExistingEmail,
@@ -687,6 +708,10 @@ module.exports = {
   reactivateAccount,
   countMembersOnly,
   countNewMembersThisMonth,
-  countAdminsOnly
+  countAdminsOnly,
+  createTeamMember,
+  getAllTeamMembers,
+  getTeamMembersByCategory,
+  deleteTeamMember
 
 };

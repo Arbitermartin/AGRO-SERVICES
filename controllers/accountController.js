@@ -289,6 +289,7 @@ async function buildIctStaffDashboard(req, res) {
   const allTickets = await accountModel.getAllTickets();
   const ticketCounts = await accountModel.countTicketsByStatus();
   const recentTickets = allTickets.slice(0, 4);
+  const allTeamMembers = await accountModel.getAllTeamMembers();
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -302,6 +303,7 @@ async function buildIctStaffDashboard(req, res) {
     allTickets,
     ticketCounts,
     recentTickets,
+    allTeamMembers,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -936,6 +938,46 @@ async function reactivateAccountPost(req, res) {
   }
 }
 
+/***********************************
+ * 
+ * Delivery team member
+ */
+async function createTeamMemberPost(req, res) {
+  try {
+    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const photo_path = req.file ? `/images/team/${req.file.filename}` : null;
+
+    await accountModel.createTeamMember({
+      full_name, title, category, bio,
+      photo_path,
+      linkedin_url: linkedin_url || null,
+      twitter_url: twitter_url || null,
+      instagram_url: instagram_url || null,
+      email: email || null,
+      display_order: parseInt(display_order, 10) || 1,
+    });
+
+    req.flash("success", "Team member posted successfully.");
+    res.redirect("/account/dashboard/ict-staff?teamPosted=true");
+  } catch (error) {
+    console.error("CREATE TEAM MEMBER ERROR:", error);
+    req.flash("error", "Failed to post team member.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function deleteTeamMemberPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteTeamMember(id);
+    req.flash("success", "Team member removed.");
+    res.redirect("/account/dashboard/ict-staff?teamPosted=true");
+  } catch (error) {
+    console.error("DELETE TEAM MEMBER ERROR:", error);
+    req.flash("error", "Failed to remove team member.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
 /* ****************************************
  * Logout
  * *************************************** */
@@ -956,15 +998,8 @@ async function accountLogout(req, res) {
   console.error("LOGOUT ERROR:", error);
   res.redirect("/account/login");
 }
-}
-
-
-
-
-
-
-
+};
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,deleteTeamMemberPost,accountLogout
 }

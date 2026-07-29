@@ -139,6 +139,37 @@ const uploadMaterial = multer({
 });
 // end here
 
+/****************************
+ * 
+ * Delivery team member upload
+ */
+const teamPhotoPath = path.join(__dirname, "..", "public", "images", "team");
+if (!fs.existsSync(teamPhotoPath)) {
+  fs.mkdirSync(teamPhotoPath, { recursive: true });
+}
+
+const teamPhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, teamPhotoPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `team-${Date.now()}${ext}`);
+  },
+});
+
+const uploadTeamPhoto = multer({
+  storage: teamPhotoStorage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only JPG or PNG images are allowed."), ok);
+  },
+});
+// team member upload end here.
+
+
 router.post(
   "/news/create",
   utilities.checkLogin,
@@ -385,5 +416,24 @@ router.post("/tickets/:id/reply",
       utilities.checkLogin, 
       utilities.checkRole("admin"), 
       utilities.handleErrors(accountController.reactivateAccountPost));
+      
+/**************************
+* Delivery team member
+*/
+  router.post(
+  "/team/create",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  uploadTeamPhoto.single("photo"),
+  utilities.trackActivity("Posted a team member"),
+  utilities.handleErrors(accountController.createTeamMemberPost)
+);
+
+router.post(
+  "/team/:id/delete",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  utilities.handleErrors(accountController.deleteTeamMemberPost)
+);
 
 module.exports= router

@@ -1,104 +1,82 @@
+<!-- ===================== TEAM PAGE HERO ===================== -->
+<section class="page-hero">
+  <div class="page-hero-shapes" aria-hidden="true">
+    <i class="bi bi-people"></i>
+    <i class="bi bi-flower1"></i>
+  </div>
+  <div class="container">
+    <div class="page-hero-eyebrow">Meet Us</div>
+    <h1>Our Team</h1>
+    <p>The people driving AgroServices' mission across Tanzania.</p>
+  </div>
+</section>
 
-  
-  <section class="team-page">
+<section class="team-section">
+  <div class="container">
 
-    <!-- Green Hero -->
-    <div class="team-hero">
-      <div class="container">
-        <h1>The People Behind AgroServices</h1>
-        <p class="hero-subtitle">
-          A dedicated team of agricultural experts, innovators, and community builders working to empower farmers across Tanzania.
-        </p>
-      </div>
-    </div>
-  
-    <div class="team-content container">
-  
-      <!-- Leadership Team -->
-      <div class="team-section">
-        <h2>LEADERSHIP</h2>
-        <h3>Our Leadership Team</h3>
-        <div class="leadership-grid">
-  
-            <div class="team-card photo-card">
-                <img src="../images/site/farm.webp" alt="David Mwakalinga" class="team-photo">
-                <h4>David Mwakalinga</h4>
-                <p class="role">Technology Lead</p>
-                <p class="bio">Builds the digital tools connecting farmers to markets.</p>
-              </div>
-  
-          <div class="team-card photo-card">
-            <img src="../images/site/farm.webp" alt="David Mwakalinga" class="team-photo">
-            <h4>David Mwakalinga</h4>
-            <p class="role">Technology Lead</p>
-            <p class="bio">Builds the digital tools connecting farmers to markets.</p>
+    <!-- ===================== LEADERSHIP TEAM ===================== -->
+   <h2 class="section-heading">LEADERSHIP TEAM</h2>
+<div class="team-grid">
+  <% if (leadershipTeam && leadershipTeam.length > 0) { %>
+    <% leadershipTeam.forEach(m => { %>
+      <div class="team-card">
+        <div class="team-card-photo" <% if (!m.photo_path) { %>style="background: linear-gradient(135deg, #66BB6A, #2E7D32); display:flex; align-items:center; justify-content:center;"<% } %>>
+          <% if (m.photo_path) { %>
+            <img src="<%= m.photo_path %>" alt="<%= m.full_name %>" style="width:100%; height:100%; object-fit:cover;">
+          <% } else { %>
+            <i class="bi bi-person-fill" style="color:rgba(255,255,255,0.9); font-size:3.2rem;"></i>
+          <% } %>
+        </div>
+        <div class="team-card-body">
+          <h3><%= m.full_name %></h3>
+          <p class="team-card-title"><%= m.title %></p>
+          <div class="team-card-social">
+            <% if (m.linkedin_url) { %><a href="<%= m.linkedin_url %>" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><% } %>
+            <% if (m.twitter_url) { %><a href="<%= m.twitter_url %>" target="_blank" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a><% } %>
+            <% if (m.email) { %><a href="mailto:<%= m.email %>" aria-label="Email"><i class="bi bi-envelope"></i></a><% } %>
           </div>
-  
-          <div class="team-card photo-card">
-            <img src="../images/site/farm.webp" alt="David Mwakalinga" class="team-photo">
-            <h4>David Mwakalinga</h4>
-            <p class="role">Technology Lead</p>
-            <p class="bio">Builds the digital tools connecting farmers to markets.</p>
-          </div>
-  
-          <!-- Card with Real Photo -->
-          <div class="team-card photo-card">
-            <img src="../images/site/farm.webp" alt="David Mwakalinga" class="team-photo">
-            <h4>David Mwakalinga</h4>
-            <p class="role">Technology Lead</p>
-            <p class="bio">Builds the digital tools connecting farmers to markets.</p>
-          </div>
-  
+          <% if (m.bio) { %>
+            <button type="button" class="team-bio-toggle"><span>Read Bio</span> <i class="bi bi-chevron-down"></i></button>
+            <p class="team-bio-text"><%= m.bio %></p>
+          <% } %>
         </div>
       </div>
-  
-    </div>
-  </section>
-  
-      <!-- Field Team -->
-      <div class="team-section">
-        <h2>ON THE GROUND</h2>
-        <h3>Field &amp; Advisory Team</h3>
-        <div class="field-team-grid">
-          <div class="field-card">
-            <div class="circle-avatar">
-                <img src="../images/site/farm.webp" alt="farm">
-            </div>
-            <h4>Grace Shirlma</h4>
-            <p class="role">Agronomist</p>
+    <% }) %>
+  <% } else { %>
+    <p style="color: var(--text-muted);">Team information coming soon.</p>
+  <% } %>
+</div>
+
+<h2 class="section-heading" style="margin-top: 60px;">ADVISORY BOARD</h2>
+<div class="team-grid">
+  <% if (advisoryBoard && advisoryBoard.length > 0) { %>
+    <% advisoryBoard.forEach(m => { %>
+      <div class="team-card">
+        <div class="team-card-photo" <% if (!m.photo_path) { %>style="background: linear-gradient(135deg, #8E24AA, #4A148C); display:flex; align-items:center; justify-content:center;"<% } %>>
+          <% if (m.photo_path) { %>
+            <img src="<%= m.photo_path %>" alt="<%= m.full_name %>" style="width:100%; height:100%; object-fit:cover;">
+          <% } else { %>
+            <i class="bi bi-person-fill" style="color:rgba(255,255,255,0.9); font-size:3.2rem;"></i>
+          <% } %>
+        </div>
+        <div class="team-card-body">
+          <h3><%= m.full_name %></h3>
+          <p class="team-card-title"><%= m.title %></p>
+          <div class="team-card-social">
+            <% if (m.linkedin_url) { %><a href="<%= m.linkedin_url %>" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a><% } %>
+            <% if (m.email) { %><a href="mailto:<%= m.email %>" aria-label="Email"><i class="bi bi-envelope"></i></a><% } %>
           </div>
-          <div class="field-card">
-            <div class="circle-avatar">
-                <img src="../images/site/farm.webp" alt="farm">
-            </div>
-            <h4>Peter Haule</h4>
-            <p class="role">Market Linkage Officer</p>
-          </div>
-          <div class="field-card">
-            <div class="circle-avatar">
-                <img src="../images/site/farm.webp" alt="farm">
-            </div>
-            <h4>Zainab Hamis</h4>
-            <p class="role">Training Coordinator</p>
-          </div>
-          <div class="field-card">
-            <div class="circle-avatar">
-                <img src="../images/site/farm.webp" alt="farm">
-            </div>
-            <h4>Emmanuel Mrema</h4>
-            <p class="role">Field Extension Officer</p>
-          </div>
+          <% if (m.bio) { %>
+            <button type="button" class="team-bio-toggle"><span>Read Bio</span> <i class="bi bi-chevron-down"></i></button>
+            <p class="team-bio-text"><%= m.bio %></p>
+          <% } %>
         </div>
       </div>
-  
-      <!-- Join Us -->
-      <div class="join-team">
-        <div class="join-content">
-          <h3>Want to join our team?</h3>
-          <p>We're always looking for passionate people in agriculture.</p>
-          <a href="/jobs" class="btn btn-filled">View Openings</a>
-        </div>
-      </div>
-  
-    </div>
-  </section>
+    <% }) %>
+  <% } else { %>
+    <p style="color: var(--text-muted);">Advisory board information coming soon.</p>
+  <% } %>
+</div>
+
+</div>
+</section>

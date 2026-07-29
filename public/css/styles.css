@@ -1442,142 +1442,131 @@ button {
 /* =====================================================
    OUR TEAM PAGE
 ===================================================== */
-.team-page {
-  background: #f8faf6;
-}
-
-.team-hero {
-  background-image: url("../images/site/team2.webp");
-  background-repeat: no-repeat;
-  background-size: cover;
-  color: white;
-  padding: 110px 0 90px;
-  text-align: center;
-}
-
-.team-label {
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 3px;
-  opacity: 0.9;
-  margin-bottom: 12px;
-}
-
-.team-hero h1 {
-  font-size: clamp(2.4rem, 5.5vw, 3.6rem);
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.hero-subtitle {
-  max-width: 780px;
-  margin: 0 auto;
-  font-size: 1.1rem;
-  opacity: 0.95;
-}
-
 .team-section {
-  padding: 80px 0;
+  background: var(--bg-main);
+  padding: 60px 0 90px;
 }
 
-.team-section h2 {
-  text-align: center;
-  color: var(--primary-green);
-  font-size: 1.1rem;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-.team-section h3 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 50px;
-}
-
-.leadership-grid {
+.team-grid {
   display: grid;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  margin-top: 20px;
 }
 
 .team-card {
-  /* background: var(--card-member-bg); */
-  color: var(--black);
-  padding: 32px 24px;
-  border-radius: 16px;
-  text-align: center;
-  transition: transform 0.3s ease;
-  min-height: 380px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 14px var(--shadow-light);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .team-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px var(--shadow-medium);
 }
 
-.team-avatar {
-  width: 110px;
-  height: 110px;
-  font-size: 2.4rem;
-  font-weight: 700;
-  margin: 0 auto 20px;
+.team-card-photo {
+  height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 3.2rem;
 }
 
+.team-card-body {
+  padding: 20px 22px 24px;
+}
 
-.team-photo {
+.team-card-body h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.team-card-title {
+  font-size: 0.85rem;
+  color: var(--primary-green);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.team-card-social {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.team-card-social a {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.team-card-social a:hover {
+  color: var(--primary-green);
+}
+
+.team-bio-toggle {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  margin-bottom: 20px;
-}
-
-.photo-card {
-  padding: 20px 24px;
-}
-
-.photo-card h4 {
-  margin-top: 12px;
-}
-
-.field-team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 30px;
-}
-
-.field-card {
-  text-align: center;
-}
-
-.circle-avatar img {
-  width: 90px;
-  height: 90px;
-  color: #1f2521;
-  font-size: 1.8rem;
-  font-weight: 700;
-  border-radius: 50%;
-  margin: 0 auto 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  background: none;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 10px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.join-team {
-  background: white;
-  padding: 50px 40px;
-  border-radius: 20px;
-  text-align: center;
-  margin: 40px auto;
-  max-width: 800px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+.team-bio-toggle:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
 }
 
-.join-team h3 {
-  font-size: 1.8rem;
-  margin-bottom: 12px;
+.team-bio-toggle i {
+  transition: transform 0.2s ease;
 }
+
+.team-card.is-open .team-bio-toggle i {
+  transform: rotate(180deg);
+}
+
+.team-bio-text {
+  max-height: 0;
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  transition: max-height 0.35s ease, margin-top 0.35s ease;
+  margin-top: 0;
+}
+
+.team-card.is-open .team-bio-text {
+  max-height: 200px;
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* end here team page */
 
 /* registration style start here */
 /* =====================================================
