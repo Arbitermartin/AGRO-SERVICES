@@ -1,0 +1,218 @@
+<div id="allTeamMembersPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-people"></i></div>
+    <h2>All Team Members</h2>
+    <p>View, edit, and manage team and advisory board members posted by ICT staff</p>
+  </div>
+
+  <h3 class="profile-section-title">Leadership Team</h3>
+  <% const leadershipList = allTeamMembers.filter(m => m.category === 'leadership'); %>
+  <% if (leadershipList.length > 0) { %>
+    <% leadershipList.forEach(m => { %>
+      <div class="manage-item" data-item-id="<%= m.id %>">
+        <div class="manage-item-summary">
+          <% if (m.photo_path) { %>
+            <img src="<%= m.photo_path %>" alt="" class="manage-item-thumb">
+          <% } else { %>
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+          <% } %>
+          <div class="manage-item-info">
+            <h4><%= m.full_name %></h4>
+            <small><%= m.title %></small>
+          </div>
+          <div class="manage-item-actions">
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
+            <form action="/account/team/<%= m.id %>/admin-delete" method="POST" onsubmit="return confirm('Remove this team member permanently?');">
+              <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="manage-edit-form" style="display:none;">
+          <form action="/account/team/<%= m.id %>/update" method="POST" enctype="multipart/form-data" class="auth-form">
+            <div class="form-field">
+              <label>Full Name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" name="full_name" value="<%= m.full_name %>" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Title / Role</label>
+              <div class="input-wrap">
+                <i class="bi bi-briefcase input-icon"></i>
+                <input type="text" name="title" value="<%= m.title %>" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Category</label>
+                <div class="input-wrap">
+                  <i class="bi bi-people input-icon"></i>
+                  <select name="category" required>
+                    <option value="leadership" <%= m.category === 'leadership' ? 'selected' : '' %>>Leadership Team</option>
+                    <option value="advisory" <%= m.category === 'advisory' ? 'selected' : '' %>>Advisory Board</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Display Order</label>
+                <div class="input-wrap">
+                  <i class="bi bi-sort-numeric-down input-icon"></i>
+                  <input type="number" name="display_order" min="1" value="<%= m.display_order %>" required>
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Bio</label>
+              <div class="input-wrap" style="align-items:flex-start;">
+                <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+                <textarea name="bio" rows="3" style="padding-left:44px;"><%= m.bio || '' %></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>LinkedIn URL</label>
+                <div class="input-wrap">
+                  <i class="bi bi-linkedin input-icon"></i>
+                  <input type="url" name="linkedin_url" value="<%= m.linkedin_url || '' %>">
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Twitter/X URL</label>
+                <div class="input-wrap">
+                  <i class="bi bi-twitter-x input-icon"></i>
+                  <input type="url" name="twitter_url" value="<%= m.twitter_url || '' %>">
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Instagram URL</label>
+                <div class="input-wrap">
+                  <i class="bi bi-instagram input-icon"></i>
+                  <input type="url" name="instagram_url" value="<%= m.instagram_url || '' %>">
+                </div>
+              <div class="form-field">
+                <label>Email</label>
+                <div class="input-wrap">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" name="email" value="<%= m.email || '' %>">
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Replace Photo (optional)</label>
+              <div class="input-wrap">
+                <i class="bi bi-image input-icon"></i>
+                <input type="file" name="photo" accept="image/jpeg,image/png">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-filled" style="margin-top:10px;">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding: 16px 0;">No leadership team members posted yet.</p>
+  <% } %>
+
+  <h3 class="profile-section-title" style="margin-top:30px;">Advisory Board</h3>
+  <% const advisoryList = allTeamMembers.filter(m => m.category === 'advisory'); %>
+  <% if (advisoryList.length > 0) { %>
+    <% advisoryList.forEach(m => { %>
+      <div class="manage-item" data-item-id="<%= m.id %>">
+        <div class="manage-item-summary">
+          <% if (m.photo_path) { %>
+            <img src="<%= m.photo_path %>" alt="" class="manage-item-thumb">
+          <% } else { %>
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+          <% } %>
+          <div class="manage-item-info">
+            <h4><%= m.full_name %></h4>
+            <small><%= m.title %></small>
+          </div>
+          <div class="manage-item-actions">
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
+            <form action="/account/team/<%= m.id %>/admin-delete" method="POST" onsubmit="return confirm('Remove this advisory member permanently?');">
+              <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="manage-edit-form" style="display:none;">
+          <form action="/account/team/<%= m.id %>/update" method="POST" enctype="multipart/form-data" class="auth-form">
+            <div class="form-field">
+              <label>Full Name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" name="full_name" value="<%= m.full_name %>" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Title / Role</label>
+              <div class="input-wrap">
+                <i class="bi bi-briefcase input-icon"></i>
+                <input type="text" name="title" value="<%= m.title %>" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Category</label>
+                <div class="input-wrap">
+                  <i class="bi bi-people input-icon"></i>
+                  <select name="category" required>
+                    <option value="leadership" <%= m.category === 'leadership' ? 'selected' : '' %>>Leadership Team</option>
+                    <option value="advisory" <%= m.category === 'advisory' ? 'selected' : '' %>>Advisory Board</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Display Order</label>
+                <div class="input-wrap">
+                  <i class="bi bi-sort-numeric-down input-icon"></i>
+                  <input type="number" name="display_order" min="1" value="<%= m.display_order %>" required>
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Bio</label>
+              <div class="input-wrap" style="align-items:flex-start;">
+                <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+                <textarea name="bio" rows="3" style="padding-left:44px;"><%= m.bio || '' %></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>LinkedIn URL</label>
+                <div class="input-wrap">
+                  <i class="bi bi-linkedin input-icon"></i>
+                  <input type="url" name="linkedin_url" value="<%= m.linkedin_url || '' %>">
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Email</label>
+                <div class="input-wrap">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" name="email" value="<%= m.email || '' %>">
+                </div>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Replace Photo (optional)</label>
+              <div class="input-wrap">
+                <i class="bi bi-image input-icon"></i>
+                <input type="file" name="photo" accept="image/jpeg,image/png">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-filled" style="margin-top:10px;">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding: 16px 0;">No advisory board members posted yet.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelAllTeamMembers"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

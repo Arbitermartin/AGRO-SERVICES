@@ -1214,6 +1214,28 @@ if (teamPhotoUploadArea && teamPhotoUploadInput) {
 }
 // end here team member.
 
+// Delivery admin to see all team member
+const allTeamMembersLink = document.getElementById('allTeamMembersLink');
+const allTeamMembersPanel = document.getElementById('allTeamMembersPanel');
+const cancelAllTeamMembers = document.getElementById('cancelAllTeamMembers');
+
+if (allTeamMembersLink && allTeamMembersPanel && dbMainContent) {
+  allTeamMembersLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    allTeamMembersPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAllTeamMembers && allTeamMembersPanel && dbMainContent) {
+  cancelAllTeamMembers.addEventListener('click', (e) => {
+    e.preventDefault();
+    allTeamMembersPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// admin see all team member end here
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

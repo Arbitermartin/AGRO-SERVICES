@@ -154,6 +154,7 @@ async function buildAdminDashboard(req, res) {
   const totalMembers = await accountModel.countMembersOnly();
   const newMembersThisMonth = await accountModel.countNewMembersThisMonth();
   const totalAdmins = await accountModel.countAdminsOnly();
+  const allTeamMembers = await accountModel.getAllTeamMembers();
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -176,6 +177,7 @@ async function buildAdminDashboard(req, res) {
     totalMembers,
     newMembersThisMonth,
     totalAdmins,
+    allTeamMembers,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -978,6 +980,47 @@ async function deleteTeamMemberPost(req, res) {
     res.redirect("/account/dashboard/ict-staff");
   }
 }
+
+async function updateTeamMemberPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const updateData = {
+      full_name, title, category, bio,
+      linkedin_url: linkedin_url || null,
+      twitter_url: twitter_url || null,
+      instagram_url: instagram_url || null,
+      email: email || null,
+      display_order: parseInt(display_order, 10) || 1,
+    };
+
+    if (req.file) {
+      updateData.photo_path = `/images/team/${req.file.filename}`;
+    }
+
+    await accountModel.updateTeamMember(id, updateData);
+
+    req.flash("success", "Team member updated successfully.");
+    res.redirect("/account/dashboard/admin?teamPosted=true");
+  } catch (error) {
+    console.error("UPDATE TEAM MEMBER ERROR:", error);
+    req.flash("error", "Failed to update team member.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteTeamMemberAdminPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteTeamMember(id);
+    req.flash("success", "Team member removed.");
+    res.redirect("/account/dashboard/admin?teamPosted=true");
+  } catch (error) {
+    console.error("DELETE TEAM MEMBER ERROR:", error);
+    req.flash("error", "Failed to remove team member.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
 /* ****************************************
  * Logout
  * *************************************** */
@@ -1001,5 +1044,5 @@ async function accountLogout(req, res) {
 };
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,deleteTeamMemberPost,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,accountLogout
 }

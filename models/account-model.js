@@ -624,6 +624,14 @@ async function getTeamMembersByCategory(category) {
 async function deleteTeamMember(id) {
   return await db("team_members").where({ id }).del();
 }
+async function getTeamMemberById(id) {
+  return await db("team_members").where({ id }).first();
+}
+
+async function updateTeamMember(id, data) {
+  return await db("team_members").where({ id }).update(data);
+}
+// team member end here.
 
 module.exports = {
   registerAccount,
@@ -711,6 +719,8 @@ module.exports = {
   countAdminsOnly,
   createTeamMember,
   getAllTeamMembers,
+  getTeamMemberById,
+  updateTeamMember,
   getTeamMembersByCategory,
   deleteTeamMember
 

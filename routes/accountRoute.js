@@ -435,5 +435,20 @@ router.post(
   utilities.checkRole("ict_staff"),
   utilities.handleErrors(accountController.deleteTeamMemberPost)
 );
+router.post(
+  "/team/:id/update",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  uploadTeamPhoto.single("photo"),
+  utilities.handleErrors(accountController.updateTeamMemberPost)
+);
+
+router.post(
+  "/team/:id/admin-delete",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.handleErrors(accountController.deleteTeamMemberAdminPost)
+);
+// end here.
 
 module.exports= router
