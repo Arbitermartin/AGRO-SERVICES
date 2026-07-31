@@ -35,19 +35,20 @@ app.use(cookieParser());
 
 // 3: Rate limiting.
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 150,
   message: "Too many requests from this IP. Please try again later.",
 });
-
-const loginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 5,
-  message: "Too many login attempts. Please try again after 10 minutes.",
-});
-
 app.use(generalLimiter);
-app.use("/account/login", loginLimiter);
+
+// const loginLimiter = rateLimit({
+//   windowMs: 10 * 60 * 1000,
+//   max: 5,
+//   message: "Too many login attempts. Please try again after 10 minutes.",
+// });
+
+// app.use(generalLimiter);
+// app.use("/account/login", loginLimiter);
 
 //4: Session Configuration (Improved Security)
 app.use(session({
@@ -65,6 +66,17 @@ app.use(function(req, res, next){
   res.locals.messages = require('express-messages')(req, res)
   next();
 });
+
+//Login rate limiter now
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 3,
+  handler: (req, res) => {
+    req.flash("error", "Too many login attempts. Please try again after 10 minutes.");
+    res.redirect("/account/login");
+  },
+});
+app.use("/account/login", loginLimiter);
 
 /*********************************
  * This is view template engine

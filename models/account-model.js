@@ -46,7 +46,7 @@ async function updatePassword(id, hashedPassword) {
 
 // Delivery update profile
 async function updateProfilePhoto(accountId, photoPath) {
-  return await db("accounts").where({ id: accountId }).update({ profile_photo: photoPath });
+  return await db("profiles").where({ account_id: accountId }).update({ profile_photo: photoPath });
 }
 
 async function checkExistingEmail(email) {
