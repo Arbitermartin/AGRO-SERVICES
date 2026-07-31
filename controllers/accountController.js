@@ -31,14 +31,13 @@ async function buildRegister(req, res) {
  *******************/
 async function buildLogin(req,res) {
   let nav = await utilities.getNav();
-  res.render("account/login"),{
+   res.render("account/login", {
     title: "Login",
     nav,
-    error: null,
+    errors: null,
     success: req.flash("success"),
     error: req.flash("error"),
-  }
-  
+  });
 }
 
 /* ****************************************
@@ -101,6 +100,7 @@ async function accountLogin(req, res) {
       email: account.email,
       account_type: account.account_type,
       loginLogId: loginLog.id,
+      profile_photo: account.profile_photo || null, 
     };
 
     switch (account.account_type) {
@@ -267,6 +267,13 @@ async function updateProfile(req, res) {
 
     await accountModel.updateFullName(accountId, full_name);
     req.session.account.full_name = full_name;
+
+     // ✅ Save photo if one was uploaded
+    if (req.file) {
+      const profile_photo = `/images/profile_photos/${req.file.filename}`;
+      await accountModel.updateProfilePhoto(accountId, profile_photo);
+      req.session.account.profile_photo = profile_photo;
+    }
 
     const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
     await accountModel.upsertBirthPlace(profile.id, { region, district, ward });

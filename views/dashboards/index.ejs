@@ -84,7 +84,9 @@
             
             <a href="#" id="addTrainingLink" class="db-submenu-link"><div><span>Add Training</span>
             </div>
-            <a href="#" class="db-submenu-link">All Trainings</a>
+            <!-- <a href="#" id="trainingRegistrationsLink" class="db-submenu-link"><div><span>All Trainings</span>
+            </div>
+          </a> -->
           </a>
           <a href="#" id="trainingRegistrationsLink" class="db-submenu-link"><div><span>Registrations</span>
           </div>
@@ -168,14 +170,26 @@
           <!-- User menu -->
           <div class="db-user-menu">
             <button type="button" class="db-user-toggle" id="dbUserToggle" aria-haspopup="true" aria-expanded="false">
-              <span class="db-avatar"><%= initials %></span>
+              <span class="db-avatar">
+                  <% if (account.profile_photo) { %>
+                  <img src="<%= account.profile_photo %>" alt="" class="db-avatar-img">
+                 <% } else { %>
+                 <%= initials %>
+                <% } %>
+              </span>
               <span class="db-user-name"><%= account.full_name %></span>
               <i class="bi bi-chevron-down db-user-caret"></i>
             </button>
 
             <div class="db-user-dropdown" id="dbUserDropdown">
               <div class="db-user-dropdown-head">
-                <span class="db-avatar db-avatar-lg"><%= initials %></span>
+                <span class="db-avatar db-avatar-lg">
+                    <% if (account.profile_photo) { %>
+                   <img src="<%= account.profile_photo %>" alt="" class="db-avatar-img">
+                  <% } else { %>
+               <%= initials %>
+              <% } %>
+                </span>
                 <div>
                   <div class="db-user-dropdown-name"><%= account.full_name %></div>
                   <div class="db-user-dropdown-email"><%= account.email %></div>
@@ -505,6 +519,26 @@
   </div>
 
   <form action="/account/update-profile" method="POST" class="auth-form" id="updateProfileForm">
+      <div class="form-field" style="text-align:center;">
+    <label>Profile Photo</label>
+    <div class="profile-photo-upload" id="profilePhotoUpload">
+      <% if (account.profile_photo) { %>
+        <img src="<%= account.profile_photo %>" alt="" id="profilePhotoPreview" class="profile-photo-preview">
+      <% } else { %>
+        <div class="profile-photo-placeholder" id="profilePhotoPreview"><%= initials %></div>
+      <% } %>
+      <div class="profile-photo-edit-badge"><i class="bi bi-camera-fill"></i></div>
+    </div>
+    <input
+      type="file"
+      id="profilePhotoInput"
+      name="profile_photo"
+      accept="image/jpeg,image/png,image/webp"
+      style="display:none;"
+    >
+    <small class="field-hint">JPG, PNG, or WEBP. Max 2MB.</small>
+  </div>
+
 
     <h3 class="profile-section-title">Personal Information</h3>
 

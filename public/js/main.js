@@ -1236,6 +1236,31 @@ if (cancelAllTeamMembers && allTeamMembersPanel && dbMainContent) {
 }
 // admin see all team member end here
 
+//  edit profile photo
+const profilePhotoUpload = document.getElementById('profilePhotoUpload');
+const profilePhotoInput = document.getElementById('profilePhotoInput');
+
+if (profilePhotoUpload && profilePhotoInput) {
+  profilePhotoUpload.addEventListener('click', () => profilePhotoInput.click());
+
+  profilePhotoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const oldPreview = document.getElementById('profilePhotoPreview');
+      const img = document.createElement('img');
+      img.src = event.target.result;
+      img.id = 'profilePhotoPreview';
+      img.className = 'profile-photo-preview';
+      oldPreview.replaceWith(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+// end here
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

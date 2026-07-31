@@ -5,6 +5,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('accounts',(table)=>{
     table.increments('id').primary();
+    table.string('profile_photo', 500);
     table.string('full_name',255).notNullable();
     table.string('email',255).unique().notNullable();
     table.string('phone_number',20);
@@ -20,5 +21,7 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    return knex.schema.dropTableIfExists('accounts');
+   return knex.schema.alterTable('accounts', (table) => {
+    table.dropColumn('profile_photo');
+  });
 };

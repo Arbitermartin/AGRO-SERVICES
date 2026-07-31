@@ -62,6 +62,33 @@ const uploadCV = multer({
   },
 });
 
+// delivery profile photo
+const profilePhotoPath = path.join(__dirname, "..", "public", "images", "profile_photos");
+if (!fs.existsSync(profilePhotoPath)) {
+  fs.mkdirSync(profilePhotoPath, { recursive: true });
+}
+
+const profilePhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, profilePhotoPath);
+  },
+  filename: (req, file, cb) => {
+    const accountId = req.session.account.id;
+    const ext = path.extname(file.originalname);
+    cb(null, `profile-${accountId}-${Date.now()}${ext}`);
+  },
+});
+
+const uploadProfilePhoto = multer({
+  storage: profilePhotoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only JPG, PNG, or WEBP images are allowed."), ok);
+  },
+});
+
 /******************************
  * 
  * Delivery job application
@@ -282,6 +309,7 @@ router.get("/logout", accountController.accountLogout);
 router.post(
   "/update-profile",
   utilities.checkLogin,
+  uploadProfilePhoto.single("profile_photo"),
   utilities.trackActivity("Updated profile"),
   utilities.handleErrors(accountController.updateProfile)
 );

@@ -44,6 +44,11 @@ async function updatePassword(id, hashedPassword) {
 }
 // end here for password change
 
+// Delivery update profile
+async function updateProfilePhoto(accountId, photoPath) {
+  return await db("accounts").where({ id: accountId }).update({ profile_photo: photoPath });
+}
+
 async function checkExistingEmail(email) {
   const accounts = await db("accounts").where({ email });
   return accounts.length > 0;
