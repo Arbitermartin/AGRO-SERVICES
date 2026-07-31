@@ -72,6 +72,8 @@ async function accountLogin(req, res) {
 
     const account = await accountModel.getAccountByEmail(email);
 
+    const profilePhoto = await accountModel.getProfilePhotoByAccountId(account.id);
+
     if (!account) {
       req.flash("error", "Invalid email or password.");
       return res.redirect("/account/login");
@@ -100,7 +102,7 @@ async function accountLogin(req, res) {
       email: account.email,
       account_type: account.account_type,
       loginLogId: loginLog.id,
-      profile_photo: account.profile_photo || null, 
+      profile_photo: profilePhoto || null,
     };
 
     switch (account.account_type) {
@@ -139,6 +141,12 @@ async function buildAdminDashboard(req, res) {
   let nav = await utilities.getNav();
   const account = req.session.account;
   const profile = (await accountModel.getProfileByAccountId(account.id)) || {};
+
+   // ✅ Keep session's profile_photo in sync with the DB source of truth
+  if (profile.profile_photo && account.profile_photo !== profile.profile_photo) {
+    account.profile_photo = profile.profile_photo;
+  }
+
   const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id)) || {} : {};
   const adminDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
   const allJobs = await accountModel.getAllJobs();
@@ -268,16 +276,21 @@ async function updateProfile(req, res) {
     await accountModel.updateFullName(accountId, full_name);
     req.session.account.full_name = full_name;
 
+     const profileData = { date_of_birth, gender, nationality, bio };
+
      // ✅ Save photo if one was uploaded
-    if (req.file) {
-      const profile_photo = `/images/profile_photos/${req.file.filename}`;
-      await accountModel.updateProfilePhoto(accountId, profile_photo);
-      req.session.account.profile_photo = profile_photo;
+     if (req.file) {
+      profileData.profile_photo = `/images/profile_photos/${req.file.filename}`;
+      req.session.account.profile_photo = profileData.profile_photo;
     }
 
-    const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
+    // const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
+    // await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
+    // await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
+     const profile = await accountModel.upsertProfile(accountId, profileData);
     await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
     await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
+
 
     req.flash("success", "Profile updated successfully.");
     res.redirect("/account/dashboard/admin?profileUpdated=true");

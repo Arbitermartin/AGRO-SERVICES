@@ -45,8 +45,22 @@ async function updatePassword(id, hashedPassword) {
 // end here for password change
 
 // Delivery update profile
-async function updateProfilePhoto(accountId, photoPath) {
-  return await db("profiles").where({ account_id: accountId }).update({ profile_photo: photoPath });
+// async function updateProfilePhoto(accountId, photoPath) {
+//   return await db("profiles").where({account_id: accountId }).update({ profile_photo: photoPath });
+// }
+async function upsertProfile(accountId, data) {
+  const existing = await getProfileByAccountId(accountId);
+  if (existing) {
+    await db("profiles").where({ id: existing.id }).update(data);
+    return { profile_photo: photoPath};
+  }
+  const inserted = await db("profiles").insert({ account_id: accountId, ...data }).returning("*");
+  return inserted[0];
+}
+
+async function getProfilePhotoByAccountId(accountId) {
+  const profile = await getProfileByAccountId(accountId);
+  return profile ? profile.profile_photo : null;
 }
 
 async function checkExistingEmail(email) {
@@ -727,6 +741,8 @@ module.exports = {
   getTeamMemberById,
   updateTeamMember,
   getTeamMembersByCategory,
-  deleteTeamMember
+  deleteTeamMember,
+  upsertProfile,
+  getProfilePhotoByAccountId
 
 };
