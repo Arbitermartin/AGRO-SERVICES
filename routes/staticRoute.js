@@ -94,4 +94,15 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
     "/contact", 
     utilities.handleErrors(accountController.submitContactForm));
 
+    // delivery event registration page
+    router.get("/events/:id", 
+      utilities.handleErrors(accountController.viewEvent));
+
+    router.get("/events/:id/register", 
+      utilities.handleErrors(accountController.buildEventRegister));
+
+    router.post("/events/:id/register", 
+      utilities.handleErrors(accountController.submitEventRegistration));
+      // end here
+
   module.exports = router

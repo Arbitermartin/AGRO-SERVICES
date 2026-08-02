@@ -1,0 +1,34 @@
+<section class="auth-page">
+  <div class="container" style="max-width: 680px;">
+
+    <div class="auth-logo" style="text-align:center; margin-bottom: 24px;">
+      <img src="../images/site/logo.webp" alt="YASNET" style="height: 60px;">
+    </div>
+
+    <div class="db-card">
+      <div class="step-header" style="text-align:center; margin-bottom: 20px;">
+        <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-calendar-event"></i></div>
+        <h2><%= event.title %></h2>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-bottom:20px; font-size:0.9rem; color:var(--text-secondary);">
+        <span><i class="bi bi-geo-alt"></i> <%= event.location || 'Venue TBA' %></span>
+        <span><i class="bi bi-calendar-check"></i> Starts: <%= new Date(event.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+        <span><i class="bi bi-calendar-x"></i> Ends: <%= new Date(event.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+      </div>
+
+      <p style="color:var(--text-secondary); line-height:1.7; margin-bottom:24px;">
+        <%= event.description %>
+      </p>
+
+      <a href="/events/<%= event.event_id %>/register" class="btn btn-filled btn-block btn-lg">
+        Register for this Event
+      </a>
+
+      <div class="auth-switch" style="margin-top:20px;text-align:center;">
+        <a href="/"><i class="bi bi-arrow-left"></i> Back to Home</a>
+      </div>
+    </div>
+
+  </div>
+</section>

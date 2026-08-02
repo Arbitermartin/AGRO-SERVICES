@@ -758,6 +758,17 @@ async function markContactMessageAsRead(id) {
   return await db("contact_messages").where({ id }).update({ is_read: true });
 }
 
+// delivery event registrations
+async function getEventById(eventId) {
+  return await db("events").where({ event_id: eventId }).first();
+}
+
+async function createEventRegistration(data) {
+  const inserted = await db("event_registrations").insert(data).returning("*");
+  return inserted[0];
+}
+// end here 
+
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
   getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
@@ -767,6 +778,6 @@ module.exports = {
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
   getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,
-  getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,
+  getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,
 
 };

@@ -1,0 +1,113 @@
+<section class="auth-page">
+  <div class="container" style="max-width: 600px;">
+
+    <div class="auth-logo" style="text-align:center; margin-bottom: 24px;">
+      <img src="../images/site/logo.webp" alt="YASNET" style="height: 60px;">
+    </div>
+
+       <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+
+    <div class="step-card">
+      <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+        <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-check"></i></div>
+        <h2>Register for <%= event.title %></h2>
+        <p>Event date: <%= new Date(event.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+      </div>
+
+      <form action="/events/<%= event.event_id %>/register" method="POST" class="auth-form">
+
+        <div class="form-field">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <i class="bi bi-person input-icon"></i>
+            <input type="text" name="full_name" placeholder="Enter your full name" required>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Email</label>
+          <div class="input-wrap">
+            <i class="bi bi-envelope input-icon"></i>
+            <input type="email" name="email" placeholder="Enter your email" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Phone Number</label>
+            <div class="input-wrap">
+              <i class="bi bi-telephone input-icon"></i>
+              <input type="tel" name="phone_number" placeholder="Phone number" required>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Age</label>
+            <div class="input-wrap">
+              <i class="bi bi-person-badge input-icon"></i>
+              <input type="number" name="age" min="1" max="120" placeholder="Age" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Country</label>
+            <div class="input-wrap">
+              <i class="bi bi-flag input-icon"></i>
+              <select id="countrySelect" name="country" required>
+                <option value="">Select country</option>
+                <option value="Tanzania">Tanzania</option>
+                <option value="Kenya">Kenya</option>
+                <option value="Uganda">Uganda</option>
+                <option value="Rwanda">Rwanda</option>
+                <option value="Burundi">Burundi</option>
+                <option value="South Sudan">South Sudan</option>
+                <option value="Ethiopia">Ethiopia</option>
+                <option value="Somalia">Somalia</option>
+                <option value="Djibouti">Djibouti</option>
+                <option value="Eritrea">Eritrea</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Region</label>
+            <div class="input-wrap">
+              <i class="bi bi-geo-alt input-icon"></i>
+              <select id="regionSelect" name="region" required>
+                <option value="">Select country first</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 12px;">
+          Submit Registration
+        </button>
+
+        <div class="auth-switch" style="margin-top:20px;text-align:center;">
+          <a href="/events/<%= event.event_id %>"><i class="bi bi-arrow-left"></i> Back to Event</a>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</section>

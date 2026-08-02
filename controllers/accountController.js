@@ -1314,6 +1314,83 @@ async function markMessageReadPost(req, res) {
 }
 // end here contact message from contact us page.
 
+/*********************************
+ * 
+ * Delivery event registrtations form for event.
+ */
+async function viewEvent(req, res) {
+  try {
+    const { id } = req.params;
+    const event = await accountModel.getEventById(id);
+
+    if (!event) {
+      req.flash("error", "Event not found.");
+      return res.redirect("/");
+    }
+
+    let nav = await utilities.getNav();
+    res.render("pages/event-details", {
+      title: event.title,
+      nav,
+      event,
+    });
+  } catch (error) {
+    console.error("VIEW EVENT ERROR:", error);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/");
+  }
+}
+
+async function buildEventRegister(req, res) {
+  try {
+    const { id } = req.params;
+    const event = await accountModel.getEventById(id);
+
+    if (!event) {
+      req.flash("error", "Event not found.");
+      return res.redirect("/");
+    }
+
+    let nav = await utilities.getNav();
+    res.render("pages/event-register", {
+      title: `Register — ${event.title}`,
+      nav,
+      event,
+      success: req.flash("success"),
+      error: req.flash("error"),
+    });
+  } catch (error) {
+    console.error("BUILD EVENT REGISTER ERROR:", error);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/");
+  }
+}
+
+async function submitEventRegistration(req, res) {
+  try {
+    const { id } = req.params;
+    const { full_name, email, phone_number, age, country, region } = req.body;
+
+    await accountModel.createEventRegistration({
+      event_id: id,
+      full_name,
+      email,
+      phone_number,
+      age: parseInt(age, 10),
+      country,
+      region,
+    });
+
+    req.flash("success", "You have successfully registered for this event!");
+    res.redirect(`/events/${id}/register`);
+  } catch (error) {
+    console.error("SUBMIT EVENT REGISTRATION ERROR:", error);
+    req.flash("error", "Failed to register. Please try again.");
+    res.redirect(`/events/${req.params.id}/register`);
+  }
+}
+// end here
+
 /* ****************************************
  * Logout
  * *************************************** */
@@ -1336,6 +1413,7 @@ async function accountLogout(req, res) {
 }
 };
 
+
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,accountLogout
 }
