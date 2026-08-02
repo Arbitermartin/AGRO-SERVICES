@@ -28,6 +28,9 @@
               </span>
             </td>
             <td>
+               <a href="/account/members/<%= acc.id %>/profile" class="btn-outline-sm">
+               <i class="bi bi-eye"></i> View
+              </a>
               <% if (acc.account_type === 'admin') { %>
                 <span style="font-size:0.78rem; color:#9ca3af;">Protected</span>
               <% } else if (acc.status === 'active') { %>

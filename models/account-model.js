@@ -652,97 +652,121 @@ async function updateTeamMember(id, data) {
 }
 // team member end here.
 
+/* *****************************
+ * Member — get by profile id
+ * ***************************** */
+async function getMemberByProfileId(profileId) {
+  return db("members").where({ profile_id: profileId }).first();
+}
+
+/* *****************************
+ * Member — insert or update
+ * ***************************** */
+async function upsertMember(profileId, data) {
+  const existing = await getMemberByProfileId(profileId);
+  if (existing) {
+    await db("members")
+      .where({ id: existing.id })
+      .update({ ...data, updated_at: db.fn.now() });
+    return existing;
+  }
+  const [inserted] = await db("members")
+    .insert({ profile_id: profileId, ...data })
+    .returning("*");
+  return inserted;
+}
+
+/* *****************************
+ * Education
+ * ***************************** */
+async function getEducationsByProfileId(profileId) {
+  return db("education")
+    .where({ profile_id: profileId })
+    .orderBy("graduation_year", "desc");
+}
+
+async function replaceEducations(profileId, items) {
+  await db("education").where({ profile_id: profileId }).del();
+  if (items && items.length > 0) {
+    await db("education").insert(
+      items.map((i) => ({ profile_id: profileId, ...i }))
+    );
+  }
+}
+
+/* *****************************
+ * Experiences
+ * ***************************** */
+async function getExperiencesByProfileId(profileId) {
+  return db("experiences")
+    .where({ profile_id: profileId })
+    .orderBy("start_date", "desc");
+}
+
+async function replaceExperiences(profileId, items) {
+  await db("experiences").where({ profile_id: profileId }).del();
+  if (items && items.length > 0) {
+    await db("experiences").insert(
+      items.map((i) => ({ profile_id: profileId, ...i }))
+    );
+  }
+}
+
+/* *****************************
+ * Phone number
+ * ***************************** */
+async function updatePhone(accountId, phone) {
+  return db("accounts")
+    .where({ id: accountId })
+    .update({ phone_number: phone });
+}
+
+// get all member 
+async function getFullMemberProfile(accountId) {
+  const account = await db("accounts").where({ id: accountId }).first();
+  if (!account) return null;
+
+  const profile = await db("profiles").where({ account_id: accountId }).first();
+  let birthPlace = null;
+  let adminDetails = null;
+
+  if (profile) {
+    birthPlace = await db("birth_places").where({ profile_id: profile.id }).first();
+    adminDetails = await db("admins").where({ profile_id: profile.id }).first();
+  }
+
+  return { account, profile, birthPlace, adminDetails };
+}
+// end here.
+
+// Delivery contact us message
+async function createContactMessage(data) {
+  const inserted = await db("contact_messages").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getAllContactMessages() {
+  return await db("contact_messages").orderBy("created_at", "desc");
+}
+
+async function countUnreadContactMessages() {
+  const result = await db("contact_messages").where("is_read", false).count("id as count").first();
+  return parseInt(result.count, 10);
+}
+
+async function markContactMessageAsRead(id) {
+  return await db("contact_messages").where({ id }).update({ is_read: true });
+}
+
 module.exports = {
-  registerAccount,
-  checkExistingEmail,
-  getAccountByEmail,
-  getAccountById,
-  updatePassword,
-  updateFullName,
-  getProfileByAccountId,
-  upsertProfile,
-  getBirthPlaceByProfileId,
-  upsertBirthPlace,
-  getAdminDetailsByProfileId,
-  upsertAdminDetails,
-  createJob,
-  getAllOpenJobs,
-  getAllJobs,
-  toggleJobStatus,
-  getJobById,
-  createJobApplication,
-  getAllApplications,
-  getApplicationsByJobId,
-  updateApplicationStatus,
-  getApplicationsByAccountId,
-  countAllJobs,
-  countOpenJobs,
-  countApplicationsByAccountId,
-  createNews,
-  getLatestNews,
-  createEvent,
-  getUpcomingEvents,
-  countAllEvents,
-  countUpcomingEvents,
-  getNewsById,
-  updateNews,
-  deleteNews,
-  getEventById,
-  updateEvent,
-  deleteEvent,
-  getAllNews,
-  getAllEventsAdmin,
-  createLoginLog,
-  recordLogout,
-  getAllLoginLogs,
-  createActivityLog,
-  getAllActivityLogs,
-  createTraining,
-  getAllTrainings,
-  getActiveTrainings,
-  getTrainingById,
-  updateTraining,
-  deleteTraining,
-  registerForTraining,
-  getMyTrainingRegistrations,
-  isRegisteredForTraining,
-  getAllTrainingRegistrations,
-  updateTrainingRegistrationStatus,
-  createTrainingGuide,
-  getAllTrainingGuides,
-  deleteTrainingGuide,
-  createLesson,
-  getAllLessons,
-  getLessonsByTrainingId,
-  getLessonById,
-  createLessonMaterial,
-  getMaterialsByLessonId,
-  deleteLessonMaterial,
-  markLessonComplete,
-  getProgressForTraining,
-  getTrainingProgressSummary,
-  createTicket,
-  generateTicketNumber,
-  getAllTickets,
-  getTicketsByAccountId,
-  getTicketById,
-  updateTicketStatus,
-  countTicketsByStatus,
-  createTicketMessage,
-  getMessagesByTicketId,
-  getAllAccounts,
-  deactivateAccount,
-  reactivateAccount,
-  countMembersOnly,
-  countNewMembersThisMonth,
-  countAdminsOnly,
-  createTeamMember,
-  getAllTeamMembers,
-  getTeamMemberById,
-  updateTeamMember,
-  getTeamMembersByCategory,
-  deleteTeamMember,
-  upsertProfile,
-  getProfilePhotoByAccountId
+  registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
+  getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
+  upsertAdminDetails,createJob,getAllOpenJobs,getAllJobs,toggleJobStatus,
+  getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,
+  getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
+  createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
+  countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,
+  getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,
 
 };

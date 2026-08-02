@@ -1,0 +1,40 @@
+<div id="messagesPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-envelope"></i></div>
+    <h2>Contact Messages</h2>
+    <p>Messages submitted through the public contact form</p>
+  </div>
+
+  <% if (allMessages && allMessages.length > 0) { %>
+    <% allMessages.forEach(msg => { %>
+      <div class="ticket-item <%= !msg.is_read ? 'message-unread' : '' %>">
+        <div class="ticket-summary">
+          <div class="ticket-info">
+            <h4><%= msg.subject %> <% if (!msg.is_read) { %><span class="new-badge">New</span><% } %></h4>
+            <small><%= msg.full_name %> &middot; <%= msg.email %> &middot; <%= new Date(msg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+          </div>
+          <button type="button" class="btn-outline-sm message-toggle" data-message-id="<%= msg.id %>"><i class="bi bi-chevron-down"></i> View</button>
+        </div>
+        <div class="ticket-thread">
+          <div class="ticket-thread-inner">
+            <p class="ticket-original-message"><%= msg.message %></p>
+            <% if (msg.phone_number) { %>
+              <p style="font-size:0.85rem; color:var(--text-secondary);"><i class="bi bi-telephone"></i> <%= msg.phone_number %></p>
+            <% } %>
+            <% if (!msg.is_read) { %>
+              <form action="/account/messages/<%= msg.id %>/read" method="POST">
+                <button type="submit" class="btn-outline-sm">Mark as Read</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:24px;">No messages yet.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelMessages"><i class="bi bi-arrow-left"></i>Back to Dashboard</a>
+  </div>
+</div>

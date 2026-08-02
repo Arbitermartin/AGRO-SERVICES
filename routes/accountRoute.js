@@ -479,4 +479,23 @@ router.post(
 );
 // end here.
 
+// Delivery update 
+router.get("/members/:id/profile", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.viewMemberProfile));
+
+router.get("/members/:id/profile/download", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.downloadMemberProfilePdf));
+  // end here
+
+  // delivery markread message.
+  router.post(
+    "/messages/:id/read", 
+    utilities.checkLogin, 
+    utilities.checkRole("ict_staff"), 
+    utilities.handleErrors(accountController.markMessageReadPost));
+
 module.exports= router

@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const utilities = require("../utilities")
+const accountController =require("../controllers/accountController")
 const accountModel = require("../models/account-model");
 
 
@@ -15,7 +16,9 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/contact", { 
       title: "Contact Us", 
-      nav 
+      nav,
+      success: req.flash("success"),
+      error: req.flash("error"), 
     })
   }))
   router.get("/team", utilities.handleErrors(async (req, res) => {
@@ -86,4 +89,9 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       nav 
     })
   }))
+  //  contact page message post
+  router.post(
+    "/contact", 
+    utilities.handleErrors(accountController.submitContactForm));
+
   module.exports = router

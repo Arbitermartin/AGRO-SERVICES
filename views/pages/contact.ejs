@@ -42,11 +42,23 @@
         <h2>Send us a message</h2>
         <p class="contact-form-sub">Fill the form and our team will respond within 24 hours.</p>
 
-        <% if (typeof sent !== 'undefined' && sent) { %>
-          <div class="contact-success" id="contactSuccess">
-            <i class="bi bi-check-circle-fill"></i> Your message has been sent. We'll be in touch soon!
-          </div>
-        <% } %>
+          <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
 
         <form class="contact-form" id="contactForm" action="/contact" method="POST" novalidate>
           <div class="contact-form-row">

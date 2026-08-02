@@ -41,8 +41,13 @@
         <i class="bi bi-cloud-upload"></i> Upload Material
       </a>
       <a href="#" id="addTeamMemberLink" class="db-nav-link"><i class="bi bi-person-badge"></i> Add Team Member</a>
-       
-      
+
+      <a href="#" id="messagesLink" class="db-nav-link">
+        <i class="bi bi-envelope"></i> Messages
+      <% if (unreadMessageCount > 0) { %>
+      <span class="db-nav-badge"><%= unreadMessageCount %></span>
+      <% } %>
+      </a>
         <a href="#" class="db-nav-link">
           <i class="bi bi-bar-chart"></i> Reports
         </a>
@@ -341,7 +346,7 @@
         <%- include('upload-material')%>
         <%- include('support-tickets') %>
         <%- include('add-team-member') %>
-        
+        <%- include('messages') %>
          
     </div>
   </div>

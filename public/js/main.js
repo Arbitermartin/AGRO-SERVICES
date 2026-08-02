@@ -637,6 +637,129 @@ if (cvUploadArea && cvUploadInput) {
       if (updateProfilePanel) updateProfilePanel.style.display = 'none';
       if (dbMainContent) dbMainContent.style.display = 'block';
     }
+
+    /* =====================================================
+       MEMBER PROFILE — photo preview + dynamic blocks
+       (ADDED — nothing removed above)
+    ===================================================== */
+
+    // Profile photo preview
+    const profilePhotoInputNew = document.getElementById('profilePhotoInput');
+    const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+    if (profilePhotoInputNew && profilePhotoPreview) {
+      profilePhotoInputNew.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          profilePhotoPreview.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Create Education block
+    function createEducationBlock() {
+      return `
+        <div class="item-block">
+          <button type="button" class="remove-item-btn">&times;</button>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Level</label>
+              <select name="edu_level[]">
+                <option value="Primary">Primary</option>
+                <option value="Secondary">Secondary</option>
+                <option value="Certificate">Certificate</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Bachelor" selected>Bachelor</option>
+                <option value="Master">Master</option>
+                <option value="PhD">PhD</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Institution</label>
+              <input type="text" name="edu_institution[]" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Course</label>
+              <input type="text" name="edu_course[]">
+            </div>
+            <div class="form-field">
+              <label>Graduation Year</label>
+              <input type="number" name="edu_year[]" min="1950" max="2035">
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Create Experience block
+    function createExperienceBlock() {
+      return `
+        <div class="item-block">
+          <button type="button" class="remove-item-btn">&times;</button>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Company</label>
+              <input type="text" name="exp_company[]">
+            </div>
+            <div class="form-field">
+              <label>Job Title</label>
+              <input type="text" name="exp_title[]">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Roles</label>
+            <textarea name="exp_roles[]" rows="2"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Years Exp</label>
+              <input type="number" name="exp_years[]" min="0">
+            </div>
+            <div class="form-field">
+              <label>Start Date</label>
+              <input type="date" name="exp_start[]">
+            </div>
+            <div class="form-field">
+              <label>End Date</label>
+              <input type="date" name="exp_end[]">
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Add Education button
+    const addEducationBtn = document.getElementById('addEducationBtn');
+    const educationList = document.getElementById('educationList');
+    if (addEducationBtn && educationList) {
+      addEducationBtn.addEventListener('click', () => {
+        educationList.insertAdjacentHTML('beforeend', createEducationBlock());
+      });
+    }
+
+    // Add Experience button
+    const addExperienceBtn = document.getElementById('addExperienceBtn');
+    const experienceList = document.getElementById('experienceList');
+    if (addExperienceBtn && experienceList) {
+      addExperienceBtn.addEventListener('click', () => {
+        experienceList.insertAdjacentHTML('beforeend', createExperienceBlock());
+      });
+    }
+
+    // Remove Education / Experience block (event delegation)
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-item-btn')) {
+        const block = e.target.closest('.item-block');
+        if (block) block.remove();
+      }
+    });
+
+    // =====================================================
+    // END of new Member Profile code
+    // =====================================================
+
       // job posting
       const addJobLink = document.getElementById('addJobLink');
       const addJobPanel = document.getElementById('addJobPanel');
@@ -1236,7 +1359,7 @@ if (cancelAllTeamMembers && allTeamMembersPanel && dbMainContent) {
 }
 // admin see all team member end here
 
-//  edit profile photo
+//  edit profile photo (original code kept)
 const profilePhotoUpload = document.getElementById('profilePhotoUpload');
 const profilePhotoInput = document.getElementById('profilePhotoInput');
 
@@ -1250,16 +1373,46 @@ if (profilePhotoUpload && profilePhotoInput) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const oldPreview = document.getElementById('profilePhotoPreview');
-      const img = document.createElement('img');
-      img.src = event.target.result;
-      img.id = 'profilePhotoPreview';
-      img.className = 'profile-photo-preview';
-      oldPreview.replaceWith(img);
+      if (oldPreview) {
+        const img = document.createElement('img');
+        img.src = event.target.result;
+        img.id = 'profilePhotoPreview';
+        img.className = 'profile-photo-preview';
+        oldPreview.replaceWith(img);
+      }
     };
     reader.readAsDataURL(file);
   });
 }
 // end here
+
+// message read
+const messagesLink = document.getElementById('messagesLink');
+const messagesPanel = document.getElementById('messagesPanel');
+const cancelMessages = document.getElementById('cancelMessages');
+
+if (messagesLink && messagesPanel && dbMainContent) {
+  messagesLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    messagesPanel.style.display = 'block';
+  });
+}
+if (cancelMessages && messagesPanel && dbMainContent) {
+  cancelMessages.addEventListener('click', (e) => {
+    e.preventDefault();
+    messagesPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+document.querySelectorAll('.message-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.ticket-item');
+    item.classList.toggle('is-open');
+  });
+});
+// end here messages
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
@@ -1275,6 +1428,5 @@ if (profilePhotoUpload && profilePhotoInput) {
   } // end if (dbSidebar)
 
 }); // end DOMContentLoaded
-
 
 

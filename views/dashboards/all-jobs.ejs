@@ -1,0 +1,56 @@
+<!-- ✅ All Job Postings panel — sibling of #dbMainContent, hidden by default -->
+<div id="allJobsPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-briefcase"></i></div>
+    <h2>All Job Postings</h2>
+    <p>Manage all published job opportunities</p>
+  </div>
+
+  <table class="db-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Region</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Deadline</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (allJobs && allJobs.length > 0) { %>
+        <% allJobs.forEach(job => { %>
+          <tr>
+            <td><b><%= job.title %></b></td>
+            <td><%= job.region %></td>
+            <td><%= job.job_type %></td>
+            <td><%= job.category %></td>
+            <td><%= new Date(job.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+            <td>
+              <span class="db-badge-status <%= job.status === 'open' ? 'db-badge-open' : 'db-badge-priority db-badge-high' %>">
+                <%= job.status === 'open' ? 'Open' : 'Closed' %>
+              </span>
+            </td>
+            <td>
+              <form action="/account/jobs/<%= job.id %>/toggle-status" method="POST" style="display:inline;">
+                <button
+                  type="submit"
+                  class="db-btn-action <%= job.status === 'open' ? 'btn-red' : 'btn-green' %>">
+                  <%= job.status === 'open' ? 'Close' : 'Reopen' %>
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="7" style="text-align:center; color:#9ca3af; padding: 24px;">No job postings yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelAllJobs"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>
+<!-- end #allJobsPanel -->

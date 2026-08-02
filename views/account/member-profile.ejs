@@ -1,0 +1,63 @@
+<section class="auth-page">
+  <div class="container" style="max-width: 680px;">
+    <div class="auth-form-panel">
+        <div class="auth-form-card">
+          <div id="toastContainer" class="toast-container">
+          <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <% success.forEach(msg => { %>
+              <div class="toast-msg success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } else if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <% error.forEach(msg => { %>
+              <div class="toast-msg error">
+                <i class="bi bi-x-circle-fill"></i>
+                <span><%= msg %></span>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+    <div class="db-card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+        <div>
+          <h2 style="margin:0;"><%= data.account.full_name %></h2>
+          <small style="color:var(--text-muted);"><%= data.account.email %> &middot; <%= data.account.account_type %></small>
+        </div>
+        <a href="/account/members/<%= data.account.id %>/profile/download" class="btn btn-filled">
+          <i class="bi bi-download"></i> Download PDF
+        </a>
+      </div>
+
+      <h3 class="profile-section-title">Account Information</h3>
+      <div class="db-profile-row"><span>Phone</span><b><%= data.account.phone_number || 'N/A' %></b></div>
+      <div class="db-profile-row"><span>Status</span><b><%= data.account.status %></b></div>
+      <div class="db-profile-row"><span>Joined</span><b><%= new Date(data.account.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></b></div>
+
+      <h3 class="profile-section-title">Personal Information</h3>
+      <% if (data.profile) { %>
+        <div class="db-profile-row"><span>Date of Birth</span><b><%= data.profile.date_of_birth ? new Date(data.profile.date_of_birth).toLocaleDateString('en-GB') : 'N/A' %></b></div>
+        <div class="db-profile-row"><span>Gender</span><b><%= data.profile.gender || 'N/A' %></b></div>
+        <div class="db-profile-row"><span>Nationality</span><b><%= data.profile.nationality || 'N/A' %></b></div>
+        <div class="db-profile-row"><span>Bio</span><b><%= data.profile.bio || 'N/A' %></b></div>
+      <% } else { %>
+        <p style="color:#9ca3af;">No additional profile information provided.</p>
+      <% } %>
+
+      <h3 class="profile-section-title">Place of Birth</h3>
+      <% if (data.birthPlace) { %>
+        <div class="db-profile-row"><span>Region</span><b><%= data.birthPlace.region || 'N/A' %></b></div>
+        <div class="db-profile-row"><span>District</span><b><%= data.birthPlace.district || 'N/A' %></b></div>
+        <div class="db-profile-row"><span>Ward</span><b><%= data.birthPlace.ward || 'N/A' %></b></div>
+      <% } else { %>
+        <p style="color:#9ca3af;">Not provided.</p>
+      <% } %>
+
+      <div class="auth-switch" style="margin-top:24px;text-align:center;">
+        <a href="/account/dashboard/admin"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+      </div>
+    </div>
+
+  </div>
+</section>

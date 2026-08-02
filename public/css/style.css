@@ -1431,6 +1431,24 @@ Deliverys style for manage news and events
   padding: 16px 10px 6px;
 }
 
+/* message style for ict */
+.message-unread {
+  background: var(--bg-light-green);
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.new-badge {
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+}
+/* end here */
+
 .db-nav-link {
   display: flex;
   align-items: center;
@@ -2172,17 +2190,143 @@ Deliverys style for manage news and events
 .ticket-status-form { display: flex; align-items: center; gap: 8px; }
 .ticket-status-form select { padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border-color); font-size: 0.8rem; }
 /* end here */
+/* =====================================================
+   EDUCATION & EXPERIENCE DYNAMIC BLOCKS
+===================================================== */
 
-.notice{
-  color: red;
+.item-block {
+  background: #f8faf8;
+  border: 1.5px solid #d4e8d4;
+  border-radius: 14px;
+  padding: 20px 18px 16px;
+  margin-bottom: 14px;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.error{
-  color: var(--danger)
+
+.item-block:hover {
+  border-color: #a5d6a7;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.08);
 }
-/* deliver success message */
-.success{
-  color: green;
+
+/* Remove (×) button */
+.remove-item-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #ffebee;
+  color: #c62828;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 2;
 }
+
+.remove-item-btn:hover {
+  background: #ef5350;
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* Add Education / Add Experience button */
+.add-item-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.8px dashed #66bb6a;
+  color: #2e7d32;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: all 0.2s ease;
+}
+
+.add-item-btn:hover {
+  background: #e8f5e9;
+  border-color: #43a047;
+  color: #1b5e20;
+}
+
+.add-item-btn i {
+  font-size: 1rem;
+}
+
+/* Make form rows inside item-block look good */
+.item-block .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.item-block .form-row:last-child {
+  margin-bottom: 0;
+}
+
+.item-block .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.item-block .form-field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.item-block input,
+.item-block select,
+.item-block textarea {
+  padding: 10px 12px;
+  border: 1.5px solid #dce8dc;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.item-block input:focus,
+.item-block select:focus,
+.item-block textarea:focus {
+  outline: none;
+  border-color: #43a047;
+  box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
+}
+
+.item-block textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* Section titles */
+.profile-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2e7d32;
+  margin: 28px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* end here update style */
+
 /* tost message */
 .toast-container {
   position: fixed;

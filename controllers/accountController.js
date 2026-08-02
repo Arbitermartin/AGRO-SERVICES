@@ -2,7 +2,7 @@ const utilities = require("../utilities")
 const path = require("path");
 const bcrypt = require('bcrypt'); // For password hashing
 const accountModel = require("../models/account-model");
-
+const PDFDocument = require("pdfkit");
 const db = require('../database/db');
 const { title } = require("process");
 const { error } = require("console");
@@ -268,36 +268,158 @@ async function createJob(req, res) {
 /***************************************
  * Delivery Update profile page
  *********************/
+// async function updateProfile(req, res) {
+//   try {
+//     const accountId = req.session.account.id;
+//     const { full_name, date_of_birth, gender, nationality, bio, region, district, ward, department, office, admin_role } = req.body;
+
+//     await accountModel.updateFullName(accountId, full_name);
+//     req.session.account.full_name = full_name;
+
+//      const profileData = { date_of_birth, gender, nationality, bio };
+
+//      // ✅ Save photo if one was uploaded
+//      if (req.file) {
+//       profileData.profile_photo = `/images/profile_photos/${req.file.filename}`;
+//       req.session.account.profile_photo = profileData.profile_photo;
+//     }
+
+//     // const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
+//     // await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
+//     // await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
+//      const profile = await accountModel.upsertProfile(accountId, profileData);
+//     await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
+//     await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
+
+
+//     req.flash("success", "Profile updated successfully.");
+//     res.redirect("/account/dashboard/admin?profileUpdated=true");
+//   } catch (error) {
+//     console.error(error);
+//     req.flash("error", "Failed to update profile.");
+//     res.redirect("/account/dashboard/admin");
+//   }
+// }
 async function updateProfile(req, res) {
   try {
     const accountId = req.session.account.id;
-    const { full_name, date_of_birth, gender, nationality, bio, region, district, ward, department, office, admin_role } = req.body;
+    const accountType = req.session.account.account_type;
 
+    const {
+      full_name,
+      phone_number,
+      date_of_birth,
+      gender,
+      nationality,
+      bio,
+      region,
+      district,
+      ward,
+      // Admin fields
+      department,
+      office,
+      admin_role,
+      // Member fields
+      student_number,
+      programme,
+      year_of_study,
+      employment_status,
+      company_name,
+      position,
+    } = req.body;
+
+    // 1. Common: update full name
     await accountModel.updateFullName(accountId, full_name);
     req.session.account.full_name = full_name;
 
-     const profileData = { date_of_birth, gender, nationality, bio };
+    // 2. Common: phone (if provided)
+    if (phone_number !== undefined) {
+      await accountModel.updatePhone(accountId, phone_number);
+    }
 
-     // ✅ Save photo if one was uploaded
-     if (req.file) {
+    // 3. Common: profile + photo
+    const profileData = { date_of_birth, gender, nationality, bio };
+    if (req.file) {
       profileData.profile_photo = `/images/profile_photos/${req.file.filename}`;
       req.session.account.profile_photo = profileData.profile_photo;
     }
+    const profile = await accountModel.upsertProfile(accountId, profileData);
 
-    // const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
-    // await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
-    // await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
-     const profile = await accountModel.upsertProfile(accountId, profileData);
+    // 4. Common: birth place
     await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
-    await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
 
+    // 5. Role-specific logic
+    if (accountType === "admin" || accountType === "ict_staff") {
+      // ===== ADMIN / ICT =====
+      await accountModel.upsertAdminDetails(profile.id, {
+        department,
+        office,
+        admin_role,
+      });
+
+      req.flash("success", "Profile updated successfully.");
+      return res.redirect(`/account/dashboard/${accountType === "admin" ? "admin" : "ict-staff"}?profileUpdated=true`);
+    }
+
+    // ===== MEMBER =====
+    await accountModel.upsertMember(profile.id, {
+      student_number,
+      programme,
+      year_of_study: year_of_study || null,
+      employment_status,
+      company_name,
+      position,
+    });
+
+    // Education
+    const eduLevels = [].concat(req.body.edu_level || []);
+    const eduInstitutions = [].concat(req.body.edu_institution || []);
+    const eduCourses = [].concat(req.body.edu_course || []);
+    const eduYears = [].concat(req.body.edu_year || []);
+
+    const educations = eduInstitutions
+      .map((inst, i) => ({
+        level: eduLevels[i] || "Bachelor",
+        institution: inst,
+        course_name: eduCourses[i] || null,
+        graduation_year: eduYears[i] ? Number(eduYears[i]) : null,
+      }))
+      .filter((e) => e.institution);
+
+    await accountModel.replaceEducations(profile.id, educations);
+
+    // Experiences
+    const expCompanies = [].concat(req.body.exp_company || []);
+    const expTitles = [].concat(req.body.exp_title || []);
+    const expRoles = [].concat(req.body.exp_roles || []);
+    const expYears = [].concat(req.body.exp_years || []);
+    const expStarts = [].concat(req.body.exp_start || []);
+    const expEnds = [].concat(req.body.exp_end || []);
+
+    const experiences = expCompanies
+      .map((company, i) => ({
+        company_name: company,
+        job_title: expTitles[i] || null,
+        roles: expRoles[i] || null,
+        years_exp: expYears[i] ? Number(expYears[i]) : null,
+        start_date: expStarts[i] || null,
+        end_date: expEnds[i] || null,
+      }))
+      .filter((e) => e.company_name);
+
+    await accountModel.replaceExperiences(profile.id, experiences);
 
     req.flash("success", "Profile updated successfully.");
-    res.redirect("/account/dashboard/admin?profileUpdated=true");
+    res.redirect("/account/dashboard/member?profileUpdated=true");
   } catch (error) {
-    console.error(error);
+    console.error("UPDATE PROFILE ERROR:", error);
     req.flash("error", "Failed to update profile.");
-    res.redirect("/account/dashboard/admin");
+
+    // Redirect back to the correct dashboard
+    const type = req.session.account?.account_type;
+    if (type === "admin") return res.redirect("/account/dashboard/admin");
+    if (type === "ict_staff") return res.redirect("/account/dashboard/ict-staff");
+    res.redirect("/account/dashboard/member");
   }
 }
 
@@ -312,6 +434,8 @@ async function buildIctStaffDashboard(req, res) {
   const ticketCounts = await accountModel.countTicketsByStatus();
   const recentTickets = allTickets.slice(0, 4);
   const allTeamMembers = await accountModel.getAllTeamMembers();
+  const allMessages = await accountModel.getAllContactMessages();
+  const unreadMessageCount = await accountModel.countUnreadContactMessages();
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -326,6 +450,8 @@ async function buildIctStaffDashboard(req, res) {
     ticketCounts,
     recentTickets,
     allTeamMembers,
+    allMessages,
+    unreadMessageCount,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -345,10 +471,9 @@ async function buildMemberDashboard(req, res) {
   const jobs = await accountModel.getAllOpenJobs();
   const myApplications = await accountModel.getApplicationsByAccountId(account.id);
   const profile = await accountModel.getProfileByAccountId(account.id) || {};
-  const birthPlace = profile.id 
-    ? (await accountModel.getBirthPlaceByProfileId(profile.id) || {}) 
-    : {};
-    const memberDetails = profile.id ? (await accountModel.getAdminDetailsByProfileId(profile.id)) || {} : {};
+  const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id) || {})  : {};
+  const member = profile.id? (await accountModel.getMemberByProfileId(profile.id)) || {}: {};
+  const educations = profile.id? await accountModel.getEducationsByProfileId(profile.id): [];experiences = profile.id? await accountModel.getExperiencesByProfileId(profile.id): [];
     const myApplicationsCount = await accountModel.countApplicationsByAccountId(account.id);
     const activeTrainings = await accountModel.getActiveTrainings();
     const myTrainings = await accountModel.getMyTrainingRegistrations(account.id);
@@ -387,7 +512,9 @@ async function buildMemberDashboard(req, res) {
     initials: getInitials(req.session.account.full_name),
     profile,
     birthPlace,
-    memberDetails,
+    member,
+    educations,
+    experiences,
     jobs,
     myApplications,
     myApplicationsCount,
@@ -1041,6 +1168,152 @@ async function deleteTeamMemberAdminPost(req, res) {
     res.redirect("/account/dashboard/admin");
   }
 }
+
+// Delivery get profile.
+async function viewMemberProfile(req, res) {
+  try {
+    const { id } = req.params;
+    const data = await accountModel.getFullMemberProfile(id);
+
+    if (!data) {
+      req.flash("error", "Member not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    let nav = await utilities.getNav();
+    res.render("account/member-profile", {
+      title: `${data.account.full_name}'s Profile`,
+      nav,
+      data,
+      success: req.flash("success"),
+      error: req.flash("error"),
+    });
+  } catch (error) {
+    console.error("VIEW MEMBER PROFILE ERROR:", error);
+    req.flash("error", "Failed to load profile.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function downloadMemberProfilePdf(req, res) {
+  try {
+    const { id } = req.params;
+    const data = await accountModel.getFullMemberProfile(id);
+
+    if (!data) {
+      req.flash("error", "Member not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const { account, profile, birthPlace, adminDetails } = data;
+
+    const doc = new PDFDocument({ margin: 50 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=${account.full_name.replace(/\s+/g, "_")}_profile.pdf`);
+    doc.pipe(res);
+
+    doc.fontSize(20).fillColor("#2E7D32").text("AgroServices Tanzania", { align: "center" });
+    doc.fontSize(12).fillColor("#666").text("Member Profile Report", { align: "center" });
+    doc.moveDown(1.5);
+
+    doc.strokeColor("#2E7D32").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown();
+
+    const addRow = (label, value) => {
+      doc.fontSize(11).fillColor("#333").font("Helvetica-Bold").text(label, { continued: true });
+      doc.font("Helvetica").fillColor("#000").text(`  ${value || "N/A"}`);
+      doc.moveDown(0.4);
+    };
+
+    doc.fontSize(14).fillColor("#2E7D32").text("Account Information");
+    doc.moveDown(0.3);
+    addRow("Full Name:", account.full_name);
+    addRow("Email:", account.email);
+    addRow("Phone Number:", account.phone_number);
+    addRow("Account Type:", account.account_type);
+    addRow("Status:", account.status);
+    addRow("Joined:", new Date(account.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }));
+
+    doc.moveDown();
+    doc.fontSize(14).fillColor("#2E7D32").text("Personal Information");
+    doc.moveDown(0.3);
+    if (profile) {
+      addRow("Date of Birth:", profile.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString('en-GB') : null);
+      addRow("Gender:", profile.gender);
+      addRow("Nationality:", profile.nationality);
+      addRow("Bio:", profile.bio);
+    } else {
+      doc.fontSize(11).fillColor("#999").text("No additional profile information provided.");
+    }
+
+    doc.moveDown();
+    doc.fontSize(14).fillColor("#2E7D32").text("Place of Birth");
+    doc.moveDown(0.3);
+    if (birthPlace) {
+      addRow("Region:", birthPlace.region);
+      addRow("District:", birthPlace.district);
+      addRow("Ward:", birthPlace.ward);
+    } else {
+      doc.fontSize(11).fillColor("#999").text("Not provided.");
+    }
+
+    if (account.account_type === "admin" && adminDetails) {
+      doc.moveDown();
+      doc.fontSize(14).fillColor("#2E7D32").text("Work Details");
+      doc.moveDown(0.3);
+      addRow("Department:", adminDetails.department);
+      addRow("Office:", adminDetails.office);
+      addRow("Admin Role:", adminDetails.admin_role);
+    }
+
+    doc.moveDown(2);
+    doc.fontSize(9).fillColor("#999").text(`Generated on ${new Date().toLocaleString('en-GB')}`, { align: "center" });
+
+    doc.end();
+  } catch (error) {
+    console.error("DOWNLOAD PDF ERROR:", error);
+    req.flash("error", "Failed to generate PDF.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here.
+/****************************
+ * 
+ * Derivery contact message from contact us page
+ */
+async function submitContactForm(req, res) {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    await accountModel.createContactMessage({
+      full_name: name,
+      email,
+      phone_number: null,
+      subject,
+      message,
+    });
+
+    req.flash("success", "Your message has been sent successfully.");
+    res.redirect("/contact");
+  } catch (error) {
+    console.error("CONTACT FORM ERROR:", error);
+    req.flash("error", "Failed to send your message. Please try again.");
+    res.redirect("/contact");
+  }
+}
+
+async function markMessageReadPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.markContactMessageAsRead(id);
+    res.redirect("/account/dashboard/ict-staff?messageRead=true");
+  } catch (error) {
+    console.error("MARK MESSAGE READ ERROR:", error);
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+// end here contact message from contact us page.
+
 /* ****************************************
  * Logout
  * *************************************** */
@@ -1064,5 +1337,5 @@ async function accountLogout(req, res) {
 };
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,accountLogout
 }
