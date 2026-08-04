@@ -1414,7 +1414,131 @@ document.querySelectorAll('.message-toggle').forEach((btn) => {
 });
 // end here messages
 
+/**************************
+ * Delivery registered users for events.
+ */
+const registeredUsersLink = document.getElementById('registeredUsersLink');
+const registeredUsersPanel = document.getElementById('registeredUsersPanel');
+const cancelRegisteredUsers = document.getElementById('cancelRegisteredUsers');
 
+if (registeredUsersLink && registeredUsersPanel && dbMainContent) {
+  registeredUsersLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    registeredUsersPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelRegisteredUsers && registeredUsersPanel && dbMainContent) {
+  cancelRegisteredUsers.addEventListener('click', (e) => {
+    e.preventDefault();
+    registeredUsersPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here
+
+/* ---------- Dashboard search ---------- */
+const dashboardSearchInput = document.getElementById('dashboardSearchInput');
+const dashboardSearchResults = document.getElementById('dashboardSearchResults');
+
+if (dashboardSearchInput && dashboardSearchResults) {
+  const roleAttr = document.body.getAttribute('data-role') || '';
+  let searchEndpoint = '/account/search/member';
+  if (roleAttr === 'admin') searchEndpoint = '/account/search/admin';
+  if (roleAttr === 'ict_staff') searchEndpoint = '/account/search/ict';
+
+  let debounceTimer;
+
+  dashboardSearchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const query = dashboardSearchInput.value.trim();
+
+    if (query.length < 2) {
+      dashboardSearchResults.style.display = 'none';
+      return;
+    }
+
+    debounceTimer = setTimeout(() => {
+      fetch(`${searchEndpoint}?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => renderSearchResults(data))
+        .catch(() => {
+          dashboardSearchResults.innerHTML = '<div class="search-no-results">Search failed. Try again.</div>';
+          dashboardSearchResults.style.display = 'block';
+        });
+    }, 300);
+  });
+
+  function renderSearchResults(data) {
+    let html = '';
+    let hasResults = false;
+
+    if (data.accounts && data.accounts.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">Users</div>';
+      data.accounts.forEach(a => {
+        html += `<div class="search-result-item"><b>${a.full_name}</b><small>${a.email} &middot; ${a.account_type}</small></div>`;
+      });
+      html += '</div>';
+    }
+
+    if (data.jobs && data.jobs.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">Jobs</div>';
+      data.jobs.forEach(j => {
+        html += `<div class="search-result-item"><b>${j.title}</b><small>${j.region} &middot; ${j.job_type}</small></div>`;
+      });
+      html += '</div>';
+    }
+
+    if (data.news && data.news.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">News</div>';
+      data.news.forEach(n => {
+        html += `<div class="search-result-item"><b>${n.title}</b></div>`;
+      });
+      html += '</div>';
+    }
+
+    if (data.events && data.events.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">Events</div>';
+      data.events.forEach(e => {
+        html += `<div class="search-result-item"><b>${e.title}</b></div>`;
+      });
+      html += '</div>';
+    }
+
+    if (data.tickets && data.tickets.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">Tickets</div>';
+      data.tickets.forEach(t => {
+        html += `<div class="search-result-item"><b>#${t.ticket_number} — ${t.subject}</b><small>${t.full_name}</small></div>`;
+      });
+      html += '</div>';
+    }
+
+    if (data.trainings && data.trainings.length > 0) {
+      hasResults = true;
+      html += '<div class="search-result-group"><div class="search-result-group-title">Trainings</div>';
+      data.trainings.forEach(t => {
+        html += `<div class="search-result-item"><b>${t.title}</b></div>`;
+      });
+      html += '</div>';
+    }
+
+    dashboardSearchResults.innerHTML = hasResults ? html : '<div class="search-no-results">No results found.</div>';
+    dashboardSearchResults.style.display = 'block';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!dashboardSearchInput.contains(e.target) && !dashboardSearchResults.contains(e.target)) {
+      dashboardSearchResults.style.display = 'none';
+    }
+  });
+}
+// end here search.
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
@@ -1431,41 +1555,41 @@ document.querySelectorAll('.message-toggle').forEach((btn) => {
 
 }); // end DOMContentLoaded
 
-/* =====================================================
-   EVENT REGISTRATION — Country / Region cascade
-===================================================== */
-const countrySelect = document.getElementById('countrySelect');
-const regionSelect = document.getElementById('regionSelect');
+// /* =====================================================
+//    EVENT REGISTRATION — Country / Region cascade
+// ===================================================== */
+// const countrySelect = document.getElementById('countrySelect');
+// const regionSelect = document.getElementById('regionSelect');
 
-if (countrySelect && regionSelect) {
-  const regionsByCountry = {
-    Tanzania: ["Arusha","Dar es Salaam", "Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma","Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza","Njombe","Pwani(Coast)","Rukwa","Ruvuma","Shinyanga","Simiyu","Singida","Songwe","Tabora","Tanga","Kaskazini Pemba","Kusini Pemba","Kaskazini Unguja","Kusini Unguja","Mjini Magharibi"],
-    Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
-    Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
-    Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
-    Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
-    "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
-    Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
-    Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
-    Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
-    Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
-  };
+// if (countrySelect && regionSelect) {
+//   const regionsByCountry = {
+//     Tanzania: ["Arusha","Dar es Salaam", "Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma","Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza","Njombe","Pwani(Coast)","Rukwa","Ruvuma","Shinyanga","Simiyu","Singida","Songwe","Tabora","Tanga","Kaskazini Pemba","Kusini Pemba","Kaskazini Unguja","Kusini Unguja","Mjini Magharibi"],
+//     Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
+//     Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
+//     Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
+//     Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
+//     "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
+//     Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
+//     Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
+//     Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
+//     Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
+//   };
 
-  countrySelect.addEventListener('change', () => {
-    const selectedCountry = countrySelect.value;
-    const regions = regionsByCountry[selectedCountry] || [];
+//   countrySelect.addEventListener('change', () => {
+//     const selectedCountry = countrySelect.value;
+//     const regions = regionsByCountry[selectedCountry] || [];
 
-    regionSelect.innerHTML = '';
+//     regionSelect.innerHTML = '';
 
-    if (regions.length === 0) {
-      regionSelect.innerHTML = '<option value="">Select country first</option>';
-      return;
-    }
+//     if (regions.length === 0) {
+//       regionSelect.innerHTML = '<option value="">Select country first</option>';
+//       return;
+//     }
 
-    regionSelect.innerHTML = '<option value="">Select region</option>' +
-      regions.map(r => `<option value="${r}">${r}</option>`).join('');
-  });
-}
-// end here for form for events
+//     regionSelect.innerHTML = '<option value="">Select region</option>' +
+//       regions.map(r => `<option value="${r}">${r}</option>`).join('');
+//   });
+// }
+// // end here for form for events
 
 

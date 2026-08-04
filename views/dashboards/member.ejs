@@ -1,4 +1,4 @@
-<body class="db-body">
+<body class="db-body" data-role="member">
 
   <div class="db-shell">
     <!-- ===================== SIDEBAR ===================== -->
@@ -58,10 +58,18 @@
         <div class="db-topbar-title">MEMBER DASHBOARD</div>
 
         <div class="db-topbar-right">
+   
+         <div class="db-search" style="position: relative;">
+          <i class="bi bi-search"></i>
+          <input type="text" id="dashboardSearchInput" placeholder="Search tickets or users...">
+          <div id="dashboardSearchResults" class="search-results-dropdown" style="display:none;"></div>
+        </div>
+
+        <!-- 
           <div class="db-search">
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Search...">
-          </div>
+          </div> -->
 
           <button type="button" class="db-icon-btn" aria-label="Notifications">
             <i class="bi bi-bell"></i>

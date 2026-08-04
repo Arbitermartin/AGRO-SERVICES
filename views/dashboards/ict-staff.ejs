@@ -1,5 +1,5 @@
 
-<body class="db-body">
+<body class="db-body" data-role="ict_staff">
 
   <div class="db-shell">
     <!-- ===================== SIDEBAR ===================== -->
@@ -71,15 +71,27 @@
           </button>
           <div>
             <div class="db-welcome">Welcome, <%= account.full_name %></div>
-            <div class="db-role">Role: <%= account.account_type %></div>
+            <div class="db-role">
+              Role:<%= account.account_type %>
+              <% if (account.is_online){%>
+              <span class="online-status"><span class="online-dot"></span> Online</span>
+              <%}%>
+            </div>
+            
           </div>
         </div>
 
         <div class="db-topbar-right">
-          <div class="db-search">
+        <div class="db-search">
+          <i class="bi bi-search"></i>
+          <input type="text" id="dashboardSearchInput" placeholder="Search tickets or users...">
+          <div id="dashboardSearchResults" class="search-results-dropdown" style="display:none;"></div>
+        </div>
+       
+          <!-- <div class="db-search">
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Search tickets or users...">
-          </div>
+          </div> -->
 
           <button type="button" class="db-icon-btn" aria-label="Notifications">
             <i class="bi bi-bell"></i>

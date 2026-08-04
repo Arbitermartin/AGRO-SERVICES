@@ -498,4 +498,38 @@ router.get("/members/:id/profile/download",
     utilities.checkRole("ict_staff"), 
     utilities.handleErrors(accountController.markMessageReadPost));
 
+    /*************************************
+     * Delivery event registraion views
+     */
+  
+    router.post("/event-registrations/:id/delete", 
+      utilities.checkLogin, 
+      utilities.checkRole("admin"), 
+      utilities.handleErrors(accountController.deleteEventRegistrationPost));
+
+    router.get("/events/:eventId/registrations/download", 
+      utilities.checkLogin, 
+      utilities.checkRole("admin"), 
+      utilities.handleErrors(accountController.downloadEventRegistrationsPdf));
+      // end here registered users.
+
+      /***************************************
+       * 
+       * Delivery get search
+       */
+
+      router.get("/search/admin", 
+        utilities.checkLogin, 
+        utilities.checkRole("admin"), 
+        utilities.handleErrors(accountController.searchAdmin));
+
+      router.get("/search/ict", 
+        utilities.checkLogin, 
+        utilities.checkRole("ict_staff"), 
+        utilities.handleErrors(accountController.searchIct));
+
+      router.get("/search/member", 
+        utilities.checkLogin, 
+        utilities.handleErrors(accountController.searchMember));
+
 module.exports= router

@@ -769,15 +769,140 @@ async function createEventRegistration(data) {
 }
 // end here 
 
+/**************************
+ * 
+ * Delivery registerd users for event.
+ * 
+ */
+async function getEventRegistrationsByEventId(eventId) {
+  return await db("event_registrations").where({ event_id: eventId }).orderBy("created_at", "desc");
+}
+
+async function getAllEventRegistrations() {
+  return await db("event_registrations as er")
+    .join("events as e", "er.event_id", "e.event_id")
+    .select("er.*", "e.title as event_title", "e.event_date", "e.end_date")
+    .orderBy("er.created_at", "desc");
+}
+
+async function deleteEventRegistration(id) {
+  return await db("event_registrations").where({ id }).del();
+}
+// end here registered users for events
+
+/* Update last_active_at on every authenticated request */
+async function updateLastActive(accountId) {
+  return await db("accounts").where({ id: accountId }).update({
+    last_active_at: db.fn.now(),
+    is_online: true,
+  });
+}
+
+/* Mark offline explicitly on logout */
+async function markOffline(accountId) {
+  return await db("accounts").where({ id: accountId }).update({ is_online: false });
+}
+
+/* Get one available ICT staff member who is online (for chatbot handoff) */
+async function getAvailableIctStaff() {
+  const cutoff = new Date(Date.now() - 5 * 60 * 1000); // active within last 5 minutes
+  return await db("accounts")
+    .where("account_type", "ict_staff")
+    .andWhere("status", "active")
+    .andWhere("is_online", true)
+    .andWhere("last_active_at", ">=", cutoff)
+    .orderBy("last_active_at", "desc")
+    .first();
+}
+
+/* Get ALL currently online ICT staff (for a dashboard indicator, or round-robin) */
+async function getAllOnlineIctStaff() {
+  const cutoff = new Date(Date.now() - 5 * 60 * 1000);
+  return await db("accounts")
+    .where("account_type", "ict_staff")
+    .andWhere("status", "active")
+    .andWhere("is_online", true)
+    .andWhere("last_active_at", ">=", cutoff)
+    .orderBy("full_name", "asc");
+}
+// end here.
+
+/**********************************************************8
+ * 
+ * Delivery search to be work in both admin dashboard
+ * member dashboards and ICT_STAFF dashboards
+ * 
+ */
+/* Admin dashboard search — across accounts, jobs, news, events */
+async function searchAdminDashboard(query) {
+  const like = `%${query}%`;
+
+  const accounts = await db("accounts")
+    .where("full_name", "ilike", like)
+    .orWhere("email", "ilike", like)
+    .limit(5);
+
+  const jobs = await db("jobs")
+    .where("title", "ilike", like)
+    .orWhere("region", "ilike", like)
+    .limit(5);
+
+  const news = await db("news")
+    .where("title", "ilike", like)
+    .limit(5);
+
+  const events = await db("events")
+    .where("title", "ilike", like)
+    .limit(5);
+
+  return { accounts, jobs, news, events };
+}
+
+/* ICT dashboard search — across tickets and accounts */
+async function searchIctDashboard(query) {
+  const like = `%${query}%`;
+
+  const tickets = await db("support_tickets as t")
+    .join("accounts as a", "t.account_id", "a.id")
+    .where("t.ticket_number", "ilike", like)
+    .orWhere("t.subject", "ilike", like)
+    .orWhere("a.full_name", "ilike", like)
+    .select("t.*", "a.full_name")
+    .limit(5);
+
+  const accounts = await db("accounts")
+    .where("full_name", "ilike", like)
+    .orWhere("email", "ilike", like)
+    .limit(5);
+
+  return { tickets, accounts };
+}
+
+/* Member dashboard search — across jobs and trainings */
+async function searchMemberDashboard(query) {
+  const like = `%${query}%`;
+
+  const jobs = await db("jobs")
+    .where("status", "open")
+    .andWhere((builder) => {
+      builder.where("title", "ilike", like).orWhere("region", "ilike", like);
+    })
+    .limit(5);
+
+  const trainings = await db("trainings")
+    .where("title", "ilike", like)
+    .limit(5);
+
+  return { jobs, trainings };
+}
+
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
   getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
   upsertAdminDetails,createJob,getAllOpenJobs,getAllJobs,toggleJobStatus,
-  getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,
-  getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
+  getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,
-  getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard
 
 };

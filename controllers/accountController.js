@@ -142,7 +142,6 @@ async function buildAdminDashboard(req, res) {
   const account = req.session.account;
   const profile = (await accountModel.getProfileByAccountId(account.id)) || {};
 
-   // ✅ Keep session's profile_photo in sync with the DB source of truth
   if (profile.profile_photo && account.profile_photo !== profile.profile_photo) {
     account.profile_photo = profile.profile_photo;
   }
@@ -158,11 +157,13 @@ async function buildAdminDashboard(req, res) {
   const allNews = await accountModel.getAllNews();
   const allEvents = await accountModel.getAllEventsAdmin();
   const allTrainingRegistrations = await accountModel.getAllTrainingRegistrations();
+   const allEventRegistrations = await accountModel.getAllEventRegistrations();
   const allAccounts = await accountModel.getAllAccounts();
   const totalMembers = await accountModel.countMembersOnly();
   const newMembersThisMonth = await accountModel.countNewMembersThisMonth();
   const totalAdmins = await accountModel.countAdminsOnly();
   const allTeamMembers = await accountModel.getAllTeamMembers();
+ 
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -186,6 +187,7 @@ async function buildAdminDashboard(req, res) {
     newMembersThisMonth,
     totalAdmins,
     allTeamMembers,
+    allEventRegistrations,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -425,6 +427,11 @@ async function updateProfile(req, res) {
 
 async function buildIctStaffDashboard(req, res) {
   let nav = await utilities.getNav();
+  const account = req.session.account;
+
+  // refresh online status from the database.
+  const freshAccount = await accountModel.getAccountById(account.id);
+  account.is_online = freshAccount.is_online;
   const loginLogs = await accountModel.getAllLoginLogs();
   const activityLogs = await accountModel.getAllActivityLogs();
   const allGuides = await accountModel.getAllTrainingGuides();
@@ -439,8 +446,10 @@ async function buildIctStaffDashboard(req, res) {
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
-    account: req.session.account,
-    initials: getInitials(req.session.account.full_name),
+    account,
+    initials: getInitials(account.full_name),
+    // account: req.session.account,
+    // initials: getInitials(req.session.account.full_name),
     loginLogs,
     activityLogs,
     allGuides,
@@ -1391,29 +1400,211 @@ async function submitEventRegistration(req, res) {
 }
 // end here
 
+/**************************************
+ * 
+ * Delivery registered users for events
+ */
+// async function viewEventRegistrations(req, res) {
+//   try {
+//     let nav = await utilities.getNav();
+//     const allEventRegistrations = await accountModel.getAllEventRegistrations();
+
+//     res.render("dashboards/registered-users", {
+//       title: "Registered Users",
+//       nav,
+//       account: req.session.account,
+//       initials: getInitials(req.session.account.full_name),
+//       allEventRegistrations,
+//       success: req.flash("success"),
+//       error: req.flash("error"),
+//     });
+//   } catch (error) {
+//     console.error("VIEW EVENT REGISTRATIONS ERROR:", error);
+//     req.flash("error", "Failed to load registered users.");
+//     res.redirect("/account/dashboard/admin");
+//   }
+// }
+
+async function deleteEventRegistrationPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteEventRegistration(id);
+    req.flash("success", "Registration removed.");
+    res.redirect("/account/dashboard/admin?registeredUsersUpdated=true");
+  } catch (error) {
+    console.error("DELETE EVENT REGISTRATION ERROR:", error);
+    req.flash("error", "Failed to remove registration.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function downloadEventRegistrationsPdf(req, res) {
+  try {
+    const { eventId } = req.params;
+    const event = await accountModel.getEventById(eventId);
+    const registrations = await accountModel.getEventRegistrationsByEventId(eventId);
+
+    if (!event) {
+      req.flash("error", "Event not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const doc = new PDFDocument({ margin: 40, size: "A4", layout: "landscape" });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=${event.title.replace(/\s+/g, "_")}_registrations.pdf`);
+    doc.pipe(res);
+
+    doc.fontSize(18).fillColor("#2E7D32").font("Helvetica-Bold")
+      .text("YOUTH AGROSERVICE NETWORK", { align: "center" });
+    doc.moveDown(0.3);
+    doc.fontSize(14).fillColor("#000").font("Helvetica-Bold")
+      .text(event.title, { align: "center" });
+    doc.moveDown(0.2);
+    doc.fontSize(10).fillColor("#555").font("Helvetica")
+      .text(
+        `Event Dates: ${new Date(event.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — ${new Date(event.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+        { align: "center" }
+      );
+    doc.moveDown(1);
+
+    doc.strokeColor("#2E7D32").lineWidth(1).moveTo(40, doc.y).lineTo(802, doc.y).stroke();
+    doc.moveDown(0.8);
+
+    // Table header
+    const startX = 40;
+    let y = doc.y;
+    const colWidths = [140, 170, 100, 40, 110, 170];
+    const headers = ["Full Name", "Email", "Phone Number", "Age", "Country", "Region / City"];
+
+    doc.fontSize(10).font("Helvetica-Bold").fillColor("#fff");
+    doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), 20).fill("#2E7D32");
+    doc.fillColor("#fff");
+    let x = startX;
+    headers.forEach((h, i) => {
+      doc.text(h, x + 5, y + 5, { width: colWidths[i] - 10 });
+      x += colWidths[i];
+    });
+
+    y += 20;
+    doc.font("Helvetica").fontSize(9);
+
+    registrations.forEach((r, index) => {
+      if (y > 520) {
+        doc.addPage({ layout: "landscape" });
+        y = 40;
+      }
+
+      const rowColor = index % 2 === 0 ? "#F4F8F2" : "#FFFFFF";
+      doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), 20).fill(rowColor);
+      doc.fillColor("#000");
+
+      x = startX;
+      const rowData = [r.full_name, r.email, r.phone_number, String(r.age), r.country, r.region];
+      rowData.forEach((val, i) => {
+        doc.text(val || "N/A", x + 5, y + 5, { width: colWidths[i] - 10 });
+        x += colWidths[i];
+      });
+
+      y += 20;
+    });
+
+    doc.moveDown(2);
+    doc.fontSize(9).fillColor("#999").text(`Generated on ${new Date().toLocaleString('en-GB')} — Total registrations: ${registrations.length}`, 40, y + 10);
+
+    doc.end();
+  } catch (error) {
+    console.error("DOWNLOAD EVENT REGISTRATIONS PDF ERROR:", error);
+    req.flash("error", "Failed to generate PDF.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here registered users.
+
+/***************************************
+ * 
+ * Delivery search in admin dashboards
+ * member dashboards and ict staff dashboards
+ */
+async function searchAdmin(req, res) {
+  try {
+    const query = req.query.q || "";
+    if (query.trim().length < 2) return res.json({ accounts: [], jobs: [], news: [], events: [] });
+
+    const results = await accountModel.searchAdminDashboard(query);
+    res.json(results);
+  } catch (error) {
+    console.error("SEARCH ADMIN ERROR:", error);
+    res.status(500).json({ accounts: [], jobs: [], news: [], events: [] });
+  }
+}
+
+async function searchIct(req, res) {
+  try {
+    const query = req.query.q || "";
+    if (query.trim().length < 2) return res.json({ tickets: [], accounts: [] });
+
+    const results = await accountModel.searchIctDashboard(query);
+    res.json(results);
+  } catch (error) {
+    console.error("SEARCH ICT ERROR:", error);
+    res.status(500).json({ tickets: [], accounts: [] });
+  }
+}
+
+async function searchMember(req, res) {
+  try {
+    const query = req.query.q || "";
+    if (query.trim().length < 2) return res.json({ jobs: [], trainings: [] });
+
+    const results = await accountModel.searchMemberDashboard(query);
+    res.json(results);
+  } catch (error) {
+    console.error("SEARCH MEMBER ERROR:", error);
+    res.status(500).json({ jobs: [], trainings: [] });
+  }
+}
+//end here search.
+
 /* ****************************************
  * Logout
  * *************************************** */
-async function accountLogout(req, res) {
-  try {
-    if (req.session.account && req.session.account.loginLogId) {
-      await accountModel.recordLogout(req.session.account.loginLogId);
-    }
-  req.flash("success","You have been logged out successfully.");
-  const flashMessages =req.session.flash;
+function accountLogout(req, res) {
+  const accountId = req.session.account ? req.session.account.id : null;
 
-  req.session.regenerate((err)=>{
-    if(err) console.error(err);
-    req.session.flash =flashMessages;
-    res.redirect("/account/login")
-  }) 
-} catch (error) {
-  console.error("LOGOUT ERROR:", error);
-  res.redirect("/account/login");
+  if (accountId) {
+    accountModel.markOffline(accountId).catch(err => console.error("MARK OFFLINE ERROR:", err));
+  }
+
+  req.flash("success", "You have been logged out successfully.");
+  const flashMessages = req.session.flash;
+
+  req.session.regenerate((err) => {
+    if (err) console.error(err);
+    req.session.flash = flashMessages;
+    res.redirect("/account/login");
+  });
 }
-};
+// async function accountLogout(req, res) {
+//   try {
+//     if (req.session.account && req.session.account.loginLogId) {
+//       await accountModel.recordLogout(req.session.account.loginLogId);
+//     }
+//   req.flash("success","You have been logged out successfully.");
+//   const flashMessages =req.session.flash;
+
+//   req.session.regenerate((err)=>{
+//     if(err) console.error(err);
+//     req.session.flash =flashMessages;
+//     res.redirect("/account/login")
+//   }) 
+// } catch (error) {
+//   console.error("LOGOUT ERROR:", error);
+//   res.redirect("/account/login");
+// }
+// };
+
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,accountLogout
 }

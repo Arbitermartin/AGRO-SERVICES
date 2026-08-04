@@ -1,4 +1,4 @@
-<body class="db-body">
+<body class="db-body" data-role="admin">
 
   <div class="db-shell">
     <!-- ===================== SIDEBAR ===================== -->
@@ -53,7 +53,7 @@
         <a href="#" id="allEventsLink" class="db-submenu-link"><div><span>All Events</span>
         </div>
       </a>
-            <a href="#" class="db-submenu-link">Registered Users</a>
+     <a href="#" id="registeredUsersLink" class="db-submenu-link">Registered Users</a>
             <a href="#" id="allNewsLink" class="db-submenu-link"><div><span>All News</span>
             </div>
           </a>
@@ -159,10 +159,18 @@
         <div class="db-topbar-title">ADMIN DASHBOARD</div>
 
         <div class="db-topbar-right">
+
+         <div class="db-search" style="position: relative;">
+          <i class="bi bi-search"></i>
+          <input type="text" id="dashboardSearchInput" placeholder="Search tickets or users...">
+          <div id="dashboardSearchResults" class="search-results-dropdown" style="display:none;"></div>
+        </div>
+
+        <!-- 
           <div class="db-search">
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Search anything...">
-          </div>
+          </div> -->
 
           <button type="button" class="db-icon-btn" aria-label="Notifications">
             <i class="bi bi-bell"></i>
@@ -676,9 +684,7 @@
 <%- include('training-registrations') %>
 <%- include('all-members') %>
 <%- include('all-team-members') %>
-
-
-
+<%- include('registered-users') %>
       </div>
       <!-- end db-content -->
     </div>

@@ -1,0 +1,95 @@
+<!-- ✅ Registered Users panel — sibling of #dbMainContent, hidden by default -->
+<div id="registeredUsersPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-people"></i></div>
+    <h2>Registered Users</h2>
+    <p>Everyone who has registered for an event</p>
+  </div>
+
+  <% 
+    // Safe guard – never crash if the variable is missing
+    const regs = (typeof allEventRegistrations !== 'undefined' && Array.isArray(allEventRegistrations))
+      ? allEventRegistrations
+      : [];
+
+    const eventGroups = {};
+    regs.forEach(r => {
+      if (!eventGroups[r.event_id]) {
+        eventGroups[r.event_id] = { 
+          title: r.event_title, 
+          event_date: r.event_date, 
+          end_date: r.end_date, 
+          rows: [] 
+        };
+      }
+      eventGroups[r.event_id].rows.push(r);
+    });
+  %>
+
+  <% if (Object.keys(eventGroups).length > 0) { %>
+    <% Object.keys(eventGroups).forEach(eventId => { %>
+      <% const group = eventGroups[eventId]; %>
+      <div style="margin-bottom: 32px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3 style="margin:0; font-size:1.05rem;"><%= group.title %></h3>
+            <small style="color:var(--text-muted);">
+              <%= group.event_date ? new Date(group.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A' %>
+              &mdash;
+              <%= group.end_date ? new Date(group.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A' %>
+              &middot; <%= group.rows.length %> registered
+            </small>
+          </div>
+          <a href="/account/events/<%= eventId %>/registrations/download" class="btn btn-filled">
+            <i class="bi bi-download"></i> Download PDF
+          </a>
+        </div>
+          
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Age</th>
+              <th>Country</th>
+              <th>Region</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% group.rows.forEach(r => { %>
+              <tr>
+                <td><%= r.full_name || 'N/A' %></td>
+                <td><%= r.email || 'N/A' %></td>
+                <td><%= r.phone_number || 'N/A' %></td>
+                <td><%= r.age || 'N/A' %></td>
+                <td><%= r.country || 'N/A' %></td>
+                <td><%= r.region || 'N/A' %></td>
+                <td>
+                  <form action="/account/event-registrations/<%= r.id %>/delete" method="POST" 
+                        onsubmit="return confirm('Remove this registration?');">
+                    <button type="submit" class="btn-outline-sm manage-delete-btn">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding: 24px;">
+      No one has registered for any events yet.
+    </p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelRegisteredUsers">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+</div>
+<!-- end #registeredUsersPanel -->

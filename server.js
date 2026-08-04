@@ -67,6 +67,9 @@ app.use(function(req, res, next){
   next();
 });
 
+// track online ict stafff
+app.use(utilities.trackPresence);
+
 //Login rate limiter now
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,

@@ -81,4 +81,16 @@ utilities.trackActivity = (actionDescription) => {
     next();
   };
 };
+
+utilities.trackPresence = async (req, res, next) => {
+  if (req.session.account) {
+    try {
+      const accountModel = require("../models/account-model");
+      await accountModel.updateLastActive(req.session.account.id);
+    } catch (err) {
+      console.error("PRESENCE UPDATE ERROR:", err);
+    }
+  }
+  next();
+};
 module.exports = utilities
