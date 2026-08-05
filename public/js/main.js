@@ -306,11 +306,21 @@ if (toastContainer) {
       });
     };
 
+    // window.selectPayment = (index) => {
+    //   document.querySelectorAll('.payment-method').forEach((el, i) => {
+    //     el.classList.toggle('selected', i === index);
+    //   });
+    // };
     window.selectPayment = (index) => {
-      document.querySelectorAll('.payment-method').forEach((el, i) => {
-        el.classList.toggle('selected', i === index);
-      });
-    };
+  document.querySelectorAll('.payment-method').forEach((el, i) => {
+    el.classList.toggle('selected', i === index);
+  });
+
+  const bankDetailsFields = document.getElementById('bankDetailsFields');
+  if (bankDetailsFields) {
+    bankDetailsFields.style.display = index === 1 ? 'block' : 'none';
+  }
+};
 
     const uploadArea = document.getElementById('uploadArea');
     const proofInput = document.getElementById('proofUpload');
@@ -1539,6 +1549,31 @@ if (dashboardSearchInput && dashboardSearchResults) {
   });
 }
 // end here search.
+
+// payments
+const allPaymentsLink = document.getElementById('allPaymentsLink');
+const allPaymentsLink2 = document.getElementById('allPaymentsLink2');
+const allPaymentsPanel = document.getElementById('allPaymentsPanel');
+const cancelAllPayments = document.getElementById('cancelAllPayments');
+
+function openAllPayments(e) {
+  e.preventDefault();
+  dbMainContent.style.display = 'none';
+  allPaymentsPanel.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+if (allPaymentsLink && allPaymentsPanel && dbMainContent) allPaymentsLink.addEventListener('click', openAllPayments);
+if (allPaymentsLink2 && allPaymentsPanel && dbMainContent) allPaymentsLink2.addEventListener('click', openAllPayments);
+
+if (cancelAllPayments && allPaymentsPanel && dbMainContent) {
+  cancelAllPayments.addEventListener('click', (e) => {
+    e.preventDefault();
+    allPaymentsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

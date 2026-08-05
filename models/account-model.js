@@ -896,6 +896,62 @@ async function searchMemberDashboard(query) {
   return { jobs, trainings };
 }
 
+/*****************************************
+ * Delivery payment here
+ */
+/* ---------- Payments ---------- */
+async function createPayment(data) {
+  const inserted = await db("payments").insert(data).returning("*");
+  return inserted[0];
+}
+
+async function getAllPendingPayments() {
+  return await db("payments as p")
+    .join("accounts as a", "p.account_id", "a.id")
+    .where("p.payment_status", "Pending")
+    .select("p.*", "a.full_name", "a.email", "a.phone_number", "a.account_type")
+    .orderBy("p.created_at", "asc");
+}
+
+async function getRecentPendingPayments(limit = 3) {
+  const all = await getAllPendingPayments();
+  return all.slice(0, limit);
+}
+
+async function countPendingPayments() {
+  const result = await db("payments").where("payment_status", "Pending").count("id as count").first();
+  return parseInt(result.count, 10);
+}
+
+async function approvePayment(id, adminId) {
+  const payment = await db("payments").where({ id }).first();
+  if (!payment) return null;
+
+  await db("payments").where({ id }).update({
+    payment_status: "Approved",
+    verified_by: adminId,
+    verified_at: db.fn.now(),
+  });
+  await db("accounts").where({ id: payment.account_id }).update({ status: "active" });
+  return payment;
+}
+
+async function rejectPayment(id, adminId) {
+  return await db("payments").where({ id }).update({
+    payment_status: "Rejected",
+    verified_by: adminId,
+    verified_at: db.fn.now(),
+  });
+}
+
+async function getAllPaymentHistory() {
+  return await db("payments as p")
+    .join("accounts as a", "p.account_id", "a.id")
+    .select("p.*", "a.full_name", "a.email")
+    .orderBy("p.created_at", "desc");
+}
+// end here payments
+
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
   getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
@@ -903,6 +959,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory
 
 };

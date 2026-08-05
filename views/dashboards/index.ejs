@@ -111,9 +111,15 @@
           </div>
         </div>
 
-        <a href="#" class="db-nav-link">
+        <!-- <a href="#" class="db-nav-link">
           <i class="bi bi-check2-square"></i> Approvals
           <span class="db-nav-badge">32</span>
+        </a> -->
+        <a href="#" id="allPaymentsLink2" class="db-nav-link">
+            <i class="bi bi-check2-square"></i> Approvals
+           <% if (pendingPaymentCount > 0) { %>
+           <span class="db-nav-badge"><%= pendingPaymentCount %></span>
+         <% } %>
         </a>
 
         <div class="db-nav-heading">Administration</div>
@@ -152,7 +158,12 @@
           </button>
           <div>
             <div class="db-welcome">Welcome, <%= account.full_name %></div>
-            <div class="db-role">Role: <%= account.account_type %></div>
+            <div class="db-role">
+              Role:<%= account.account_type %>
+              <% if (account.is_online){%>
+              <span class="online-status"><span class="online-dot"></span> Online</span>
+              <%}%>
+            </div>
           </div>
         </div>
 
@@ -420,6 +431,35 @@
             </div>
 
             <div class="db-card">
+          <div class="db-panel-title">Pending Approvals</div>
+
+          <% if (recentPendingPayments && recentPendingPayments.length > 0) { %>
+        <% recentPendingPayments.forEach(p => { %>
+          <div class="db-approval-item">
+        <span class="db-approval-avatar"><%= p.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() %></span>
+        <div class="db-approval-info">
+          <span><%= p.full_name %></span>
+          <small>Payment for <%= p.membership_plan %> Membership</small>
+          <small class="db-approval-amount">TZS <%= Number(p.amount).toLocaleString() %></small>
+        </div>
+        <div class="db-approval-actions">
+          <form action="/account/payments/<%= p.id %>/approve" method="POST" style="display:inline;">
+            <button type="submit" class="db-btn-approve">Approve</button>
+          </form>
+          <form action="/account/payments/<%= p.id %>/reject" method="POST" style="display:inline;">
+            <button type="submit" class="db-btn-reject">Reject</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:16px 0;">No pending payments.</p>
+  <% } %>
+
+  <a href="#" id="allPaymentsLink" class="db-view-all">View all payments <i class="bi bi-arrow-right"></i></a>
+</div>
+
+            <!-- <div class="db-card">
               <div class="db-panel-title">Pending Approvals</div>
 
               <div class="db-approval-item">
@@ -462,7 +502,7 @@
               </div>
 
               <a href="#" class="db-view-all">View all payments <i class="bi bi-arrow-right"></i></a>
-            </div>
+            </div> -->
 
           </div>
           <!-- end db-bottom-grid -->
@@ -685,6 +725,7 @@
 <%- include('all-members') %>
 <%- include('all-team-members') %>
 <%- include('registered-users') %>
+<%- include('all-payments') %>
       </div>
       <!-- end db-content -->
     </div>

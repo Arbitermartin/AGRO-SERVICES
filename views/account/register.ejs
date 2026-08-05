@@ -206,35 +206,61 @@
           </div>
         </div>
 
-        <!-- Step 4: Payment -->
-        <div class="step-card" id="step-4" style="display:none;">
-          <div class="step-header">
-            <div class="step-number">4</div>
-            <h2>Complete payment</h2>
-          </div>
+      <!-- Step 4: Payment -->
+         <div class="step-card" id="step-4" style="display:none;">
+         <div class="step-header">
+    <div class="step-number">4</div>
+    <h2>Complete payment</h2>
+  </div>
 
-          <div style="background:#f1f8e9;padding:20px;border-radius:12px;margin-bottom:24px;">
-            <p><strong>Standard Plan — TZS 25,000</strong></p>
-          </div>
+  <div style="background:#f1f8e9;padding:20px;border-radius:12px;margin-bottom:24px;">
+    <p><strong>Standard Plan — TZS 25,000</strong></p>
+  </div>
 
-          <div class="payment-methods">
-            <div class="payment-method selected" onclick="selectPayment(0)">
-              <input type="radio" name="payment_method" value="Mobile Money" checked hidden>
-              <i class="bi bi-phone"></i>
-              <span>Mobile Money (M-Pesa/Tigo)</span>
-            </div>
+  <div class="payment-methods">
+    <div class="payment-method selected" onclick="selectPayment(0)">
+      <input type="radio" name="payment_method" value="Mobile Money" checked hidden>
+      <i class="bi bi-phone"></i>
+      <span>Mobile Money (M-Pesa/Tigo)</span>
+    </div>
 
-            <div class="payment-method" onclick="selectPayment(1)">
-              <input type="radio" name="payment_method" value="Bank Transfer" hidden>
-              <i class="bi bi-bank"></i>
-              <span>Bank Transfer</span>
-            </div>
-          </div>
+    <div class="payment-method" onclick="selectPayment(1)">
+      <input type="radio" name="payment_method" value="Bank Transfer" hidden>
+      <i class="bi bi-bank"></i>
+      <span>Bank Transfer</span>
+    </div>
+  </div>
 
-          <button type="button" onclick="nextStep(4)" class="btn btn-filled btn-block" style="margin-top:30px;">
-            I've Made Payment
-          </button>
-        </div>
+  <div id="bankDetailsFields" style="display:none; margin-top:20px;">
+    <div class="form-field">
+      <label>Bank Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-bank input-icon"></i>
+        <select name="bank_name">
+          <option value="">Select bank</option>
+          <option value="CRDB Bank">CRDB Bank</option>
+          <option value="NMB Bank">NMB Bank</option>
+          <option value="NBC Bank">NBC Bank</option>
+          <option value="Equity Bank">Equity Bank</option>
+          <option value="Stanbic Bank">Stanbic Bank</option>
+          <option value="DTB Bank">DTB Bank</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Account Number Used</label>
+      <div class="input-wrap">
+        <i class="bi bi-credit-card-2-front input-icon"></i>
+        <input type="text" name="bank_account_number" placeholder="Enter the account number you paid from">
+      </div>
+    </div>
+  </div>
+
+  <button type="button" onclick="nextStep(4)" class="btn btn-filled btn-block" style="margin-top:30px;">
+    I've Made Payment
+  </button>
+</div>
 
         <!-- Step 5: Upload -->
         <div class="step-card" id="step-5" style="display:none;">

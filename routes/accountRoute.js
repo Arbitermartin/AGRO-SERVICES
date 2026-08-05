@@ -532,4 +532,21 @@ router.get("/members/:id/profile/download",
         utilities.checkLogin, 
         utilities.handleErrors(accountController.searchMember));
 
+        /*********************
+         * payment check
+         */
+        router.post(
+  "/payments/:id/approve",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.handleErrors(accountController.approvePaymentPost)
+);
+
+router.post(
+  "/payments/:id/reject",
+  utilities.checkLogin,
+  utilities.checkRole("admin"),
+  utilities.handleErrors(accountController.rejectPaymentPost)
+);
+
 module.exports= router

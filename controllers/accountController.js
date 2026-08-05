@@ -45,16 +45,41 @@ async function buildLogin(req,res) {
  * *************************************** */
 async function registerAccount(req, res) {
   try {
-    const { fullName, email, Phone_number, password } = req.body;
+    const {
+      fullName,
+      email,
+      Phone_number,
+      password,
+      membership_plan,
+      payment_method,
+      transaction_reference,
+      bank_name,
+      bank_account_number,
+    } = req.body;
+
     const hashedPassword = await bcrypt.hash(password, 10);
+    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword);
 
-    await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword);
+    if (req.file) {
+      const planPrices = { Basic: 10000, Standard: 25000, Premium: 50000 };
+      const amount = planPrices[membership_plan] || 25000;
 
-    req.flash("success", "Registration successful. Please log in.");
+      await accountModel.createPayment({
+        account_id: newAccount.id,
+        membership_plan: membership_plan || "Standard",
+        amount,
+        payment_method: payment_method || "Mobile Money",
+        transaction_reference: transaction_reference || "N/A",
+        bank_name: payment_method === "Bank Transfer" ? bank_name : null,
+        bank_account_number: payment_method === "Bank Transfer" ? bank_account_number : null,
+        payment_proof: `/uploads/${req.file.filename}`,
+      });
+    }
+
+    req.flash("success", "Registration successful! Your payment is under review. You'll be notified once approved.");
     res.redirect("/account/login");
   } catch (error) {
     console.error(error);
-
     if (error.code === "23505") {
       req.flash("error", "Email already exists. Please log in or use another email.");
       return res.redirect("/account/register");
@@ -63,6 +88,26 @@ async function registerAccount(req, res) {
     res.status(500).send("Registration failed.");
   }
 }
+// async function registerAccount(req, res) {
+//   try {
+//     const { fullName, email, Phone_number, password } = req.body;
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword);
+
+//     req.flash("success", "Registration successful. Please log in.");
+//     res.redirect("/account/login");
+//   } catch (error) {
+//     console.error(error);
+
+//     if (error.code === "23505") {
+//       req.flash("error", "Email already exists. Please log in or use another email.");
+//       return res.redirect("/account/register");
+//     }
+
+//     res.status(500).send("Registration failed.");
+//   }
+// }
 /* ****************************************
  * Process login and redirect based on role
  * *************************************** */
@@ -139,7 +184,11 @@ function getInitials(fullName) {
  * *************************************** */
 async function buildAdminDashboard(req, res) {
   let nav = await utilities.getNav();
-  const account = req.session.account;
+   const account = req.session.account;
+
+  const freshAccount = await accountModel.getAccountById(account.id);
+  account.is_online = freshAccount.is_online;
+
   const profile = (await accountModel.getProfileByAccountId(account.id)) || {};
 
   if (profile.profile_photo && account.profile_photo !== profile.profile_photo) {
@@ -163,6 +212,12 @@ async function buildAdminDashboard(req, res) {
   const newMembersThisMonth = await accountModel.countNewMembersThisMonth();
   const totalAdmins = await accountModel.countAdminsOnly();
   const allTeamMembers = await accountModel.getAllTeamMembers();
+
+    // ✅ Payments
+  const pendingPayments = await accountModel.getAllPendingPayments();
+  const recentPendingPayments = await accountModel.getRecentPendingPayments(3);
+  const pendingPaymentCount = await accountModel.countPendingPayments();
+  const allPaymentHistory = await accountModel.getAllPaymentHistory();
  
 
   res.render("dashboards/index", {
@@ -188,6 +243,10 @@ async function buildAdminDashboard(req, res) {
     totalAdmins,
     allTeamMembers,
     allEventRegistrations,
+     pendingPayments,
+    recentPendingPayments,
+    pendingPaymentCount,
+    allPaymentHistory,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -1565,6 +1624,48 @@ async function searchMember(req, res) {
 }
 //end here search.
 
+/*************************
+ * 
+ * Delivery payment here
+ */
+
+/* ---------- Approve / Reject payments (admin) ---------- */
+async function approvePaymentPost(req, res) {
+  try {
+    const { id } = req.params;
+    const adminId = req.session.account.id;
+    const payment = await accountModel.approvePayment(id, adminId);
+
+    if (!payment) {
+      req.flash("error", "Payment not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    req.flash("success", "Payment approved. Member account is now active.");
+    res.redirect("/account/dashboard/admin?paymentUpdated=true");
+  } catch (error) {
+    console.error("APPROVE PAYMENT ERROR:", error);
+    req.flash("error", "Failed to approve payment.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function rejectPaymentPost(req, res) {
+  try {
+    const { id } = req.params;
+    const adminId = req.session.account.id;
+    await accountModel.rejectPayment(id, adminId);
+
+    req.flash("success", "Payment rejected.");
+    res.redirect("/account/dashboard/admin?paymentUpdated=true");
+  } catch (error) {
+    console.error("REJECT PAYMENT ERROR:", error);
+    req.flash("error", "Failed to reject payment.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here
+
 /* ****************************************
  * Logout
  * *************************************** */
@@ -1606,5 +1707,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,accountLogout
+  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,accountLogout
 }
