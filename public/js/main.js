@@ -1575,6 +1575,28 @@ if (cancelAllPayments && allPaymentsPanel && dbMainContent) {
 }
 // end here
 
+// show all members
+const ictAllMembersLink = document.getElementById('ictAllMembersLink');
+const ictAllMembersPanel = document.getElementById('ictAllMembersPanel');
+const cancelIctAllMembers = document.getElementById('cancelIctAllMembers');
+
+if (ictAllMembersLink && ictAllMembersPanel && dbMainContent) {
+  ictAllMembersLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    ictAllMembersPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelIctAllMembers && ictAllMembersPanel && dbMainContent) {
+  cancelIctAllMembers.addEventListener('click', (e) => {
+    e.preventDefault();
+    ictAllMembersPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here show all members
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

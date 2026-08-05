@@ -45,9 +45,7 @@ async function updatePassword(id, hashedPassword) {
 // end here for password change
 
 // Delivery update profile
-// async function updateProfilePhoto(accountId, photoPath) {
-//   return await db("profiles").where({account_id: accountId }).update({ profile_photo: photoPath });
-// }
+
 async function upsertProfile(accountId, data) {
   const existing = await getProfileByAccountId(accountId);
   if (existing) {
@@ -952,6 +950,39 @@ async function getAllPaymentHistory() {
 }
 // end here payments
 
+/*****************************************
+ * 
+ * Delivery member to be viewed by ict
+ * 
+ */
+async function getAllMembersOnly() {
+  return await db("accounts").where("account_type", "member").orderBy("full_name", "asc");
+}
+
+async function getFullMemberDetailsForIct(accountId) {
+  const memberAccount = await db("accounts").where({ id: accountId }).first();
+  if (!memberAccount) return null;
+
+  const profile = await db("profiles").where({ account_id: accountId }).first();
+  let birthPlace = null;
+
+  if (profile) {
+    birthPlace = await db("birth_places").where({ profile_id: profile.id }).first();
+  }
+
+  return { memberAccount, profile: profile || {}, birthPlace: birthPlace || {} };
+}
+
+async function permanentlyDeleteAccount(accountId) {
+  return await db("accounts").where({ id: accountId }).del();
+}
+
+async function adminResetPassword(accountId, hashedPassword) {
+  return await db("accounts").where({ id: accountId }).update({ password: hashedPassword });
+}
+// end here member to be viewed by ict staff
+
+
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
   getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
@@ -959,6 +990,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword
 
 };

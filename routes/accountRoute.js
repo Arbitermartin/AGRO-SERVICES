@@ -1,8 +1,6 @@
-/*
-Account route
-Deliver a login view
-*/
-// need resources
+/***********************
+ * ACCOUNT ROUTE
+ */
 const express =require("express")
 const router =new express.Router()
 const accountController =require("../controllers/accountController")
@@ -11,6 +9,7 @@ const regValidate = require('../utilities/account-validation')
 const multer = require("multer");
 const path =require("path");
 const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 
 const upload = multer({
   dest: "public/images/site/"
@@ -244,11 +243,23 @@ router.post("/events/:event_id/delete",
 /* ****************************************
  * Deliver views
  * *************************************** */
+
+//Login rate limiter now
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 3,
+  handler: (req, res) => {
+    req.flash("error", "Too many login attempts. Please try again after 10 minutes.");
+    return res.redirect("/account/login");   // safe now — GET isn't rate-limited
+  },
+});
+
 router.get("/login", utilities.handleErrors(accountController.buildLogin));
 
 // Process the login request
 router.post(
     "/login",
+    loginLimiter,
     regValidate.loginRules(),
     regValidate.checkLoginData,
     utilities.handleErrors(accountController.accountLogin)
@@ -548,5 +559,23 @@ router.post(
   utilities.checkRole("admin"),
   utilities.handleErrors(accountController.rejectPaymentPost)
 );
+
+/************************
+ * Delivery ict to delete member
+ */
+router.post(
+  "/members/:id/reset-password",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  utilities.handleErrors(accountController.ictResetMemberPassword)
+);
+
+router.post(
+  "/members/:id/delete",
+  utilities.checkLogin,
+  utilities.checkRole("ict_staff"),
+  utilities.handleErrors(accountController.ictDeleteMember)
+);
+// end here
 
 module.exports= router

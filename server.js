@@ -37,18 +37,14 @@ app.use(cookieParser());
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 150,
-  message: "Too many requests from this IP. Please try again later.",
+  handler: (req, res) => {
+    req.flash("error", "Too many requests. Please try again later.");
+    res.redirect(req.headers.referer || "/");
+  },
 });
+
 app.use(generalLimiter);
 
-// const loginLimiter = rateLimit({
-//   windowMs: 10 * 60 * 1000,
-//   max: 5,
-//   message: "Too many login attempts. Please try again after 10 minutes.",
-// });
-
-// app.use(generalLimiter);
-// app.use("/account/login", loginLimiter);
 
 //4: Session Configuration (Improved Security)
 app.use(session({
@@ -70,16 +66,7 @@ app.use(function(req, res, next){
 // track online ict stafff
 app.use(utilities.trackPresence);
 
-//Login rate limiter now
-const loginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 3,
-  handler: (req, res) => {
-    req.flash("error", "Too many login attempts. Please try again after 10 minutes.");
-    res.redirect("/account/login");
-  },
-});
-app.use("/account/login", loginLimiter);
+
 
 /*********************************
  * This is view template engine

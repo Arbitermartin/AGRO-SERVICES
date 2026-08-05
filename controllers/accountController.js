@@ -7,14 +7,9 @@ const db = require('../database/db');
 const { title } = require("process");
 const { error } = require("console");
 
-async function accountManagement(req,res,next){
-    res.render("dashboards/index", {
-        title: "YASNET Dashboard",
 
-      })
 
-      
-}
+
 /* ****************************************
  * Deliver registration view
  * *************************************** */
@@ -88,26 +83,7 @@ async function registerAccount(req, res) {
     res.status(500).send("Registration failed.");
   }
 }
-// async function registerAccount(req, res) {
-//   try {
-//     const { fullName, email, Phone_number, password } = req.body;
-//     const hashedPassword = await bcrypt.hash(password, 10);
 
-//     await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword);
-
-//     req.flash("success", "Registration successful. Please log in.");
-//     res.redirect("/account/login");
-//   } catch (error) {
-//     console.error(error);
-
-//     if (error.code === "23505") {
-//       req.flash("error", "Email already exists. Please log in or use another email.");
-//       return res.redirect("/account/register");
-//     }
-
-//     res.status(500).send("Registration failed.");
-//   }
-// }
 /* ****************************************
  * Process login and redirect based on role
  * *************************************** */
@@ -329,38 +305,7 @@ async function createJob(req, res) {
 /***************************************
  * Delivery Update profile page
  *********************/
-// async function updateProfile(req, res) {
-//   try {
-//     const accountId = req.session.account.id;
-//     const { full_name, date_of_birth, gender, nationality, bio, region, district, ward, department, office, admin_role } = req.body;
 
-//     await accountModel.updateFullName(accountId, full_name);
-//     req.session.account.full_name = full_name;
-
-//      const profileData = { date_of_birth, gender, nationality, bio };
-
-//      // ✅ Save photo if one was uploaded
-//      if (req.file) {
-//       profileData.profile_photo = `/images/profile_photos/${req.file.filename}`;
-//       req.session.account.profile_photo = profileData.profile_photo;
-//     }
-
-//     // const profile = await accountModel.upsertProfile(accountId, { date_of_birth, gender, nationality, bio });
-//     // await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
-//     // await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
-//      const profile = await accountModel.upsertProfile(accountId, profileData);
-//     await accountModel.upsertBirthPlace(profile.id, { region, district, ward });
-//     await accountModel.upsertAdminDetails(profile.id, { department, office, admin_role });
-
-
-//     req.flash("success", "Profile updated successfully.");
-//     res.redirect("/account/dashboard/admin?profileUpdated=true");
-//   } catch (error) {
-//     console.error(error);
-//     req.flash("error", "Failed to update profile.");
-//     res.redirect("/account/dashboard/admin");
-//   }
-// }
 async function updateProfile(req, res) {
   try {
     const accountId = req.session.account.id;
@@ -502,6 +447,13 @@ async function buildIctStaffDashboard(req, res) {
   const allTeamMembers = await accountModel.getAllTeamMembers();
   const allMessages = await accountModel.getAllContactMessages();
   const unreadMessageCount = await accountModel.countUnreadContactMessages();
+
+  //Members + full details, pre-loaded for inline view
+  const allMembersOnly = await accountModel.getAllMembersOnly();
+  const memberDetailsMap = {};
+  for (const m of allMembersOnly) {
+    memberDetailsMap[m.id] = await accountModel.getFullMemberDetailsForIct(m.id);
+  }
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -520,6 +472,8 @@ async function buildIctStaffDashboard(req, res) {
     allTeamMembers,
     allMessages,
     unreadMessageCount,
+    allMembersOnly,
+    memberDetailsMap,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -1463,26 +1417,7 @@ async function submitEventRegistration(req, res) {
  * 
  * Delivery registered users for events
  */
-// async function viewEventRegistrations(req, res) {
-//   try {
-//     let nav = await utilities.getNav();
-//     const allEventRegistrations = await accountModel.getAllEventRegistrations();
 
-//     res.render("dashboards/registered-users", {
-//       title: "Registered Users",
-//       nav,
-//       account: req.session.account,
-//       initials: getInitials(req.session.account.full_name),
-//       allEventRegistrations,
-//       success: req.flash("success"),
-//       error: req.flash("error"),
-//     });
-//   } catch (error) {
-//     console.error("VIEW EVENT REGISTRATIONS ERROR:", error);
-//     req.flash("error", "Failed to load registered users.");
-//     res.redirect("/account/dashboard/admin");
-//   }
-// }
 
 async function deleteEventRegistrationPost(req, res) {
   try {
@@ -1666,6 +1601,52 @@ async function rejectPaymentPost(req, res) {
 }
 // end here
 
+/***********************************
+ * delivery ict to reset password
+ */
+async function ictResetMemberPassword(req, res) {
+  try {
+    const { id } = req.params;
+    const { new_password, confirm_new_password } = req.body;
+
+    if (new_password !== confirm_new_password) {
+      req.flash("error", "Passwords do not match.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await accountModel.adminResetPassword(id, hashedPassword);
+
+    req.flash("success", "Member's password has been reset successfully.");
+    res.redirect("/account/dashboard/ict-staff?membersUpdated=true");
+  } catch (error) {
+    console.error("ICT RESET PASSWORD ERROR:", error);
+    req.flash("error", "Failed to reset password.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function ictDeleteMember(req, res) {
+  try {
+    const { id } = req.params;
+    const memberAccount = await accountModel.getAccountById(id);
+
+    if (!memberAccount || memberAccount.account_type !== "member") {
+      req.flash("error", "Member not found.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    await accountModel.permanentlyDeleteAccount(id);
+
+    req.flash("success", `${memberAccount.full_name}'s account has been permanently deleted.`);
+    res.redirect("/account/dashboard/ict-staff?membersUpdated=true");
+  } catch (error) {
+    console.error("ICT DELETE MEMBER ERROR:", error);
+    req.flash("error", "Failed to delete member.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
 /* ****************************************
  * Logout
  * *************************************** */
@@ -1685,27 +1666,10 @@ function accountLogout(req, res) {
     res.redirect("/account/login");
   });
 }
-// async function accountLogout(req, res) {
-//   try {
-//     if (req.session.account && req.session.account.loginLogId) {
-//       await accountModel.recordLogout(req.session.account.loginLogId);
-//     }
-//   req.flash("success","You have been logged out successfully.");
-//   const flashMessages =req.session.flash;
 
-//   req.session.regenerate((err)=>{
-//     if(err) console.error(err);
-//     req.session.flash =flashMessages;
-//     res.redirect("/account/login")
-//   }) 
-// } catch (error) {
-//   console.error("LOGOUT ERROR:", error);
-//   res.redirect("/account/login");
-// }
-// };
 
 
 
 module.exports={
-  accountManagement,buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,accountLogout
 }

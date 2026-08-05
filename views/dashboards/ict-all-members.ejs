@@ -1,0 +1,80 @@
+<div id="ictAllMembersPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-people"></i></div>
+    <h2>All Members</h2>
+    <p>View and manage member accounts</p>
+  </div>
+
+  <% if (allMembersOnly && allMembersOnly.length > 0) { %>
+    <% allMembersOnly.forEach(m => { %>
+      <% const details = memberDetailsMap[m.id]; %>
+      <div class="manage-item" data-item-id="<%= m.id %>">
+        <div class="manage-item-summary">
+          <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+          <div class="manage-item-info">
+            <h4><%= m.full_name %></h4>
+            <small><%= m.email %> &middot; <%= m.status %></small>
+          </div>
+          <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-eye"></i> View</button>
+        </div>
+
+        <div class="manage-edit-form" style="display:none;">
+
+          <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin-bottom:8px;">Account Information</h5>
+          <div class="db-profile-row"><span>Phone</span><b><%= m.phone_number || 'N/A' %></b></div>
+          <div class="db-profile-row"><span>Status</span><b><%= m.status %></b></div>
+          <div class="db-profile-row"><span>Joined</span><b><%= new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></b></div>
+
+          <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin:16px 0 8px;">Personal Information</h5>
+          <% if (details.profile.id) { %>
+            <div class="db-profile-row"><span>Date of Birth</span><b><%= details.profile.date_of_birth ? new Date(details.profile.date_of_birth).toLocaleDateString('en-GB') : 'N/A' %></b></div>
+            <div class="db-profile-row"><span>Gender</span><b><%= details.profile.gender || 'N/A' %></b></div>
+            <div class="db-profile-row"><span>Nationality</span><b><%= details.profile.nationality || 'N/A' %></b></div>
+          <% } else { %>
+            <p style="color:#9ca3af; font-size:0.85rem;">No additional profile information provided.</p>
+          <% } %>
+
+          <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin:16px 0 8px;">Place of Birth</h5>
+          <% if (details.birthPlace.id) { %>
+            <div class="db-profile-row"><span>Region</span><b><%= details.birthPlace.region || 'N/A' %></b></div>
+            <div class="db-profile-row"><span>District</span><b><%= details.birthPlace.district || 'N/A' %></b></div>
+          <% } else { %>
+            <p style="color:#9ca3af; font-size:0.85rem;">Not provided.</p>
+          <% } %>
+
+          <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin:16px 0 8px;">Reset Password</h5>
+          <form action="/account/members/<%= m.id %>/reset-password" method="POST" class="auth-form">
+            <div class="form-field">
+              <label>New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" name="new_password" placeholder="New password" pattern="^.{8,}$" required>
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Confirm New Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" name="confirm_new_password" placeholder="Confirm new password" pattern="^.{8,}$" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-filled" style="margin-top:8px;">Reset Password</button>
+          </form>
+
+          <form action="/account/members/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Permanently delete this member? This cannot be undone.');" style="margin-top:16px;">
+            <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#c0392b; width:100%;">
+              <i class="bi bi-trash"></i> Delete Permanently
+            </button>
+          </form>
+
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:20px;">No members found.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelIctAllMembers"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>
