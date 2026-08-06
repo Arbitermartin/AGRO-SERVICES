@@ -1,0 +1,32 @@
+<section class="news-details-page">
+  <div class="container" style="max-width: 760px;">
+
+    <div class="news-details-back">
+      <a href="/"><i class="bi bi-arrow-left"></i> Back to Home</a>
+    </div>
+
+    <div class="news-details-card">
+
+      <% if (newsItem.profile_image) { %>
+        <div class="news-details-image">
+          <img src="<%= newsItem.profile_image %>" alt="<%= newsItem.title %>" loading="lazy">
+        </div>
+      <% } %>
+
+      <div class="news-details-body">
+        <span class="news-details-date">
+          <i class="bi bi-calendar-event"></i>
+          <%= new Date(newsItem.news_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+        </span>
+
+        <h1 class="news-details-title"><%= newsItem.title %></h1>
+
+        <div class="news-details-text">
+          <%= newsItem.description %>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>

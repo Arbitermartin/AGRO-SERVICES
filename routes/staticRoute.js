@@ -105,4 +105,8 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       utilities.handleErrors(accountController.submitEventRegistration));
       // end here
 
+// news datails
+router.get("/news/:id", 
+  utilities.handleErrors(accountController.viewNewsDetails));
+
   module.exports = router

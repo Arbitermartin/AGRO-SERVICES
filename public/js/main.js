@@ -30,6 +30,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   // team page
+
+// /* =====================================================
+//    EVENT REGISTRATION — Country / Region cascade
+// ===================================================== */
+const countrySelect = document.getElementById('countrySelect');
+const regionSelect = document.getElementById('regionSelect');
+
+if (countrySelect && regionSelect) {
+  const regionsByCountry = {
+    Tanzania: ["Arusha","Dar es Salaam", "Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma","Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza","Njombe","Pwani(Coast)","Rukwa","Ruvuma","Shinyanga","Simiyu","Singida","Songwe","Tabora","Tanga","Kaskazini Pemba","Kusini Pemba","Kaskazini Unguja","Kusini Unguja","Mjini Magharibi"],
+    Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
+    Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
+    Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
+    Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
+    "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
+    Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
+    Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
+    Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
+    Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
+  };
+
+  countrySelect.addEventListener('change', () => {
+    const selectedCountry = countrySelect.value;
+    const regions = regionsByCountry[selectedCountry] || [];
+
+    regionSelect.innerHTML = '';
+
+    if (regions.length === 0) {
+      regionSelect.innerHTML = '<option value="">Select country first</option>';
+      return;
+    }
+
+    regionSelect.innerHTML = '<option value="">Select region</option>' +
+      regions.map(r => `<option value="${r}">${r}</option>`).join('');
+  });
+}
+// // end here for form for events
+
+
+
 /* =====================================================
    TEAM PAGE — bio toggle
 ===================================================== */
@@ -1612,41 +1652,5 @@ if (cancelIctAllMembers && ictAllMembersPanel && dbMainContent) {
 
 }); // end DOMContentLoaded
 
-// /* =====================================================
-//    EVENT REGISTRATION — Country / Region cascade
-// ===================================================== */
-// const countrySelect = document.getElementById('countrySelect');
-// const regionSelect = document.getElementById('regionSelect');
-
-// if (countrySelect && regionSelect) {
-//   const regionsByCountry = {
-//     Tanzania: ["Arusha","Dar es Salaam", "Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma","Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza","Njombe","Pwani(Coast)","Rukwa","Ruvuma","Shinyanga","Simiyu","Singida","Songwe","Tabora","Tanga","Kaskazini Pemba","Kusini Pemba","Kaskazini Unguja","Kusini Unguja","Mjini Magharibi"],
-//     Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
-//     Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
-//     Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
-//     Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
-//     "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
-//     Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
-//     Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
-//     Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
-//     Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
-//   };
-
-//   countrySelect.addEventListener('change', () => {
-//     const selectedCountry = countrySelect.value;
-//     const regions = regionsByCountry[selectedCountry] || [];
-
-//     regionSelect.innerHTML = '';
-
-//     if (regions.length === 0) {
-//       regionSelect.innerHTML = '<option value="">Select country first</option>';
-//       return;
-//     }
-
-//     regionSelect.innerHTML = '<option value="">Select region</option>' +
-//       regions.map(r => `<option value="${r}">${r}</option>`).join('');
-//   });
-// }
-// // end here for form for events
 
 

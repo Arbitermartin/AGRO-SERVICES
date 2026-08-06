@@ -164,7 +164,7 @@
 /* Image */
 .news-image img{
   width:100%;
-  height:220px;
+  height:400px;
   object-fit:cover;
 }
 
@@ -231,6 +231,83 @@
   display:block;
   font-size:.9rem;
 }
+
+/* delivery view full updates for news  */
+.news-details-page {
+  background: var(--bg-main, #f4f8f2);
+  padding: 40px 0 80px;
+  min-height: 60vh;
+}
+
+.news-details-back {
+  margin-bottom: 20px;
+}
+
+.news-details-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-green, #2e7d32);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.news-details-back a:hover {
+  text-decoration: underline;
+}
+
+.news-details-card {
+  background: var(--bg-card, #fff);
+  border-radius: var(--radius-md, 16px);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.news-details-image {
+  width: 100%;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+}
+
+.news-details-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.news-details-body {
+  padding: 32px;
+}
+
+.news-details-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted, #9ca3af);
+  margin-bottom: 14px;
+}
+
+.news-details-title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--text-primary, #1b1b1b);
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+/* ✅ readable, responsive body text */
+.news-details-text {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: var(--text-secondary, #4b5563);
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+/* end here */
+
 /*********************************************
 Deliverys style for manage news and events
 ******************************/
@@ -3391,6 +3468,25 @@ Delivery style for job view in admin dashboard
     .application-details-inner {
       padding-left: 0;
     }
+
+    /* view news update full delivery here */
+     .news-details-body {
+    padding: 22px;
+  }
+
+  .news-details-title {
+    font-size: 1.3rem;
+  }
+
+  .news-details-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  .news-details-image {
+    aspect-ratio: 16 / 9;
+  }
+  /* end here news repsonsive view */
 }
 @media (max-width:480px){
 
