@@ -1,0 +1,90 @@
+<div id="adminManagementPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-shield-lock"></i></div>
+    <h2>Admin Management</h2>
+    <p>Manage administrator accounts and roles</p>
+  </div>
+
+  <% if (!isSuperAdmin) { %>
+    <div style="background:#fff8e1; border-radius:10px; padding:16px; margin-bottom:20px; text-align:center; color:#f57f17; font-size:0.88rem;">
+      <i class="bi bi-lock"></i> Only Super Admins can create, edit, or remove administrator accounts.
+    </div>
+  <% } %>
+
+  <table class="db-table">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% allAdminAccounts.forEach(a => { %>
+        <tr>
+          <td><%= a.full_name %></td>
+          <td><%= a.email %></td>
+          <td>
+            <span class="db-badge-status <%= a.admin_level === 'super_admin' ? 'db-badge-priority db-badge-high' : 'db-badge-progress' %>">
+              <%= a.admin_level === 'super_admin' ? 'Super Admin' : 'Minor Admin' %>
+            </span>
+          </td>
+          <td>
+            <% if (isSuperAdmin) { %>
+              <form action="/account/admins/<%= a.id %>/update-level" method="POST" style="display:inline;">
+                <select name="admin_level" onchange="this.form.submit()" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border-color); font-size:0.8rem;">
+                  <option value="minor_admin" <%= a.admin_level === 'minor_admin' ? 'selected' : '' %>>Minor Admin</option>
+                  <option value="super_admin" <%= a.admin_level === 'super_admin' ? 'selected' : '' %>>Super Admin</option>
+                </select>
+              </form>
+              <% if (a.id !== account.id) { %>
+                <form action="/account/admins/<%= a.id %>/delete" method="POST" onsubmit="return confirm('Remove this admin account?');" style="display:inline;">
+                  <button type="submit" class="btn-outline-sm manage-delete-btn">Delete</button>
+                </form>
+              <% } %>
+            <% } else { %>
+              <span style="font-size:0.78rem; color:#9ca3af;">No permission</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <% if (isSuperAdmin) { %>
+    <h3 class="profile-section-title" style="margin-top:30px;">Create New Admin</h3>
+    <form action="/account/admins/create" method="POST" class="auth-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Full Name</label>
+          <div class="input-wrap"><i class="bi bi-person input-icon"></i><input type="text" name="fullName" required></div>
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <div class="input-wrap"><i class="bi bi-envelope input-icon"></i><input type="email" name="email" required></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Phone Number</label>
+          <div class="input-wrap"><i class="bi bi-telephone input-icon"></i><input type="tel" name="phoneNumber" required></div>
+        </div>
+        <div class="form-field">
+          <label>Password</label>
+          <div class="input-wrap"><i class="bi bi-lock input-icon"></i><input type="password" name="password" pattern="^.{8,}$" required></div>
+        </div>
+        <div class="form-field">
+          <label>Admin Role</label>
+          <div class="input-wrap">
+            <i class="bi bi-shield input-icon"></i>
+            <select name="adminLevel" required>
+              <option value="minor_admin">Minor Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-filled btn-block">Create Admin</button>
+    </form>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelAdminManagement"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

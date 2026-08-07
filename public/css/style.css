@@ -1810,16 +1810,63 @@ Deliverys style for manage news and events
   border: none;
 }
 
-.db-notif-dot {
+/* notification style */
+.db-notif-menu { position: relative; }
+
+.db-notif-count {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--danger);
-  border: 2px solid var(--bg-navbar);
+  top: -4px;
+  right: -6px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
 }
+
+.db-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  z-index: 999;
+  display: none;
+}
+.db-notif-dropdown.open { display: block; }
+
+.db-notif-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid #f0f0f0;
+  font-weight: 700; font-size: 0.9rem;
+}
+.db-notif-header a { font-size: 0.78rem; color: #2e7d32; font-weight: 600; text-decoration: none; }
+
+.db-notif-item {
+  display: flex; gap: 10px; padding: 12px 16px;
+  border-bottom: 1px solid #f5f5f5; font-size: 0.85rem;
+}
+.db-notif-item-body { flex: 1; }
+.db-notif-item-body b { display: block; margin-bottom: 2px; }
+.db-notif-item-body small { color: #9ca3af; font-size: 0.75rem; }
+.db-notif-item-actions { display: flex; flex-direction: column; gap: 6px; }
+.db-notif-item-actions button {
+  background: none; border: none; cursor: pointer; font-size: 0.85rem; color: #9ca3af;
+}
+.db-notif-item-actions button:hover { color: #2e7d32; }
+
+.db-notif-empty { padding: 24px; text-align: center; color: #9ca3af; font-size: 0.85rem; }
 
 /* ---------- User menu ---------- */
 .db-user-menu {

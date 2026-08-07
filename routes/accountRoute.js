@@ -578,4 +578,44 @@ router.post(
 );
 // end here
 
+/*******************
+ * 
+ * Delivery admin 
+ */
+router.post("/admins/create", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.createAdminPost));
+
+router.post("/admins/:id/update-level", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.updateAdminLevelPost));
+
+router.post("/admins/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.deleteAdminPost));
+  // end here.
+
+  /******************
+   * Delivery notifications here
+   */
+router.get("/notifications", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.getNotificationsJson));
+
+router.post("/notifications/:id/read",
+   utilities.checkLogin, 
+   utilities.handleErrors(accountController.markNotificationReadPost));
+
+router.post("/notifications/mark-all-read", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.markAllNotificationsReadPost));
+
+router.post("/notifications/:id/delete", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.deleteNotificationPost));
+  // end here.
+
 module.exports= router

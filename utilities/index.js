@@ -93,4 +93,19 @@ utilities.trackPresence = async (req, res, next) => {
   }
   next();
 };
+
+// track admins
+utilities.checkSuperAdmin = (req, res, next) => {
+  if (
+    req.session.account &&
+    req.session.account.account_type === "admin" &&
+    req.session.account.admin_level === "super_admin"
+  ) {
+    return next();
+  }
+  req.flash("error", "Only Super Admins can manage administrator accounts.");
+  return res.redirect("/account/dashboard/admin");
+};
+
+// end here
 module.exports = utilities

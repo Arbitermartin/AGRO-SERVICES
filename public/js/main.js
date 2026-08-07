@@ -1637,6 +1637,100 @@ if (cancelIctAllMembers && ictAllMembersPanel && dbMainContent) {
 }
 // end here show all members
 
+// delivery admin
+const adminManagementLink = document.getElementById('adminManagementLink');
+const adminManagementPanel = document.getElementById('adminManagementPanel');
+const cancelAdminManagement = document.getElementById('cancelAdminManagement');
+if (adminManagementLink && adminManagementPanel && dbMainContent) {
+  adminManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; adminManagementPanel.style.display='block'; });
+}
+if (cancelAdminManagement) cancelAdminManagement.addEventListener('click', (e) => { e.preventDefault(); adminManagementPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+// notifications area
+const notifToggle = document.getElementById('notifToggle');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifCount = document.getElementById('notifCount'); 
+const notifDot = document.getElementById('notifDot');
+const notifList = document.getElementById('notifList');
+const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+function loadNotifications() {
+  fetch('/account/notifications')
+    .then(res => res.json())
+    .then(items => {
+      if (notifCount) {
+        if (items.length > 0) {
+          notifCount.textContent = items.length > 9 ? '9+' : items.length;
+          notifCount.style.display = 'flex';
+        } else {
+          notifCount.style.display = 'none';
+        }
+      }
+    
+
+      notifList.innerHTML = items.map(n => `
+        <div class="db-notif-item" data-id="${n.id}">
+          <div class="db-notif-item-body">
+            <b>${n.title}</b>
+            <span>${n.message}</span><br>
+            <small>${new Date(n.created_at).toLocaleString('en-GB')}</small>
+          </div>
+          <div class="db-notif-item-actions">
+            <button class="notif-mark-read" title="Mark as read"><i class="bi bi-check-circle"></i></button>
+            <button class="notif-delete" title="Delete"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+
+      notifList.querySelectorAll('.notif-mark-read').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.db-notif-item');
+          const id = item.dataset.id;
+          fetch(`/account/notifications/${id}/read`, { method: 'POST' })
+            .then(() => { item.remove(); loadNotifications(); });
+        });
+      });
+
+      notifList.querySelectorAll('.notif-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.db-notif-item');
+          const id = item.dataset.id;
+          fetch(`/account/notifications/${id}/delete`, { method: 'POST' })
+            .then(() => { item.remove(); loadNotifications(); });
+        });
+      });
+    })
+    .catch(() => {
+      if (notifList) notifList.innerHTML = '<p class="db-notif-empty">Failed to load.</p>';
+    });
+}
+
+if (notifToggle && notifDropdown) {
+  notifToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = notifDropdown.classList.toggle('open');
+    if (isOpen) loadNotifications();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!notifDropdown.contains(e.target) && e.target !== notifToggle) {
+      notifDropdown.classList.remove('open');
+    }
+  });
+
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fetch('/account/notifications/mark-all-read', { method: 'POST' })
+        .then(() => loadNotifications());
+    });
+  }
+
+  loadNotifications();
+  setInterval(loadNotifications, 30000);
+}
+// end here
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {

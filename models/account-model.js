@@ -990,6 +990,73 @@ async function getNewsById(newsId) {
 }
 // end here news read more.
 
+/******************************
+ * 
+ * Delivery create admin 
+ */
+async function createAdminAccount(fullName, email, phoneNumber, hashedPassword, adminLevel) {
+  const account = await db("accounts")
+    .insert({
+      full_name: fullName,
+      email,
+      phone_number: phoneNumber,
+      password: hashedPassword,
+      account_type: "admin",
+      admin_level: adminLevel,
+      status: "active",
+    })
+    .returning("*");
+  return account[0];
+}
+
+async function updateAdminLevel(accountId, adminLevel) {
+  return await db("accounts").where({ id: accountId }).update({ admin_level: adminLevel });
+}
+
+async function getAllAdminAccounts() {
+  return await db("accounts").where("account_type", "admin").orderBy("full_name", "asc");
+}
+// end here create admin
+
+/**************************
+ * Delivery notifications
+ */
+async function createNotification(recipientId, title, message, link = null) {
+  return await db("notifications").insert({ recipient_id: recipientId, title, message, link });
+}
+
+async function notifyRoles(roles, title, message, link = null) {
+  const accounts = await db("accounts").whereIn("account_type", roles).select("id");
+  if (accounts.length === 0) return;
+  const rows = accounts.map(a => ({ recipient_id: a.id, title, message, link }));
+  await db("notifications").insert(rows);
+}
+
+async function getNotificationsForAccount(accountId) {
+  return await db("notifications")
+    .where({ recipient_id: accountId, is_read: false })
+    .orderBy("created_at", "desc")
+    .limit(20);
+}
+
+async function countUnreadNotifications(accountId) {
+  const result = await db("notifications").where({ recipient_id: accountId, is_read: false }).count("id as count").first();
+  return parseInt(result.count, 10);
+}
+
+async function markNotificationRead(id) {
+  return await db("notifications").where({ id }).update({ is_read: true });
+}
+
+async function markAllNotificationsRead(accountId) {
+  return await db("notifications").where({ recipient_id: accountId, is_read: false }).update({ is_read: true });
+}
+
+async function deleteNotification(id) {
+  return await db("notifications").where({ id }).del();
+}
+// end here.
+
 
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
@@ -998,6 +1065,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification
 
 };

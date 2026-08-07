@@ -122,6 +122,7 @@ async function accountLogin(req, res) {
       full_name: account.full_name,
       email: account.email,
       account_type: account.account_type,
+       admin_level: account.admin_level || null,
       loginLogId: loginLog.id,
       profile_photo: profilePhoto || null,
     };
@@ -194,6 +195,10 @@ async function buildAdminDashboard(req, res) {
   const recentPendingPayments = await accountModel.getRecentPendingPayments(3);
   const pendingPaymentCount = await accountModel.countPendingPayments();
   const allPaymentHistory = await accountModel.getAllPaymentHistory();
+
+  // admins check
+  const allAdminAccounts = await accountModel.getAllAdminAccounts();
+  const isSuperAdmin = account.admin_level === "super_admin";
  
 
   res.render("dashboards/index", {
@@ -223,6 +228,8 @@ async function buildAdminDashboard(req, res) {
     recentPendingPayments,
     pendingPaymentCount,
     allPaymentHistory,
+    allAdminAccounts,
+    isSuperAdmin,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -292,6 +299,14 @@ async function createJob(req, res) {
     console.log("JOB BODY:", req.body);
 
     await accountModel.createJob({ title, region, job_type, category, description, start_date, end_date });
+
+    // inside createJob, after insert:
+    await accountModel.notifyRoles(
+     ["member", "ict_staff"],
+      "New Job Posting",
+       `A new job "${title}" was posted.`,
+      "/jobs"
+     );
 
     req.flash("success", "Job posting published successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");
@@ -581,6 +596,14 @@ async function submitMemberJobApplication(req, res) {
       cv_file_path: cvFilePath,
     });
 
+     // ✅ ADD THIS — right after the insert succeeds
+    await accountModel.notifyRoles(
+      ["admin", "ict_staff"],
+      "New Job Application",
+      `${applicant_name} applied for a job posting.`,
+      "/account/dashboard/admin"
+    );
+
     req.flash("success", "Your application has been submitted successfully!");
     res.redirect("/account/dashboard/member");
   } catch (error) {
@@ -697,6 +720,13 @@ async function createNewsPost(req, res) {
     const profile_image = req.file ? `/images/news/${req.file.filename}` : null;
 
     await accountModel.createNews({ title, description, news_date, profile_image });
+    // inside createNewsPost, after insert:
+    await accountModel.notifyRoles(
+     ["member", "ict_staff"],
+      "News Update",
+      `New news posted: "${title}".`,
+       "/"
+      );
 
     req.flash("success", "News posted successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
@@ -712,6 +742,13 @@ async function createEventPost(req, res) {
     const { title, description, location, event_date, end_date } = req.body;
 
     await accountModel.createEvent({ title, description, location, event_date, end_date });
+    // inside createEventPost, after insert:
+    await accountModel.notifyRoles(
+      ["member", "ict_staff"],
+      "New Event Posted",
+      `A new event "${title}" was posted.`,
+      "/"
+      );
 
     req.flash("success", "Event created successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
@@ -807,6 +844,13 @@ async function createTrainingPost(req, res) {
       gradient_end: gradient_end || '#2E7D32',
       start_date, end_date,
     });
+    // inside createTrainingPost, after insert:
+   await accountModel.notifyRoles(
+    ["member", "ict_staff"],
+     "New Training Program",
+     `A new training "${title}" was posted.`,
+     "/training"
+     );
 
     req.flash("success", "Training program added successfully.");
     res.redirect("/account/dashboard/admin?trainingPosted=true");
@@ -823,6 +867,15 @@ async function registerTraining(req, res) {
     const accountId = req.session.account.id;
 
     await accountModel.registerForTraining(trainingId, accountId);
+
+    // inside registerTraining, after successful insert:
+    const trainingInfo = await accountModel.getTrainingById(trainingId);
+     await accountModel.notifyRoles(
+      ["admin", "ict_staff"],
+      "New Training Registration",
+      `${req.session.account.full_name} registered for "${trainingInfo.title}".`,
+      "/account/dashboard/admin"
+     );
 
     req.flash("success", "You have successfully registered for this training!");
     res.redirect("/account/dashboard/member?trainingRegistered=true");
@@ -883,6 +936,13 @@ async function createLessonPost(req, res) {
   try {
     const { training_id, title, description, lesson_order } = req.body;
     await accountModel.createLesson({ training_id, title, description, lesson_order: parseInt(lesson_order, 10) || 1 });
+    // inside createLessonPost, after insert:
+    await accountModel.notifyRoles(
+     ["member"],
+     "New Lesson Added",
+     `A new lesson "${title}" was added to your training program.`,
+     "/account/dashboard/member"
+    );
 
     req.flash("success", "Lesson added successfully.");
     res.redirect("/account/dashboard/ict-staff");
@@ -914,6 +974,13 @@ async function uploadLessonMaterial(req, res) {
       file_type,
       uploaded_by: req.session.account.id,
     });
+    // inside uploadLessonMaterial, after insert:
+    await accountModel.notifyRoles(
+    ["member"],
+     "New Training Material",
+     `New material "${title}" was uploaded for your training.`,
+     "/account/dashboard/member"
+     );
 
     req.flash("success", "Material uploaded successfully.");
     res.redirect("/account/dashboard/ict-staff");
@@ -1007,6 +1074,14 @@ async function createSupportTicket(req, res) {
   try {
     const { subject, description } = req.body;
     const ticket = await accountModel.createTicket(req.session.account.id, subject, description);
+
+    // inside createSupportTicket, after ticket creation:
+   await accountModel.notifyRoles(
+      ["ict_staff"],
+     "New Support Ticket",
+      `${req.session.account.full_name} opened ticket #${ticket.ticket_number}: ${subject}.`,
+     "/account/dashboard/ict-staff"
+     );
 
     req.flash("success", `Ticket ${ticket.ticket_number} created successfully.`);
     res.redirect("/account/dashboard/member?ticketCreated=true");
@@ -1127,6 +1202,14 @@ async function createTeamMemberPost(req, res) {
       email: email || null,
       display_order: parseInt(display_order, 10) || 1,
     });
+
+    // inside createTeamMemberPost, after insert:
+    await accountModel.notifyRoles(
+      ["admin"],
+     "New Team Member Added",
+      `${full_name} was added to the team by ICT staff.`,
+      "/account/dashboard/admin"
+     );
 
     req.flash("success", "Team member posted successfully.");
     res.redirect("/account/dashboard/ict-staff?teamPosted=true");
@@ -1647,25 +1730,70 @@ async function ictDeleteMember(req, res) {
   }
 }
 
-/* ****************************************
- * Logout
- * *************************************** */
-function accountLogout(req, res) {
-  const accountId = req.session.account ? req.session.account.id : null;
+/******************************************
+ * 
+ * Delivery create admin accounts
+ */
 
-  if (accountId) {
-    accountModel.markOffline(accountId).catch(err => console.error("MARK OFFLINE ERROR:", err));
+async function createAdminPost(req, res) {
+  try {
+    const { fullName, email, phoneNumber, password, adminLevel } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await accountModel.createAdminAccount(fullName, email, phoneNumber, hashedPassword, adminLevel || "minor_admin");
+
+    req.flash("success", "Admin account created successfully.");
+    res.redirect("/account/dashboard/admin?adminsUpdated=true");
+  } catch (error) {
+    console.error("CREATE ADMIN ERROR:", error);
+    if (error.code === "23505") {
+      req.flash("error", "Email already exists.");
+      return res.redirect("/account/dashboard/admin");
+    }
+    req.flash("error", "Failed to create admin account.");
+    res.redirect("/account/dashboard/admin");
   }
-
-  req.flash("success", "You have been logged out successfully.");
-  const flashMessages = req.session.flash;
-
-  req.session.regenerate((err) => {
-    if (err) console.error(err);
-    req.session.flash = flashMessages;
-    res.redirect("/account/login");
-  });
 }
+
+async function updateAdminLevelPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { admin_level } = req.body;
+    await accountModel.updateAdminLevel(id, admin_level);
+
+    req.flash("success", "Admin role updated.");
+    res.redirect("/account/dashboard/admin?adminsUpdated=true");
+  } catch (error) {
+    console.error("UPDATE ADMIN LEVEL ERROR:", error);
+    req.flash("error", "Failed to update admin role.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteAdminPost(req, res) {
+  try {
+    const { id } = req.params;
+
+    // ✅ prevent a Super Admin from accidentally deleting themselves
+    if (parseInt(id, 10) === req.session.account.id) {
+      req.flash("error", "You cannot delete your own account.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const targetAdmin = await accountModel.getAccountById(id);
+    await accountModel.permanentlyDeleteAccount(id);
+
+    req.flash("success", `${targetAdmin.full_name}'s admin account has been removed.`);
+    res.redirect("/account/dashboard/admin?adminsUpdated=true");
+  } catch (error) {
+    console.error("DELETE ADMIN ERROR:", error);
+    req.flash("error", "Failed to delete admin account.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here.
+
+
 
 /************************************
  * 
@@ -1695,9 +1823,75 @@ async function viewNewsDetails(req, res) {
 }
 // end here news full updates.
 
+/*******************************
+ * Delivery notifications
+ */
+async function getNotificationsJson(req, res) {
+  try {
+    const notifications = await accountModel.getNotificationsForAccount(req.session.account.id);
+    res.json(notifications);
+  } catch (error) {
+    console.error("GET NOTIFICATIONS ERROR:", error);
+    res.status(500).json([]);
+  }
+}
+
+async function markNotificationReadPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.markNotificationRead(id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("MARK NOTIFICATION READ ERROR:", error);
+    res.sendStatus(500);
+  }
+}
+
+async function markAllNotificationsReadPost(req, res) {
+  try {
+    await accountModel.markAllNotificationsRead(req.session.account.id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("MARK ALL READ ERROR:", error);
+    res.sendStatus(500);
+  }
+}
+
+async function deleteNotificationPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteNotification(id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("DELETE NOTIFICATION ERROR:", error);
+    res.sendStatus(500);
+  }
+}
+// end here.
+
+/* ****************************************
+ * Logout
+ * *************************************** */
+function accountLogout(req, res) {
+  const accountId = req.session.account ? req.session.account.id : null;
+
+  if (accountId) {
+    accountModel.markOffline(accountId).catch(err => console.error("MARK OFFLINE ERROR:", err));
+  }
+
+  req.flash("success", "You have been logged out successfully.");
+  const flashMessages = req.session.flash;
+
+  req.session.regenerate((err) => {
+    if (err) console.error(err);
+    req.session.flash = flashMessages;
+    res.redirect("/account/login");
+  });
+}
+
 
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,accountLogout
 }

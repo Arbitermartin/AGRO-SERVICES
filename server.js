@@ -34,9 +34,19 @@ app.use(express.json());
 app.use(cookieParser());
 
 // 3: Rate limiting.
+// const generalLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 150,
+//   handler: (req, res) => {
+//     req.flash("error", "Too many requests. Please try again later.");
+//     res.redirect(req.headers.referer || "/");
+//   },
+// });
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 150,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // A bit more relaxed for development
+  standardHeaders: true,
+  legacyHeaders: false,
   handler: (req, res) => {
     req.flash("error", "Too many requests. Please try again later.");
     res.redirect(req.headers.referer || "/");
@@ -52,16 +62,26 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   name: 'sessionId',
+  cookie: {
+    httpOnly: true, // Prevents client-side JS from reading the cookie
+    secure: false,  // false in development (true in production with HTTPS)
+    sameSite: "lax",  // Good balance for development
+    maxAge: 1000 * 60 * 60 * 4 // 4 hours
+  }
 }));
 
 // 5: The Flash Message
 app.use(flash());
-// Express Messages Middleware
-app.use(require('connect-flash')());
-app.use(function(req, res, next){
-  res.locals.messages = require('express-messages')(req, res)
+app.use((req,res,next)=>{
+  res.locals.messages = require("express-messages")(req,res);
   next();
 });
+// Express Messages Middleware
+// app.use(require('connect-flash')());
+// app.use(function(req, res, next){
+//   res.locals.messages = require('express-messages')(req, res)
+//   next();
+// });
 
 // track online ict stafff
 app.use(utilities.trackPresence);

@@ -30,7 +30,7 @@
               <div><span>Team &amp; Advisory</span>
               </div>
             </a>
-            <a href="#" class="db-submenu-link">Add Member</a>
+            
             <a href="#" class="db-submenu-link">Member Reports</a>
             <a href="#" class="db-submenu-link">Export Members</a>
           </div>
@@ -86,9 +86,7 @@
             
             <a href="#" id="addTrainingLink" class="db-submenu-link"><div><span>Add Training</span>
             </div>
-            <!-- <a href="#" id="trainingRegistrationsLink" class="db-submenu-link"><div><span>All Trainings</span>
-            </div>
-          </a> -->
+           
           </a>
           <a href="#" id="trainingRegistrationsLink" class="db-submenu-link"><div><span>Registrations</span>
           </div>
@@ -111,10 +109,6 @@
           </div>
         </div>
 
-        <!-- <a href="#" class="db-nav-link">
-          <i class="bi bi-check2-square"></i> Approvals
-          <span class="db-nav-badge">32</span>
-        </a> -->
         <a href="#" id="allPaymentsLink2" class="db-nav-link">
             <i class="bi bi-check2-square"></i> Approvals
            <% if (pendingPaymentCount > 0) { %>
@@ -130,8 +124,7 @@
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
-            <a href="#" class="db-submenu-link">All Admins</a>
-            <a href="#" class="db-submenu-link">Add Admin</a>
+            <a href="#" id="adminManagementLink" class="db-submenu-link"> Manage Admins</a>
             <a href="#" class="db-submenu-link">Admin Activity</a>
             <a href="#" class="db-submenu-link">Send Credentials</a>
           </div>
@@ -176,17 +169,25 @@
           <input type="text" id="dashboardSearchInput" placeholder="Search tickets or users...">
           <div id="dashboardSearchResults" class="search-results-dropdown" style="display:none;"></div>
         </div>
-
-        <!-- 
-          <div class="db-search">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Search anything...">
-          </div> -->
-
-          <button type="button" class="db-icon-btn" aria-label="Notifications">
+           <div class="db-notif-menu">
+           <button type="button" class="db-icon-btn" id="notifToggle" aria-label="Notifications">
+           <i class="bi bi-bell"></i>
+             <span class="db-notif-count" id="notifCount" style="display:none;">0</span>
+              </button>
+           <div class="db-notif-dropdown" id="notifDropdown">
+           <div class="db-notif-header">
+            <span>Notifications</span>
+            <a href="#" id="markAllReadBtn">Mark all read</a>
+           </div>
+          <div class="db-notif-list" id="notifList">
+          <p class="db-notif-empty">Loading...</p>
+         </div>
+       </div>
+      </div>
+          <!-- <button type="button" class="db-icon-btn" aria-label="Notifications">
             <i class="bi bi-bell"></i>
             <span class="db-notif-dot"></span>
-          </button>
+          </button> -->
 
           <!-- User menu -->
           <div class="db-user-menu">
@@ -728,6 +729,7 @@
       </div>
 <%- include('registered-users') %>
 <%- include('all-payments') %>
+<%- include('admin-management') %>
 
 
       <!-- end db-content -->
