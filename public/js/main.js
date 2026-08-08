@@ -518,6 +518,53 @@ if (cvUploadArea && cvUploadInput) {
     });
   }
 
+  // testmonials
+  const testimonialSlider = document.getElementById('testimonialSlider');
+if (testimonialSlider) {
+  const slides = Array.from(testimonialSlider.querySelectorAll('.testimonial-slide'));
+  const dotsContainer = document.getElementById('testimonialDots');
+  const prevBtn = document.getElementById('testimonialPrev');
+  const nextBtn = document.getElementById('testimonialNext');
+  let currentIndex = 0;
+  let autoTimer;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'testimonial-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  });
+  const dots = Array.from(dotsContainer.querySelectorAll('.testimonial-dot'));
+
+  function goToSlide(index) {
+    slides[currentIndex].classList.remove('active');
+    dots[currentIndex].classList.remove('active');
+    currentIndex = (index + slides.length) % slides.length;
+    slides[currentIndex].classList.add('active');
+    dots[currentIndex].classList.add('active');
+    resetAutoplay();
+  }
+  function resetAutoplay() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goToSlide(currentIndex + 1), 6000);
+  }
+  if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+  resetAutoplay();
+}
+// end here testmonials
+
+// registration intake
+const registrationIntakeLink = document.getElementById('registrationIntakeLink');
+const registrationIntakePanel = document.getElementById('registrationIntakePanel');
+const cancelRegistrationIntake = document.getElementById('cancelRegistrationIntake');
+if (registrationIntakeLink && registrationIntakePanel && dbMainContent) {
+  registrationIntakeLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; registrationIntakePanel.style.display='block'; });
+}
+if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click', (e) => { e.preventDefault(); registrationIntakePanel.style.display='none'; dbMainContent.style.display='block'; });
+
+
+
   /* =====================================================
      ADMIN / ICT DASHBOARD
   ===================================================== */
@@ -1796,6 +1843,29 @@ document.querySelectorAll('.ticket-toggle-simple').forEach(btn => {
   btn.addEventListener('click', () => btn.closest('.ticket-item').classList.toggle('is-open'));
 });
 // end here
+
+// testimonials delivery here
+
+const addTestimonialLink = document.getElementById('addTestimonialLink');
+const addTestimonialPanel = document.getElementById('addTestimonialPanel');
+const cancelAddTestimonial = document.getElementById('cancelAddTestimonial');
+if (addTestimonialLink && addTestimonialPanel && dbMainContent) {
+  addTestimonialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; addTestimonialPanel.style.display='block'; });
+}
+if (cancelAddTestimonial) cancelAddTestimonial.addEventListener('click', (e) => { e.preventDefault(); addTestimonialPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+const testimonialUploadArea = document.getElementById('testimonialUploadArea');
+const testimonialUploadInput = document.getElementById('testimonialUploadInput');
+if (testimonialUploadArea && testimonialUploadInput) {
+  testimonialUploadArea.addEventListener('click', () => testimonialUploadInput.click());
+  testimonialUploadInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      document.getElementById('testimonialUploadedFile').style.display = 'block';
+      document.getElementById('testimonialFileName').textContent = e.target.files[0].name;
+    }
+  });
+}
+// end here.
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

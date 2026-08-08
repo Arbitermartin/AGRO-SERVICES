@@ -31,27 +31,54 @@
         </div>
       </div>
 
-      <div class="form-field">
-        <label>Assign To</label>
-        <div class="input-wrap" style="align-items:flex-start; padding:12px;">
-          <div style="width:100%;">
-            <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.85rem;">Minor Admins</label>
-            <% assignablePeople.filter(p => p.account_type === 'admin').forEach(p => { %>
-              <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.88rem;">
-                <input type="checkbox" name="assignee_ids" value="<%= p.id %>"> <%= p.full_name %>
-              </label>
-            <% }) %>
+     <div class="assignment-section">
 
-            <label style="display:block; margin:14px 0 8px; font-weight:600; font-size:0.85rem;">ICT Staff</label>
-            <% assignablePeople.filter(p => p.account_type === 'ict_staff').forEach(p => { %>
-              <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.88rem;">
-                <input type="checkbox" name="assignee_ids" value="<%= p.id %>"> <%= p.full_name %>
-              </label>
-            <% }) %>
-          </div>
-        </div>
-        <small class="field-hint">Check one name to assign to a specific person, or check all names to assign to everyone.</small>
-      </div>
+  <!-- ICT Staff -->
+  <label class="assignment-title">ICT Staff</label>
+
+  <div class="staff-list">
+    <% assignablePeople
+      .filter(p => p.account_type === 'ict_staff')
+      .forEach(p => { %>
+
+      <label class="staff-option">
+        <input
+          type="checkbox"
+          name="assignee_ids"
+          value="<%= p.id %>"
+        >
+        <span><%= p.full_name %></span>
+      </label>
+
+    <% }) %>
+  </div>
+
+
+  <!-- Admin -->
+  <label class="assignment-title">Admin</label>
+
+  <div class="staff-list">
+    <% assignablePeople
+      .filter(p => p.account_type === 'admin')
+      .forEach(p => { %>
+
+      <label class="staff-option">
+        <input
+          type="checkbox"
+          name="assignee_ids"
+          value="<%= p.id %>"
+        >
+        <span><%= p.full_name %></span>
+      </label>
+
+    <% }) %>
+  </div>
+
+  <small class="field-hint">
+    Check one name to assign to a specific person, or check all names to assign to everyone.
+  </small>
+
+</div>
 
       <button type="submit" class="btn btn-filled btn-block btn-lg">Assign Task</button>
     </form>

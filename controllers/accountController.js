@@ -13,7 +13,30 @@ const mailer = require("../utilities/mailer");
 /* ****************************************
  * Deliver registration view
  * *************************************** */
+// async function buildRegister(req, res) {
+//   let nav = await utilities.getNav();
+//   res.render("account/register", {
+//     title: "Registration",
+//     nav,
+//     errors: null,
+//   });
+// }
 async function buildRegister(req, res) {
+  const intake = await accountModel.getActiveIntake();
+
+  if (!intake) {
+    req.flash("error", "Registration is not currently open.");
+    return res.redirect("/account/register");
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const closeDate = new Date(intake.close_date); closeDate.setHours(0,0,0,0);
+
+  if (today > closeDate) {
+    req.flash("error", "Registration for this intake has closed.");
+    return res.redirect("/account/register");
+  }
+
   let nav = await utilities.getNav();
   res.render("account/register", {
     title: "Registration",
@@ -212,6 +235,12 @@ async function buildAdminDashboard(req, res) {
     }
   const myTasks = await accountModel.getTasksForAccount(account.id);
 
+  //delivery testmonials
+  const allTestimonials = await accountModel.getAllTestimonials();
+
+  // registration intake
+  const activeIntake = await accountModel.getActiveIntake();
+
   
  
 
@@ -249,6 +278,8 @@ async function buildAdminDashboard(req, res) {
     allTasks,
     taskAssigneesMap,
     myTasks,
+    allTestimonials,
+    activeIntake,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -2071,6 +2102,144 @@ async function updateIndividualTaskStatusPost(req, res) {
 }
 // end here.
 
+/***************************
+ * Delivery testimonials create and view
+ */
+
+async function createTestimonialPost(req, res) {
+  try {
+    const { full_name, role_location, message, display_order } = req.body;
+    const photo_path = req.file ? `/images/testimonials/${req.file.filename}` : null;
+
+    await accountModel.createTestimonial({
+      full_name,
+      role_location,
+      message,
+      photo_path,
+      display_order: parseInt(display_order, 10) || 1,
+    });
+
+    req.flash("success", "Testimonial posted successfully.");
+    res.redirect("/account/dashboard/admin?testimonialsUpdated=true");
+  } catch (error) {
+    console.error("CREATE TESTIMONIAL ERROR:", error);
+    req.flash("error", "Failed to post testimonial.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteTestimonialPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteTestimonial(id);
+    req.flash("success", "Testimonial removed.");
+    res.redirect("/account/dashboard/admin?testimonialsUpdated=true");
+  } catch (error) {
+    console.error("DELETE TESTIMONIAL ERROR:", error);
+    req.flash("error", "Failed to remove testimonial.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function updateTestimonialPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { full_name, role_location, message, display_order, is_active } = req.body;
+    const updateData = {
+      full_name,
+      role_location,
+      message,
+      display_order: parseInt(display_order, 10) || 1,
+      is_active: is_active === "on",
+    };
+
+    if (req.file) {
+      updateData.photo_path = `/images/testimonials/${req.file.filename}`;
+    }
+
+    await accountModel.updateTestimonial(id, updateData);
+
+    req.flash("success", "Testimonial updated.");
+    res.redirect("/account/dashboard/admin?testimonialsUpdated=true");
+  } catch (error) {
+    console.error("UPDATE TESTIMONIAL ERROR:", error);
+    req.flash("error", "Failed to update testimonial.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here.
+
+// delivery intake registration
+async function createIntakePost(req, res) {
+  try {
+    const {
+      intake_name, open_date, close_date,
+      mobile_money_number, mobile_money_provider,
+      bank_name, bank_account_name, bank_account_number,
+    } = req.body;
+
+    await accountModel.createIntake({
+      intake_name, open_date, close_date,
+      mobile_money_number, mobile_money_provider,
+      bank_name, bank_account_name, bank_account_number,
+    });
+
+    req.flash("success", `Registration for "${intake_name}" is now open.`);
+    res.redirect("/account/dashboard/admin?intakeUpdated=true");
+  } catch (error) {
+    console.error("CREATE INTAKE ERROR:", error);
+    req.flash("error", "Failed to open registration.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function closeIntakePost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.closeIntake(id);
+    req.flash("success", "Registration has been closed.");
+    res.redirect("/account/dashboard/admin?intakeUpdated=true");
+  } catch (error) {
+    console.error("CLOSE INTAKE ERROR:", error);
+    req.flash("error", "Failed to close registration.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+/* ✅ This replaces / precedes buildRegister — shown when user clicks "Register" */
+async function buildRegisterGate(req, res) {
+  try {
+    const intake = await accountModel.getActiveIntake();
+    let nav = await utilities.getNav();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let isOpen = false;
+    let daysRemaining = 0;
+
+    if (intake) {
+      const closeDate = new Date(intake.close_date);
+      closeDate.setHours(0, 0, 0, 0);
+      isOpen = today <= closeDate;
+      daysRemaining = Math.ceil((closeDate - today) / (1000 * 60 * 60 * 24));
+    }
+
+    res.render("account/register-gate", {
+      title: "Registration",
+      nav,
+      intake,
+      isOpen,
+      daysRemaining,
+    });
+  } catch (error) {
+    console.error("BUILD REGISTER GATE ERROR:", error);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/");
+  }
+}
+// end here.
+
 
 /* ****************************************
  * Logout
@@ -2096,5 +2265,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,accountLogout
 }

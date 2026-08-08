@@ -6,6 +6,7 @@ baseController.buildHome = async function(req, res) {
   try {
     const latestNews = await accountModel.getLatestNews();
     const upcomingEvents = await accountModel.getUpcomingEvents();
+    const testimonials = await accountModel.getActiveTestimonials();  
 
     let nav = await utilities.getNav();
     res.render("pages/index", {
@@ -13,6 +14,7 @@ baseController.buildHome = async function(req, res) {
       nav,
       latestNews,
       upcomingEvents,
+      testimonials,
     });
   } catch (err) {
     console.error("Home page error:", err);

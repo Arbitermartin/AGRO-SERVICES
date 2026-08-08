@@ -1,0 +1,113 @@
+<div id="addTestimonialPanel" class="db-card" style="display:none; max-width: 640px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-chat-quote"></i></div>
+    <h2>Post Testimonial</h2>
+    <p>Share a member's testimony on the homepage</p>
+  </div>
+
+  <form action="/account/testimonials/create" method="POST" enctype="multipart/form-data" class="auth-form">
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" name="full_name" placeholder="e.g. Grace Mwakasege" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Role / Location</label>
+      <div class="input-wrap">
+        <i class="bi bi-geo-alt input-icon"></i>
+        <input type="text" name="role_location" placeholder="e.g. Smallholder farmer, Dodoma">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Testimony Message</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-chat-quote input-icon" style="margin-top:12px;"></i>
+        <textarea name="message" rows="4" placeholder="Write the testimony..." style="padding-left:44px;" required></textarea>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Display Order</label>
+      <div class="input-wrap">
+        <i class="bi bi-sort-numeric-down input-icon"></i>
+        <input type="number" name="display_order" min="1" value="1" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Photo</label>
+      <div class="upload-area" id="testimonialUploadArea">
+        <i class="bi bi-cloud-upload" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i>
+        <p>Tap to upload photo<br><small>JPG or PNG (max 3MB)</small></p>
+        <input type="file" id="testimonialUploadInput" name="photo" accept="image/jpeg,image/png" style="display:none;">
+      </div>
+      <div id="testimonialUploadedFile" style="display:none; margin-top:8px; font-size:0.85rem; color:var(--primary-green);">
+        <i class="bi bi-file-earmark-check"></i> <span id="testimonialFileName"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg">Post Testimonial</button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelAddTestimonial"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </form>
+
+  <% if (allTestimonials && allTestimonials.length > 0) { %>
+    <h3 class="profile-section-title" style="margin-top:30px;">Posted Testimonials</h3>
+    <% allTestimonials.forEach(t => { %>
+      <div class="manage-item">
+        <div class="manage-item-summary">
+          <% if (t.photo_path) { %>
+            <img src="<%= t.photo_path %>" alt="" class="manage-item-thumb">
+          <% } else { %>
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+          <% } %>
+          <div class="manage-item-info">
+            <h4><%= t.full_name %></h4>
+            <small><%= t.role_location || 'No role set' %> &middot; <%= t.is_active ? 'Active' : 'Hidden' %></small>
+          </div>
+          <div class="manage-item-actions">
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
+            <form action="/account/testimonials/<%= t.id %>/delete" method="POST" onsubmit="return confirm('Delete this testimonial permanently?');">
+              <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="manage-edit-form" style="display:none;">
+          <form action="/account/testimonials/<%= t.id %>/update" method="POST" enctype="multipart/form-data" class="auth-form">
+            <div class="form-field">
+              <label>Full Name</label>
+              <div class="input-wrap"><i class="bi bi-person input-icon"></i><input type="text" name="full_name" value="<%= t.full_name %>" required></div>
+            </div>
+            <div class="form-field">
+              <label>Role / Location</label>
+              <div class="input-wrap"><i class="bi bi-geo-alt input-icon"></i><input type="text" name="role_location" value="<%= t.role_location || '' %>"></div>
+            </div>
+            <div class="form-field">
+              <label>Message</label>
+              <div class="input-wrap" style="align-items:flex-start;"><i class="bi bi-chat-quote input-icon" style="margin-top:12px;"></i><textarea name="message" rows="3" style="padding-left:44px;" required><%= t.message %></textarea></div>
+            </div>
+            <div class="form-field">
+              <label>Display Order</label>
+              <div class="input-wrap"><i class="bi bi-sort-numeric-down input-icon"></i><input type="number" name="display_order" min="1" value="<%= t.display_order %>" required></div>
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.88rem;">
+              <input type="checkbox" name="is_active" <%= t.is_active ? 'checked' : '' %>> Show on homepage
+            </label>
+            <div class="form-field">
+              <label>Replace Photo (optional)</label>
+              <div class="input-wrap"><i class="bi bi-image input-icon"></i><input type="file" name="photo" accept="image/jpeg,image/png"></div>
+            </div>
+            <button type="submit" class="btn btn-filled" style="margin-top:10px;">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>

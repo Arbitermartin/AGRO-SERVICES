@@ -1,0 +1,69 @@
+<section class="auth-page">
+  <div class="container" style="max-width: 560px;">
+
+    
+
+    <%- messages() %>
+
+    <div class="db-card">
+      <% if (isOpen) { %>
+
+        <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+          <div class="step-number" style="margin: 0 auto 12px; background:#43a047;"><i class="bi bi-unlock"></i></div>
+          <h2>Registration is Open</h2>
+          <p><%= intake.intake_name %></p>
+        </div>
+
+        <div style="background:var(--bg-light-green, #e8f5e9); border-radius:12px; padding:18px 20px; margin-bottom:24px; text-align:center;">
+          <p style="font-weight:700; color:var(--primary-green, #2e7d32); margin-bottom:4px;">
+            <%= daysRemaining %> <%= daysRemaining === 1 ? 'day' : 'days' %> remaining
+          </p>
+          <p style="font-size:0.85rem; color:var(--text-secondary, #4b5563);">
+            Registration closes on <%= new Date(intake.close_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+          </p>
+        </div>
+
+        <h3 class="profile-section-title">Payment Options</h3>
+
+        <% if (intake.mobile_money_number) { %>
+          <div class="db-profile-row"><span><i class="bi bi-phone"></i> Mobile Money (<%= intake.mobile_money_provider || 'N/A' %>)</span><b><%= intake.mobile_money_number %></b></div>
+        <% } %>
+
+        <% if (intake.bank_name) { %>
+          <div class="db-profile-row"><span><i class="bi bi-bank"></i> Bank Name</span><b><%= intake.bank_name %></b></div>
+          <div class="db-profile-row"><span>Account Name</span><b><%= intake.bank_account_name %></b></div>
+          <div class="db-profile-row"><span>Account Number</span><b><%= intake.bank_account_number %></b></div>
+        <% } %>
+
+        <a href="/account/register/form" class="btn btn-filled btn-block btn-lg" style="margin-top:24px;">
+          Continue to Registration
+        </a>
+
+      <% } else { %>
+
+        <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+          <div class="step-number" style="margin: 0 auto 12px; background:#c0392b;"><i class="bi bi-lock"></i></div>
+          <h2>Registration Closed</h2>
+        </div>
+
+        <p style="text-align:center; color:var(--text-secondary, #4b5563); margin-bottom:24px;">
+          <% if (intake) { %>
+            Registration for "<%= intake.intake_name %>" closed on <%= new Date(intake.close_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>. Please check back for the next intake.
+          <% } else { %>
+            Registration is not currently open. Please check back later.
+          <% } %>
+        </p>
+
+        <a href="/" class="btn btn-outline btn-block">
+          <i class="bi bi-house"></i> Back to Home
+        </a>
+
+      <% } %>
+
+      <div class="auth-switch" style="margin-top:20px;text-align:center;">
+        Already have an account? <a href="/account/login">Log in</a>
+      </div>
+    </div>
+
+  </div>
+</section>

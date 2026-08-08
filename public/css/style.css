@@ -1435,6 +1435,121 @@ Deliverys style for manage news and events
 .faq-home-footer a:hover {
   gap: 10px;
 }
+
+/* delivery testimonials style */
+.testimonials-section { 
+  background: var(--bg-light-green, #e8f5e9);
+   padding: 60px 0; 
+  }
+.testimonial-slider { 
+  position: relative; 
+  max-width: 640px; 
+  margin: 30px auto 0; 
+  min-height: 220px; 
+}
+
+.testimonial-slide { 
+  display: none; 
+  text-align: center; 
+  animation: fadeSlide 0.4s ease; 
+}
+
+.testimonial-slide.active { 
+  display: block; 
+}
+
+@keyframes fadeSlide { 
+  from { opacity: 0; 
+    transform: translateY(10px); 
+  } 
+  to 
+  { 
+    opacity: 1; 
+    transform: translateY(0); 
+  } 
+}
+.testimonial-quote-icon {
+   font-size: 2rem; 
+   color: var(--primary-green, #2e7d32); 
+   margin-bottom: 10px; 
+   display: block; 
+  }
+
+.testimonial-text {
+   font-size: 1.1rem; 
+   line-height: 1.75; 
+   color: var(--text-primary, #1b1b1b);
+    margin-bottom: 22px; 
+  }
+  
+.testimonial-avatar, .testimonial-avatar-img { 
+  width: 56px; 
+  height: 56px; 
+  border-radius: 50%; 
+  margin: 0 auto 10px; 
+  object-fit: cover; 
+}
+
+.testimonial-avatar {
+   background: var(--primary-green,#2e7d32); 
+   color: #fff; 
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   font-weight: 700; 
+  }
+.testimonial-name {
+   font-weight: 700; 
+   margin-bottom: 2px; 
+  }
+.testimonial-role {
+   font-size: 0.85rem;
+    color: var(--text-muted, #9ca3af); 
+  }
+
+.testimonial-dots { 
+  display: flex; 
+  justify-content: center; 
+  gap: 8px; 
+  margin-top: 20px; 
+}
+
+.testimonial-dot { 
+  width: 9px; 
+  height: 9px; 
+  border-radius: 50%; 
+  background: #c8d6c8; 
+  border: none; 
+  cursor: pointer; 
+}
+
+.testimonial-dot.active { 
+  background: var(--primary-green, #2e7d32);
+ }
+
+.testimonial-controls { 
+  display: flex; 
+  justify-content: center; 
+  gap: 14px; 
+  margin-top: 16px; 
+}
+
+.testimonial-controls button { 
+  width: 38px; 
+  height: 38px; 
+  border-radius: 50%; 
+  border: 1.5px solid var(--border-color, #e0e0e0); 
+  background: #fff; 
+  color: var(--primary-green, #2e7d32); 
+  cursor: pointer; 
+}
+.testimonial-controls button:hover { 
+  background: var(--primary-green, #2e7d32); 
+  color: #fff; 
+}
+
+/* end here. */
+
 /* =====================================================
    ADMIN DASHBOARD
 ===================================================== */
@@ -1867,6 +1982,84 @@ Deliverys style for manage news and events
 .db-notif-item-actions button:hover { color: #2e7d32; }
 
 .db-notif-empty { padding: 24px; text-align: center; color: #9ca3af; font-size: 0.85rem; }
+
+
+/* assignment for admin and ict */
+.assignment-section{
+  width: 100%;
+  margin-top: 14px;
+}
+.assignment-title{
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+   color: var(--btn-text-dark);
+}
+.staff-list{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card);
+  border-radius: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.staff-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background: var(--bg-dashboard);
+  color: var(--btn-text-dark);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.staff-option:hover {
+  background: var(--bg-dashboard);
+}
+
+.staff-option input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.staff-option span {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.staff-option:has(input:checked) {
+  background: var(--bg-light-green);
+  color: var(--icon-event);
+  font-weight: 500;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 9px;
+  color: #6b7280;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+
 
 /* ---------- User menu ---------- */
 .db-user-menu {

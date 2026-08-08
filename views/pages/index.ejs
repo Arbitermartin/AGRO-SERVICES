@@ -211,6 +211,40 @@
 
     </div>
 
+    <!-- ===================== TESTIMONIALS (placed after FAQ) ===================== -->
+<section class="testimonials-section">
+  <div class="container">
+    <h2 class="section-heading" style="text-align:center;">What Our Members Say</h2>
+
+    <% if (testimonials && testimonials.length > 0) { %>
+      <div class="testimonial-slider" id="testimonialSlider">
+        <% testimonials.forEach((t, i) => { %>
+          <div class="testimonial-slide <%= i === 0 ? 'active' : '' %>">
+            <i class="bi bi-quote testimonial-quote-icon"></i>
+            <p class="testimonial-text">"<%= t.message %>"</p>
+            <% if (t.photo_path) { %>
+              <img src="<%= t.photo_path %>" alt="<%= t.full_name %>" class="testimonial-avatar-img">
+            <% } else { %>
+              <div class="testimonial-avatar"><%= t.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() %></div>
+            <% } %>
+            <p class="testimonial-name"><%= t.full_name %></p>
+            <% if (t.role_location) { %><span class="testimonial-role"><%= t.role_location %></span><% } %>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="testimonial-dots" id="testimonialDots"></div>
+
+      <div class="testimonial-controls">
+        <button type="button" id="testimonialPrev" aria-label="Previous testimonial"><i class="bi bi-chevron-left"></i></button>
+        <button type="button" id="testimonialNext" aria-label="Next testimonial"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    <% } else { %>
+      <p style="text-align:center; color:var(--text-muted);">No testimonials yet.</p>
+    <% } %>
+  </div>
+</section>
+
     <div class="faq-home-footer">
       <span>Still have questions?</span>
       <a href="/contact">Contact our team <i class="bi bi-arrow-right"></i></a>

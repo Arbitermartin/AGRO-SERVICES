@@ -115,6 +115,33 @@ const uploadTaskReport = multer({
 });
 // end here for both admin and icts
 
+/************************
+ * Delivery testmonials
+ */
+const testimonialPhotoPath = path.join(__dirname, "..", "public", "images", "testimonials");
+if (!fs.existsSync(testimonialPhotoPath)) {
+  fs.mkdirSync(testimonialPhotoPath, { recursive: true });
+}
+
+const testimonialPhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, testimonialPhotoPath),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `testimonial-${Date.now()}${ext}`);
+  },
+});
+
+const uploadTestimonialPhoto = multer({
+  storage: testimonialPhotoStorage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only JPG or PNG images are allowed."), ok);
+  },
+});
+// end here testimonials.
+
 /******************************
  * 
  * Delivery job application
@@ -695,5 +722,42 @@ router.post("/task-assignees/:taskAssigneeId/submit-report",
   utilities.handleErrors(accountController.submitTaskReportPost));
 
   // end here.
+
+  /***************************
+   * 
+   * Delivery testimonials test
+   */
+router.post("/testimonials/create", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), uploadTestimonialPhoto.single("photo"), utilities.handleErrors(accountController.createTestimonialPost));
+
+router.post("/testimonials/:id/update", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  uploadTestimonialPhoto.single("photo"), 
+  utilities.handleErrors(accountController.updateTestimonialPost));
+
+router.post("/testimonials/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.deleteTestimonialPost));
+  // end here.
+
+  // register
+router.get("/register", 
+  utilities.handleErrors(accountController.buildRegisterGate));   // ✅ gate page first
+router.get("/register/form", 
+  utilities.handleErrors(accountController.buildRegister));  // ✅ actual form, only reachable if open
+
+router.post("/intakes/create", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.createIntakePost));
+
+router.post("/intakes/:id/close", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.closeIntakePost));
+  // end here
 
 module.exports= router

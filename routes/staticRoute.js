@@ -82,13 +82,13 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
     })
   }))
 
-  router.get("/register", utilities.handleErrors(async (req, res) => {
-    let nav = await utilities.getNav()
-    res.render("account/register", { 
-      title: "Register", 
-      nav 
-    })
-  }))
+  // router.get("/register", utilities.handleErrors(async (req, res) => {
+  //   let nav = await utilities.getNav()
+  //   res.render("account/register", { 
+  //     title: "Register", 
+  //     nav 
+  //   })
+  // }))
   //  contact page message post
   router.post(
     "/contact", 
