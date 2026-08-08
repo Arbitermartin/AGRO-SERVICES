@@ -1,0 +1,54 @@
+<div id="myTasksPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-clipboard-check"></i></div>
+    <h2>My Tasks</h2>
+    <p>Activities assigned to you</p>
+  </div>
+
+  <% if (myTasks && myTasks.length > 0) { %>
+    <% myTasks.forEach(t => { %>
+      <div class="ticket-item">
+        <div class="ticket-summary">
+          <div class="ticket-info">
+            <h4><%= t.title %></h4>
+            <small>Due: <%= t.due_date ? new Date(t.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No deadline' %></small>
+          </div>
+          <span class="db-badge-status
+            <%= t.individual_status === 'pending' ? 'db-badge-progress' : '' %>
+            <%= t.individual_status === 'in_progress' ? 'db-badge-progress' : '' %>
+            <%= t.individual_status === 'completed' ? 'db-badge-open' : '' %>
+          "><%= t.individual_status.replace('_', ' ') %></span>
+          <button type="button" class="btn-outline-sm ticket-toggle-simple"><i class="bi bi-chevron-down"></i></button>
+        </div>
+        <div class="ticket-thread">
+          <div class="ticket-thread-inner">
+            <p class="ticket-original-message"><%= t.description %></p>
+
+            <% if (t.report_file_path) { %>
+              <p style="font-size:0.85rem; color:var(--primary-green); margin-bottom:12px;">
+                <i class="bi bi-check-circle"></i> Report submitted on <%= new Date(t.submitted_at).toLocaleDateString('en-GB') %> —
+                <a href="<%= t.report_file_path %>" target="_blank">View</a>
+              </p>
+            <% } else { %>
+              <form action="/account/task-assignees/<%= t.id %>/submit-report" method="POST" enctype="multipart/form-data" class="auth-form">
+                <div class="form-field">
+                  <label>Submit Report (PDF or DOC)</label>
+                  <div class="upload-area">
+                    <input type="file" name="report_file" accept=".pdf,.doc,.docx" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-filled">Submit Report</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:24px;">No tasks assigned to you yet.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelMyTasks"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

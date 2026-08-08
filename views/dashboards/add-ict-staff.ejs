@@ -1,0 +1,53 @@
+<div id="addIctStaffPanel" class="db-card" style="display:none; max-width: 600px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-plus"></i></div>
+    <h2>Add ICT Staff</h2>
+    <p>Create a new ICT staff account with dashboard access</p>
+  </div>
+
+  <% if (!isSuperAdmin) { %>
+    <div style="background:#fff8e1; border-radius:10px; padding:16px; margin-bottom:20px; text-align:center; color:#f57f17; font-size:0.88rem;">
+      <i class="bi bi-lock"></i> Only Super Admins can add ICT staff.
+    </div>
+  <% } else { %>
+
+    <form action="/account/ict-staff/create" method="POST" class="auth-form">
+      <div class="form-field">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <i class="bi bi-person input-icon"></i>
+          <input type="text" name="fullName" placeholder="Enter full name" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Email</label>
+        <div class="input-wrap">
+          <i class="bi bi-envelope input-icon"></i>
+          <input type="email" name="email" placeholder="Enter email address" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Phone Number</label>
+        <div class="input-wrap">
+          <i class="bi bi-telephone input-icon"></i>
+          <input type="tel" name="phoneNumber" placeholder="Enter phone number" required>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-light-green, #e8f5e9); border-radius:10px; padding:14px 16px; margin-bottom:20px; font-size:0.85rem; color:var(--primary-green, #2e7d32);">
+        <i class="bi bi-info-circle"></i> A temporary password will be generated automatically. Once email sending is connected, credentials will be sent directly to this ICT staff member's inbox.
+      </div>
+
+      <button type="submit" class="btn btn-filled btn-block btn-lg">
+        Create ICT Staff Account
+      </button>
+
+      <div class="auth-switch" style="margin-top:20px;text-align:center;">
+        <a href="#" id="cancelAddIctStaff"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+      </div>
+    </form>
+
+  <% } %>
+</div>

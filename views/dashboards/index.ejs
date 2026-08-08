@@ -120,11 +120,22 @@
 
         <div class="db-nav-group">
           <button type="button" class="db-nav-toggle" aria-expanded="false">
-            <span><i class="bi bi-shield-lock"></i> Admins</span>
+            <span><i class="bi bi-shield-lock"></i> Admins & ICT</span>
             <i class="bi bi-chevron-down db-nav-caret"></i>
           </button>
           <div class="db-submenu">
             <a href="#" id="adminManagementLink" class="db-submenu-link"> Manage Admins</a>
+            <a href="#" id="addIctStaffLink" class="db-nav-link"> Add ICT Staff
+
+            </a>
+            <a href="#" id="ictManagementLink" class="db-nav-link">ICT Management
+
+            </a>
+            <a href="#" id="taskManagementLink" class="db-nav-link"> Task Management
+
+            </a>
+             <a href="#" id="myTasksLink" class="db-nav-link"> My Tasks
+        </a>
             <a href="#" class="db-submenu-link">Admin Activity</a>
             <a href="#" class="db-submenu-link">Send Credentials</a>
           </div>
@@ -184,10 +195,7 @@
          </div>
        </div>
       </div>
-          <!-- <button type="button" class="db-icon-btn" aria-label="Notifications">
-            <i class="bi bi-bell"></i>
-            <span class="db-notif-dot"></span>
-          </button> -->
+
 
           <!-- User menu -->
           <div class="db-user-menu">
@@ -730,6 +738,9 @@
 <%- include('registered-users') %>
 <%- include('all-payments') %>
 <%- include('admin-management') %>
+<%- include('add-ict-staff') %>
+<%- include('ict-management') %>
+<%- include('task-management') %>
 
 
       <!-- end db-content -->

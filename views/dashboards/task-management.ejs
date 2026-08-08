@@ -1,0 +1,109 @@
+<div id="taskManagementPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-list-task"></i></div>
+    <h2>Task Management</h2>
+    <p>Assign activities to admins and ICT staff</p>
+  </div>
+
+  <% if (isSuperAdmin) { %>
+    <form action="/account/tasks/create" method="POST" class="auth-form">
+      <div class="form-field">
+        <label>Task Title</label>
+        <div class="input-wrap">
+          <i class="bi bi-card-heading input-icon"></i>
+          <input type="text" name="title" placeholder="e.g. Prepare monthly report" required>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Description / Instructions</label>
+        <div class="input-wrap" style="align-items:flex-start;">
+          <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+          <textarea name="description" rows="4" placeholder="Describe what needs to be done. A report must be submitted as a PDF or DOC file once complete." style="padding-left:44px;" required></textarea>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Due Date</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-check input-icon"></i>
+          <input type="date" name="due_date">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Assign To</label>
+        <div class="input-wrap" style="align-items:flex-start; padding:12px;">
+          <div style="width:100%;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.85rem;">Minor Admins</label>
+            <% assignablePeople.filter(p => p.account_type === 'admin').forEach(p => { %>
+              <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.88rem;">
+                <input type="checkbox" name="assignee_ids" value="<%= p.id %>"> <%= p.full_name %>
+              </label>
+            <% }) %>
+
+            <label style="display:block; margin:14px 0 8px; font-weight:600; font-size:0.85rem;">ICT Staff</label>
+            <% assignablePeople.filter(p => p.account_type === 'ict_staff').forEach(p => { %>
+              <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.88rem;">
+                <input type="checkbox" name="assignee_ids" value="<%= p.id %>"> <%= p.full_name %>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+        <small class="field-hint">Check one name to assign to a specific person, or check all names to assign to everyone.</small>
+      </div>
+
+      <button type="submit" class="btn btn-filled btn-block btn-lg">Assign Task</button>
+    </form>
+
+    <h3 class="profile-section-title" style="margin-top:32px;">All Assigned Tasks</h3>
+    <% if (allTasks && allTasks.length > 0) { %>
+      <% allTasks.forEach(task => { %>
+        <% const assignees = taskAssigneesMap[task.id] || []; %>
+        <div class="manage-item">
+          <div class="manage-item-summary">
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-list-task"></i></div>
+            <div class="manage-item-info">
+              <h4><%= task.title %></h4>
+              <small>Due: <%= task.due_date ? new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No deadline' %></small>
+            </div>
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-eye"></i> View</button>
+          </div>
+          <div class="manage-edit-form" style="display:none;">
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;"><%= task.description %></p>
+
+            <h5 style="font-size:0.78rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin-bottom:10px;">Assigned To</h5>
+            <% assignees.forEach(a => { %>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f5f5f5; font-size:0.85rem;">
+                <span><%= a.full_name %> (<%= a.account_type %>)</span>
+                <span class="db-badge-status
+                  <%= a.individual_status === 'pending' ? 'db-badge-progress' : '' %>
+                  <%= a.individual_status === 'in_progress' ? 'db-badge-progress' : '' %>
+                  <%= a.individual_status === 'completed' ? 'db-badge-open' : '' %>
+                "><%= a.individual_status.replace('_', ' ') %></span>
+                <% if (a.report_file_path) { %>
+                  <a href="<%= a.report_file_path %>" target="_blank" style="font-size:0.8rem;"><i class="bi bi-file-earmark-text"></i> View Report</a>
+                <% } %>
+              </div>
+            <% }) %>
+
+            <form action="/account/tasks/<%= task.id %>/delete" method="POST" onsubmit="return confirm('Delete this task?');" style="margin-top:14px;">
+              <button type="submit" class="btn-outline-sm manage-delete-btn">Delete Task</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding:20px;">No tasks assigned yet.</p>
+    <% } %>
+
+  <% } else { %>
+    <div style="background:#fff8e1; border-radius:10px; padding:16px; text-align:center; color:#f57f17; font-size:0.88rem;">
+      <i class="bi bi-lock"></i> Only Super Admins can assign tasks.
+    </div>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelTaskManagement"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

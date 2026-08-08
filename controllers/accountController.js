@@ -6,7 +6,7 @@ const PDFDocument = require("pdfkit");
 const db = require('../database/db');
 const { title } = require("process");
 const { error } = require("console");
-
+const mailer = require("../utilities/mailer");
 
 
 
@@ -199,6 +199,20 @@ async function buildAdminDashboard(req, res) {
   // admins check
   const allAdminAccounts = await accountModel.getAllAdminAccounts();
   const isSuperAdmin = account.admin_level === "super_admin";
+
+  // view all ict staff here
+  const allIctStaffOnly = await accountModel.getAllIctStaffOnly();
+
+  // view tasks
+  const assignablePeople = [...(await accountModel.getAllAdminAccounts()), ...(await accountModel.getAllIctStaffOnly())];
+  const allTasks = await accountModel.getAllTasksForSuperAdmin();
+  const taskAssigneesMap = {};
+              for (const t of allTasks) {
+      taskAssigneesMap[t.id] = await accountModel.getAssigneesForTask(t.id);
+    }
+  const myTasks = await accountModel.getTasksForAccount(account.id);
+
+  
  
 
   res.render("dashboards/index", {
@@ -230,6 +244,11 @@ async function buildAdminDashboard(req, res) {
     allPaymentHistory,
     allAdminAccounts,
     isSuperAdmin,
+    allIctStaffOnly,
+    assignablePeople,
+    allTasks,
+    taskAssigneesMap,
+    myTasks,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -469,6 +488,10 @@ async function buildIctStaffDashboard(req, res) {
   for (const m of allMembersOnly) {
     memberDetailsMap[m.id] = await accountModel.getFullMemberDetailsForIct(m.id);
   }
+
+  // ict view tasks
+  const myTasks = await accountModel.getTasksForAccount(account.id);
+
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -489,6 +512,7 @@ async function buildIctStaffDashboard(req, res) {
     unreadMessageCount,
     allMembersOnly,
     memberDetailsMap,
+    myTasks,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -1868,6 +1892,185 @@ async function deleteNotificationPost(req, res) {
   }
 }
 // end here.
+/*************************
+ * 
+ * Delivery Node mailer ict staff create
+ */
+
+async function createIctStaffPost(req, res) {
+  try {
+    const { fullName, email, phoneNumber } = req.body;
+
+    const tempPassword = utilities.generateTempPassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const newIctStaff = await accountModel.createIctStaffAccount(fullName, email, phoneNumber, hashedPassword);
+
+    const emailResult = await mailer.sendCredentialsEmail(email, fullName, tempPassword);
+
+    if (emailResult.sent) {
+      req.flash("success", `ICT staff account created for ${fullName}. Login credentials sent via email.`);
+    } else {
+      req.flash("success", `ICT staff account created for ${fullName}. Temporary password: ${tempPassword} (email sending not yet connected — share this manually for now).`);
+    }
+
+    res.redirect("/account/dashboard/admin?ictStaffAdded=true");
+  } catch (error) {
+    console.error("CREATE ICT STAFF ERROR:", error);
+    if (error.code === "23505") {
+      req.flash("error", "An account with this email already exists.");
+      return res.redirect("/account/dashboard/admin");
+    }
+    req.flash("error", "Failed to create ICT staff account.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here.
+/********************
+ * Delivery management for ict staffs by admins
+ */
+async function updateIctStaffPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { full_name, email, phone_number, status } = req.body;
+
+    await accountModel.updateIctStaffDetails(id, { full_name, email, phone_number, status });
+
+    req.flash("success", "ICT staff details updated successfully.");
+    res.redirect("/account/dashboard/admin?ictStaffUpdated=true");
+  } catch (error) {
+    console.error("UPDATE ICT STAFF ERROR:", error);
+    if (error.code === "23505") {
+      req.flash("error", "That email is already in use by another account.");
+      return res.redirect("/account/dashboard/admin");
+    }
+    req.flash("error", "Failed to update ICT staff details.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function adminResetIctPasswordPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { new_password, confirm_new_password } = req.body;
+
+    if (new_password !== confirm_new_password) {
+      req.flash("error", "Passwords do not match.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await accountModel.adminResetPassword(id, hashedPassword);
+
+    req.flash("success", "ICT staff password has been reset successfully.");
+    res.redirect("/account/dashboard/admin?ictStaffUpdated=true");
+  } catch (error) {
+    console.error("ADMIN RESET ICT PASSWORD ERROR:", error);
+    req.flash("error", "Failed to reset password.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteIctStaffPost(req, res) {
+  try {
+    const { id } = req.params;
+    const ictAccount = await accountModel.getAccountById(id);
+
+    if (!ictAccount || ictAccount.account_type !== "ict_staff") {
+      req.flash("error", "ICT staff account not found.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    await accountModel.permanentlyDeleteAccount(id);
+
+    req.flash("success", `${ictAccount.full_name}'s ICT staff account has been permanently deleted.`);
+    res.redirect("/account/dashboard/admin?ictStaffUpdated=true");
+  } catch (error) {
+    console.error("DELETE ICT STAFF ERROR:", error);
+    req.flash("error", "Failed to delete ICT staff account.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+// end here.
+
+// delivery task assign for both minor admin and supper admin
+async function createTaskPost(req, res) {
+  try {
+    const { title, description, due_date, assignee_ids } = req.body;
+
+    let assigneeIds = Array.isArray(assignee_ids) ? assignee_ids : [assignee_ids];
+    assigneeIds = assigneeIds.filter(Boolean);
+
+    if (assigneeIds.length === 0) {
+      req.flash("error", "Please select at least one person to assign this task to.");
+      return res.redirect("/account/dashboard/admin");
+    }
+
+    await accountModel.createTask(req.session.account.id, title, description, due_date, assigneeIds);
+
+    await accountModel.notifyRoles(["admin"], "Task Assigned", `A new task "${title}" was assigned.`, "/account/dashboard/admin");
+    for (const id of assigneeIds) {
+      await accountModel.createNotification(id, "New Task Assigned", `You have been assigned a new task: "${title}".`, null);
+    }
+
+    req.flash("success", "Task assigned successfully.");
+    res.redirect("/account/dashboard/admin?tasksUpdated=true");
+  } catch (error) {
+    console.error("CREATE TASK ERROR:", error);
+    req.flash("error", "Failed to assign task.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteTaskPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteTask(id);
+    req.flash("success", "Task deleted.");
+    res.redirect("/account/dashboard/admin?tasksUpdated=true");
+  } catch (error) {
+    console.error("DELETE TASK ERROR:", error);
+    req.flash("error", "Failed to delete task.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function submitTaskReportPost(req, res) {
+  try {
+    const { taskAssigneeId } = req.params;
+
+    if (!req.file) {
+      req.flash("error", "Please upload your report as a PDF or DOC file.");
+      return res.redirect("back");
+    }
+
+    const reportFilePath = `/uploads/task-reports/${req.file.filename}`;
+    await accountModel.submitTaskReport(taskAssigneeId, reportFilePath);
+
+    req.flash("success", "Task report submitted successfully.");
+    res.redirect("back");
+  } catch (error) {
+    console.error("SUBMIT TASK REPORT ERROR:", error);
+    req.flash("error", "Failed to submit report.");
+    res.redirect("back");
+  }
+}
+
+async function updateIndividualTaskStatusPost(req, res) {
+  try {
+    const { taskAssigneeId } = req.params;
+    const { status } = req.body;
+    await accountModel.updateIndividualTaskStatus(taskAssigneeId, status);
+    req.flash("success", "Task status updated.");
+    res.redirect("back");
+  } catch (error) {
+    console.error("UPDATE TASK STATUS ERROR:", error);
+    req.flash("error", "Failed to update status.");
+    res.redirect("back");
+  }
+}
+// end here.
+
 
 /* ****************************************
  * Logout
@@ -1893,5 +2096,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,accountLogout
 }

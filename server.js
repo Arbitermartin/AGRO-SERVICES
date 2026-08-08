@@ -33,15 +33,7 @@ app.use(express.json());
 // 2: Cookie Parser (needed for CSRF later)
 app.use(cookieParser());
 
-// 3: Rate limiting.
-// const generalLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000,
-//   max: 150,
-//   handler: (req, res) => {
-//     req.flash("error", "Too many requests. Please try again later.");
-//     res.redirect(req.headers.referer || "/");
-//   },
-// });
+
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // A bit more relaxed for development
@@ -76,12 +68,7 @@ app.use((req,res,next)=>{
   res.locals.messages = require("express-messages")(req,res);
   next();
 });
-// Express Messages Middleware
-// app.use(require('connect-flash')());
-// app.use(function(req, res, next){
-//   res.locals.messages = require('express-messages')(req, res)
-//   next();
-// });
+
 
 // track online ict stafff
 app.use(utilities.trackPresence);
@@ -102,6 +89,25 @@ app.use(express.static(path.join(__dirname, 'public'))) ;
 app.use("/account", accountRoute);
 app.use(static);
 app.use("/", staticRoute);
+
+// // File Not Found Route - must be last route in list
+// app.use(async (req, res, next) => {
+//   next({status: 404, message: 'Sorry, we appear to have lost that page.'})
+// })
+
+// /* ***********************
+// * Express Error Handler
+// * Place after all other middleware
+// *************************/
+// app.use(async (err, req, res, next) => {
+//   let nav = await utilities.getNav()
+//   console.error(`Error at: "${req.originalUrl}": ${err.message}`)
+//   res.render("errors/error", {
+//     title: err.status || 'Server Error',
+//     message: err.message,
+//     nav
+//   })
+// })
 
 // Build Home View.
 

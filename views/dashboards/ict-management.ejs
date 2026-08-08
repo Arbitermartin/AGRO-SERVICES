@@ -1,0 +1,101 @@
+<div id="ictManagementPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-person-gear"></i></div>
+    <h2>ICT Staff Management</h2>
+    <p>View, edit, reset passwords, and manage ICT staff accounts</p>
+  </div>
+
+  <% if (!isSuperAdmin) { %>
+    <div style="background:#fff8e1; border-radius:10px; padding:16px; margin-bottom:20px; text-align:center; color:#f57f17; font-size:0.88rem;">
+      <i class="bi bi-lock"></i> Only Super Admins can manage ICT staff accounts.
+    </div>
+  <% } else { %>
+
+    <% if (allIctStaffOnly && allIctStaffOnly.length > 0) { %>
+      <% allIctStaffOnly.forEach(ict => { %>
+        <div class="manage-item" data-item-id="<%= ict.id %>">
+          <div class="manage-item-summary">
+            <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+            <div class="manage-item-info">
+              <h4><%= ict.full_name %></h4>
+              <small><%= ict.email %> &middot; <%= ict.status %></small>
+            </div>
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-eye"></i> View</button>
+          </div>
+
+          <div class="manage-edit-form" style="display:none;">
+
+            <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin-bottom:8px;">Edit Details</h5>
+            <form action="/account/ict-staff/<%= ict.id %>/update" method="POST" class="auth-form">
+              <div class="form-field">
+                <label>Full Name</label>
+                <div class="input-wrap">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" name="full_name" value="<%= ict.full_name %>" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Email</label>
+                <div class="input-wrap">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" name="email" value="<%= ict.email %>" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Phone Number</label>
+                <div class="input-wrap">
+                  <i class="bi bi-telephone input-icon"></i>
+                  <input type="tel" name="phone_number" value="<%= ict.phone_number || '' %>">
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Status</label>
+                <div class="input-wrap">
+                  <i class="bi bi-toggle-on input-icon"></i>
+                  <select name="status">
+                    <option value="active" <%= ict.status === 'active' ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= ict.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-filled" style="margin-top:8px;">Save Changes</button>
+            </form>
+
+            <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin:20px 0 8px;">Reset Password</h5>
+            <form action="/account/ict-staff/<%= ict.id %>/reset-password" method="POST" class="auth-form">
+              <div class="form-field">
+                <label>New Password</label>
+                <div class="input-wrap">
+                  <i class="bi bi-lock input-icon"></i>
+                  <input type="password" name="new_password" placeholder="New password" pattern="^.{8,}$" required>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Confirm New Password</label>
+                <div class="input-wrap">
+                  <i class="bi bi-lock input-icon"></i>
+                  <input type="password" name="confirm_new_password" placeholder="Confirm new password" pattern="^.{8,}$" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-filled" style="margin-top:8px;">Reset Password</button>
+            </form>
+
+            <form action="/account/ict-staff/<%= ict.id %>/delete" method="POST" onsubmit="return confirm('Permanently delete this ICT staff account? This cannot be undone.');" style="margin-top:20px;">
+              <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#c0392b; width:100%;">
+                <i class="bi bi-trash"></i> Delete Permanently
+              </button>
+            </form>
+
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; color:#9ca3af; padding:20px;">No ICT staff accounts found.</p>
+    <% } %>
+
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelIctManagement"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

@@ -1057,6 +1057,88 @@ async function deleteNotification(id) {
 }
 // end here.
 
+/*******************************
+ * Delivery ict staff create
+ */
+async function createIctStaffAccount(fullName, email, phoneNumber, hashedPassword) {
+  const account = await db("accounts")
+    .insert({
+      full_name: fullName,
+      email,
+      phone_number: phoneNumber,
+      password: hashedPassword,
+      account_type: "ict_staff",
+      status: "active",
+    })
+    .returning("*");
+  return account[0];
+}
+
+/**************************
+ * Delivery view ict staff must  be deleted also by admin
+ * 
+ */
+async function getAllIctStaffOnly() {
+  return await db("accounts").where("account_type", "ict_staff").orderBy("full_name", "asc");
+}
+
+async function updateIctStaffDetails(accountId, data) {
+  return await db("accounts").where({ id: accountId }).update(data);
+}
+// end here.
+
+/* ---------- Tasks ---------- */
+async function createTask(assignedBy, title, description, dueDate, assigneeIds) {
+  const inserted = await db("tasks")
+    .insert({ assigned_by: assignedBy, title, description, due_date: dueDate })
+    .returning("*");
+  const task = inserted[0];
+
+  const rows = assigneeIds.map(accountId => ({ task_id: task.id, account_id: accountId }));
+  await db("task_assignees").insert(rows);
+
+  return task;
+}
+
+async function getAllTasksForSuperAdmin() {
+  return await db("tasks as t")
+    .join("accounts as a", "t.assigned_by", "a.id")
+    .select("t.*", "a.full_name as assigned_by_name")
+    .orderBy("t.created_at", "desc");
+}
+
+async function getAssigneesForTask(taskId) {
+  return await db("task_assignees as ta")
+    .join("accounts as a", "ta.account_id", "a.id")
+    .where("ta.task_id", taskId)
+    .select("ta.*", "a.full_name", "a.account_type");
+}
+
+async function getTasksForAccount(accountId) {
+  return await db("task_assignees as ta")
+    .join("tasks as t", "ta.task_id", "t.id")
+    .where("ta.account_id", accountId)
+    .select("ta.*", "t.title", "t.description", "t.due_date", "t.status")
+    .orderBy("t.created_at", "desc");
+}
+
+async function submitTaskReport(taskAssigneeId, reportFilePath) {
+  return await db("task_assignees").where({ id: taskAssigneeId }).update({
+    individual_status: "completed",
+    report_file_path: reportFilePath,
+    submitted_at: db.fn.now(),
+  });
+}
+
+async function updateIndividualTaskStatus(taskAssigneeId, status) {
+  return await db("task_assignees").where({ id: taskAssigneeId }).update({ individual_status: status });
+}
+
+async function deleteTask(taskId) {
+  return await db("tasks").where({ id: taskId }).del();
+}
+// end here.
+
 
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
@@ -1065,6 +1147,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask
 
 };

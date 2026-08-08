@@ -88,6 +88,33 @@ const uploadProfilePhoto = multer({
   },
 });
 
+
+// delivery tasks upload
+
+const taskReportsPath = path.join(__dirname, "..", "public", "uploads", "task-reports");
+if (!fs.existsSync(taskReportsPath)) {
+  fs.mkdirSync(taskReportsPath, { recursive: true });
+}
+
+const taskReportStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, taskReportsPath),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `report-${Date.now()}${ext}`);
+  },
+});
+
+const uploadTaskReport = multer({
+  storage: taskReportStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /pdf|doc|docx/;
+    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only PDF or DOC/DOCX files are allowed."), ok);
+  },
+});
+// end here for both admin and icts
+
 /******************************
  * 
  * Delivery job application
@@ -616,6 +643,57 @@ router.post("/notifications/mark-all-read",
 router.post("/notifications/:id/delete", 
   utilities.checkLogin, 
   utilities.handleErrors(accountController.deleteNotificationPost));
+  // end here.
+
+  // delivery create ict staff
+  router.post(
+  "/ict-staff/create",
+  utilities.checkLogin,
+  utilities.checkSuperAdmin,
+  utilities.handleErrors(accountController.createIctStaffPost)
+);
+// end here
+
+/************************
+ * Delivery admin manage all ict staffs
+ */
+router.post("/ict-staff/:id/update", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.updateIctStaffPost));
+
+router.post("/ict-staff/:id/reset-password", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.adminResetIctPasswordPost));
+
+router.post("/ict-staff/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.deleteIctStaffPost));
+
+  // end here.
+
+  // delivery task for minor admin and icts
+router.post("/tasks/create", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.createTaskPost));
+
+router.post("/tasks/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkSuperAdmin, 
+  utilities.handleErrors(accountController.deleteTaskPost));
+
+router.post("/task-assignees/:taskAssigneeId/status", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.updateIndividualTaskStatusPost));
+
+router.post("/task-assignees/:taskAssigneeId/submit-report", 
+  utilities.checkLogin, 
+  uploadTaskReport.single("report_file"), 
+  utilities.handleErrors(accountController.submitTaskReportPost));
+
   // end here.
 
 module.exports= router

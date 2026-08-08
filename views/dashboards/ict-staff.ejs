@@ -49,6 +49,8 @@
       <span class="db-nav-badge"><%= unreadMessageCount %></span>
       <% } %>
       </a>
+          <a href="#" id="myTasksLink" class="db-nav-link"><i class="bi bi-list-task"></i> My Tasks
+        </a>
         <a href="#" class="db-nav-link">
           <i class="bi bi-bar-chart"></i> Reports
         </a>
@@ -89,15 +91,7 @@
           <div id="dashboardSearchResults" class="search-results-dropdown" style="display:none;"></div>
         </div>
        
-          <!-- <div class="db-search">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Search tickets or users...">
-          </div> -->
-<!-- 
-          <button type="button" class="db-icon-btn" aria-label="Notifications">
-            <i class="bi bi-bell"></i>
-            <span class="db-notif-dot"></span>
-          </button> -->
+      
            <div class="db-notif-menu">
            <button type="button" class="db-icon-btn" id="notifToggle" aria-label="Notifications">
            <i class="bi bi-bell"></i>
@@ -375,6 +369,7 @@
         <%- include('add-team-member') %>
         <%- include('messages') %>
         <%- include('ict-all-members') %>
+        <%- include('my-tasks') %>
          
     </div>
   </div>

@@ -108,4 +108,18 @@ utilities.checkSuperAdmin = (req, res, next) => {
 };
 
 // end here
+
+/***************
+ * Random email generate
+ */
+utilities.generateTempPassword = () => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
+  let password = "";
+  for (let i = 0; i < 10; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+};
+// end here
+
 module.exports = utilities

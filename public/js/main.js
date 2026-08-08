@@ -1731,6 +1731,72 @@ if (notifToggle && notifDropdown) {
 }
 // end here
 
+// Delivery ict staff create
+const addIctStaffLink = document.getElementById('addIctStaffLink');
+const addIctStaffPanel = document.getElementById('addIctStaffPanel');
+const cancelAddIctStaff = document.getElementById('cancelAddIctStaff');
+
+if (addIctStaffLink && addIctStaffPanel && dbMainContent) {
+  addIctStaffLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    addIctStaffPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelAddIctStaff && addIctStaffPanel && dbMainContent) {
+  cancelAddIctStaff.addEventListener('click', (e) => {
+    e.preventDefault();
+    addIctStaffPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here. 
+
+// delivery ict staff management
+const ictManagementLink = document.getElementById('ictManagementLink');
+const ictManagementPanel = document.getElementById('ictManagementPanel');
+const cancelIctManagement = document.getElementById('cancelIctManagement');
+
+if (ictManagementLink && ictManagementPanel && dbMainContent) {
+  ictManagementLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    ictManagementPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelIctManagement && ictManagementPanel && dbMainContent) {
+  cancelIctManagement.addEventListener('click', (e) => {
+    e.preventDefault();
+    ictManagementPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here ict staff management.
+
+// task management
+const taskManagementLink = document.getElementById('taskManagementLink');
+const taskManagementPanel = document.getElementById('taskManagementPanel');
+const cancelTaskManagement = document.getElementById('cancelTaskManagement');
+if (taskManagementLink && taskManagementPanel && dbMainContent) {
+  taskManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; taskManagementPanel.style.display='block'; });
+}
+if (cancelTaskManagement) cancelTaskManagement.addEventListener('click', (e) => { e.preventDefault(); taskManagementPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+const myTasksLink = document.getElementById('myTasksLink');
+const myTasksPanel = document.getElementById('myTasksPanel');
+const cancelMyTasks = document.getElementById('cancelMyTasks');
+if (myTasksLink && myTasksPanel && dbMainContent) {
+  myTasksLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; myTasksPanel.style.display='block'; });
+}
+if (cancelMyTasks) cancelMyTasks.addEventListener('click', (e) => { e.preventDefault(); myTasksPanel.style.display='none'; dbMainContent.style.display='block'; });
+
+document.querySelectorAll('.ticket-toggle-simple').forEach(btn => {
+  btn.addEventListener('click', () => btn.closest('.ticket-item').classList.toggle('is-open'));
+});
+// end here
+
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {
       btn.addEventListener('click', () => {
