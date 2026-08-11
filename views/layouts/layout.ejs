@@ -18,5 +18,32 @@
     <% if (typeof showFooter === 'undefined' || showFooter === true) { %>
         <%- include('../partials/footer') %>
     <% } %>
+    <div class="chatbot-widget">
+  <button type="button" class="chatbot-bubble" id="chatbotToggle" aria-label="Open chat assistant">
+    <i class="bi bi-headset"></i>
+  </button>
+
+  <div class="chatbot-window" id="chatbotWindow" style="display:none;">
+    <div class="chatbot-header">
+      <div>
+        <strong>AgroServices Assi
+            stant</strong>
+        <small>We typically reply instantly</small>
+      </div>
+      <button type="button" id="chatbotClose" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="chatbot-msg chatbot-msg-bot">
+        Hi! I'm the AgroServices assistant. Ask me about registration, jobs, training, payments, or anything else.
+      </div>
+    </div>
+
+    <form class="chatbot-input-row" id="chatbotForm">
+      <input type="text" id="chatbotInput" placeholder="Type your question..." autocomplete="off" required>
+      <button type="submit" aria-label="Send"><i class="bi bi-send"></i></button>
+    </form>
+  </div>
+</div>
 </body>
 </html>

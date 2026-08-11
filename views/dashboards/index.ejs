@@ -132,16 +132,16 @@
           </button>
           <div class="db-submenu">
             <a href="#" id="adminManagementLink" class="db-submenu-link"> Manage Admins</a>
-            <a href="#" id="addIctStaffLink" class="db-nav-link"> Add ICT Staff
+            <a href="#" id="addIctStaffLink" class="db-submenu-link"> Add ICT Staff
 
             </a>
-            <a href="#" id="ictManagementLink" class="db-nav-link">ICT Management
+            <a href="#" id="ictManagementLink" class="db-submenu-link">ICT Management
 
             </a>
-            <a href="#" id="taskManagementLink" class="db-nav-link"> Task Management
+            <a href="#" id="taskManagementLink" class="db-submenu-link"> Task Management
 
             </a>
-             <a href="#" id="myTasksLink" class="db-nav-link"> My Tasks
+             <a href="#" id="myTasksLink" class="db-submenu-link"> My Tasks
         </a>
             <a href="#" class="db-submenu-link">Admin Activity</a>
             <a href="#" class="db-submenu-link">Send Credentials</a>
@@ -303,7 +303,7 @@
               <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-mortarboard-fill"></i></div>
               <div>
                 <div class="db-stat-label">Trainings</div>
-                <div class="db-stat-value">16</div>
+                <div class="db-stat-value"><%= allTrainingRegistrations.length %></div>
                 <div class="db-stat-delta db-stat-delta-orange">4 upcoming</div>
               </div>
             </div>
@@ -312,7 +312,7 @@
               <div class="db-stat-icon db-stat-icon-yellow"><i class="bi bi-hourglass-split"></i></div>
               <div>
                 <div class="db-stat-label">Pending Payments</div>
-                <div class="db-stat-value">32</div>
+                <div class="db-stat-value"><%= pendingPaymentCount %></div>
                 <div class="db-stat-delta db-stat-delta-yellow">Your approval</div>
               </div>
             </div>
@@ -397,54 +397,50 @@
               </div>
             </div>
 
-            <div class="db-card">
+             <div class="db-card">
               <div class="db-panel-title">Recent Activities</div>
-              <div class="db-activity-item">
-                <i class="bi bi-person-plus-fill db-activity-icon db-activity-blue"></i>
-                <div><span>New member registered</span><small>John Doe joined &middot; 10 min ago</small></div>
-              </div>
-              <div class="db-activity-item">
-                <i class="bi bi-cash-coin db-activity-icon db-activity-green"></i>
-                <div><span>Payment submitted</span><small>Payment of TZS 50,000 &middot; 25 min ago</small></div>
-              </div>
-              <div class="db-activity-item">
-                <i class="bi bi-calendar-plus-fill db-activity-icon db-activity-purple"></i>
-                <div><span>New event created</span><small>Youth Leadership Summit &middot; 1 hr ago</small></div>
-              </div>
-              <div class="db-activity-item">
-                <i class="bi bi-briefcase-fill db-activity-icon db-activity-orange"></i>
-                <div><span>Job application received</span><small>Software Developer &middot; 2 hrs ago</small></div>
-              </div>
-              <a href="#" class="db-view-all">View all activities <i class="bi bi-arrow-right"></i></a>
-            </div>
+                   <% if (recentActivity && recentActivity.length > 0) { %>
+                       <% recentActivity.forEach(act => { %>
+                  <div class="db-activity-item">
+                     <i class="bi bi-activity db-activity-icon db-activity-blue"></i>
+                       <div>
+                         <span><%= act.full_name %></span>
+                          <small><%= act.action %> &middot; <%= new Date(act.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></small>
+                      </div>
+                     </div>
+                       <% }) %>
+                     <% } else { %>
+                 <p style="text-align:center; color:#9ca3af; padding:16px 0;">No recent activity.</p>
+                 <% } %>
+                 <a href="#" class="db-view-all">View all activities <i class="bi bi-arrow-right"></i></a>
+                </div>
 
             <div class="db-card db-events-card">
               <div class="db-panel-title">Upcoming Events</div>
-              <table class="db-table">
-                <thead>
-                  <tr><th>Event</th><th>Date</th><th>Location</th><th>Registrations</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Youth Leadership Summit</td><td>25 May 2024</td><td>Dar es Salaam</td>
-                    <td>120 / 200</td><td><span class="db-badge-open">Open</span></td>
-                  </tr>
-                  <tr>
-                    <td>Digital Skills Workshop</td><td>02 Jun 2024</td><td>Online</td>
-                    <td>85 / 150</td><td><span class="db-badge-open">Open</span></td>
-                  </tr>
-                  <tr>
-                    <td>Entrepreneurship Bootcamp</td><td>10 Jun 2024</td><td>Arusha</td>
-                    <td>60 / 100</td><td><span class="db-badge-open">Open</span></td>
-                  </tr>
-                  <tr>
-                    <td>ICT Innovation Expo</td><td>15 Jun 2024</td><td>Mwanza</td>
-                    <td>45 / 100</td><td><span class="db-badge-open">Open</span></td>
-                  </tr>
-                </tbody>
-              </table>
-              <a href="#" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
-            </div>
+               <table class="db-table">
+               <thead>
+                <tr><th>Event</th><th>Date</th><th>Location</th><th>Registrations</th><th>Status</th></tr>
+             </thead>
+              <tbody>
+                <% if (upcomingEventsForDashboard && upcomingEventsForDashboard.length > 0) { %>
+                 <% upcomingEventsForDashboard.forEach(ev => { %>
+                 <tr>
+                     <td><%= ev.title %></td>
+                     <td><%= new Date(ev.event_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                     <td><%= ev.location || 'TBA' %></td>
+                     <td><%= ev.registration_count %></td>
+                     <td><span class="db-badge-open">Open</span></td>
+                     </tr>
+                     <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="5" style="text-align:center; color:#9ca3af; padding:16px;">No upcoming events.</td></tr>
+                   <% } %>
+                   </tbody>
+                     </table>
+                   <a href="#" id="dashboardViewAllEventsLink" class="db-view-all">View all events <i class="bi bi-arrow-right"></i></a>
+               </div>
+
+           
 
             <div class="db-card">
           <div class="db-panel-title">Pending Approvals</div>

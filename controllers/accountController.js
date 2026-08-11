@@ -241,8 +241,10 @@ async function buildAdminDashboard(req, res) {
   // registration intake
   const activeIntake = await accountModel.getActiveIntake();
 
-  
- 
+  // get upcoming event
+  const upcomingEventsForDashboard = await accountModel.getUpcomingEventsWithRegistrationCount();
+  const recentActivity = await accountModel.getRecentActivityForDashboard(4); 
+
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -280,6 +282,8 @@ async function buildAdminDashboard(req, res) {
     myTasks,
     allTestimonials,
     activeIntake,
+    upcomingEventsForDashboard,
+    recentActivity,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -2240,6 +2244,68 @@ async function buildRegisterGate(req, res) {
 }
 // end here.
 
+/**************************
+ * 
+ * Delivery chatbot
+ * 
+ */
+async function chatbotAsk(req, res) {
+  try {
+    const { message } = req.body;
+
+    if (!message || message.trim().length === 0) {
+      return res.json({ type: "bot", text: "Please type a question and I'll try to help." });
+    }
+
+    const match = await accountModel.findFaqMatch(message);
+
+    if (match) {
+      return res.json({ type: "bot", text: match.answer });
+    }
+
+    // No FAQ match — check for a live agent
+    const agent = await accountModel.getAvailableIctStaff();
+
+    if (agent) {
+      return res.json({
+        type: "agent_available",
+        text: `I'm not sure about that one — but ${agent.name || agent.full_name} from our ICT team is online. Would you like me to connect you?`,
+      });
+    }
+
+    return res.json({
+      type: "no_agent",
+      text: "I'm not sure about that, and no ICT staff are online right now. Would you like to leave a message and we'll get back to you?",
+    });
+  } catch (error) {
+    console.error("CHATBOT ASK ERROR:", error);
+    res.status(500).json({ type: "bot", text: "Something went wrong. Please try again." });
+  }
+}
+
+async function chatbotCreateTicket(req, res) {
+  try {
+    const { name, email, message } = req.body;
+
+    // Create a lightweight ticket for anonymous chatbot handoff
+    const guestAccount = await db("accounts").where({ email }).first();
+    let accountId = guestAccount ? guestAccount.id : null;
+
+    if (!accountId) {
+      return res.json({ success: false, text: "Please log in or register to create a support ticket, or use the Contact Us page." });
+    }
+
+    const ticket = await accountModel.createTicket(accountId, "Chatbot handoff request", message);
+    await accountModel.notifyRoles(["ict_staff"], "New Support Ticket (via Chatbot)", `A visitor requested live support: "${message}"`, "/account/dashboard/ict-staff");
+
+    res.json({ success: true, text: `Got it — ticket #${ticket.ticket_number} has been created. Our ICT team will follow up soon.` });
+  } catch (error) {
+    console.error("CHATBOT CREATE TICKET ERROR:", error);
+    res.status(500).json({ success: false, text: "Something went wrong creating your request." });
+  }
+}
+// end here chatboat
+
 
 /* ****************************************
  * Logout
@@ -2265,5 +2331,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotAsk,chatbotCreateTicket,accountLogout
 }

@@ -554,6 +554,101 @@ if (testimonialSlider) {
 }
 // end here testmonials
 
+// chatboat
+/* =====================================================
+   CHATBOT WIDGET
+===================================================== */
+const chatbotToggle = document.getElementById('chatbotToggle');
+const chatbotWindow = document.getElementById('chatbotWindow');
+const chatbotClose = document.getElementById('chatbotClose');
+const chatbotForm = document.getElementById('chatbotForm');
+const chatbotInput = document.getElementById('chatbotInput');
+const chatbotMessages = document.getElementById('chatbotMessages');
+
+if (chatbotToggle && chatbotWindow) {
+  chatbotToggle.addEventListener('click', () => {
+    const isOpen = chatbotWindow.style.display === 'flex';
+    chatbotWindow.style.display = isOpen ? 'none' : 'flex';
+  });
+
+  if (chatbotClose) {
+    chatbotClose.addEventListener('click', () => {
+      chatbotWindow.style.display = 'none';
+    });
+  }
+
+  function addChatMessage(text, sender) {
+    const msg = document.createElement('div');
+    msg.className = `chatbot-msg chatbot-msg-${sender}`;
+    msg.textContent = text;
+    chatbotMessages.appendChild(msg);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+  }
+
+  function addQuickButton(label, onClick) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chatbot-quick-btn';
+    btn.textContent = label;
+    btn.addEventListener('click', onClick);
+    chatbotMessages.appendChild(btn);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+  }
+
+  if (chatbotForm) {
+    chatbotForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const message = chatbotInput.value.trim();
+      if (!message) return;
+
+      addChatMessage(message, 'user');
+      chatbotInput.value = '';
+
+      fetch('/chatbot/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          addChatMessage(data.text, 'bot');
+
+          if (data.type === 'no_agent' || data.type === 'agent_available') {
+            addQuickButton('Yes, leave a message', () => {
+              addChatMessage('Yes, leave a message', 'user');
+              addChatMessage('Please share your registered email so we can follow up:', 'bot');
+
+              const emailInput = document.createElement('input');
+              emailInput.type = 'email';
+              emailInput.placeholder = 'Your email';
+              emailInput.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;margin-top:6px;';
+              chatbotMessages.appendChild(emailInput);
+
+              const sendBtn = document.createElement('button');
+              sendBtn.type = 'button';
+              sendBtn.className = 'chatbot-quick-btn';
+              sendBtn.textContent = 'Send request';
+              sendBtn.style.marginTop = '6px';
+              sendBtn.addEventListener('click', () => {
+                fetch('/chatbot/create-ticket', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: emailInput.value, message }),
+                })
+                  .then(res => res.json())
+                  .then(res => addChatMessage(res.text, 'bot'));
+              });
+              chatbotMessages.appendChild(sendBtn);
+              chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            });
+          }
+        })
+        .catch(() => addChatMessage('Sorry, something went wrong. Please try again.', 'bot'));
+    });
+  }
+}
+// end here
+
 // registration intake
 const registrationIntakeLink = document.getElementById('registrationIntakeLink');
 const registrationIntakePanel = document.getElementById('registrationIntakePanel');
@@ -1866,6 +1961,8 @@ if (testimonialUploadArea && testimonialUploadInput) {
   });
 }
 // end here.
+
+
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

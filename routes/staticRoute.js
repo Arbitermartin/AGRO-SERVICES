@@ -109,4 +109,12 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
 router.get("/news/:id", 
   utilities.handleErrors(accountController.viewNewsDetails));
 
+   // chatbot
+router.post("/chatbot/ask", 
+  utilities.handleErrors(accountController.chatbotAsk));
+
+router.post("/chatbot/create-ticket", 
+  utilities.handleErrors(accountController.chatbotCreateTicket));
+  // end here.
+
   module.exports = router
