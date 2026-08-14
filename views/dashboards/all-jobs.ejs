@@ -34,6 +34,7 @@
             </td>
             <td>
               <form action="/account/jobs/<%= job.id %>/toggle-status" method="POST" style="display:inline;">
+                <%- include('../partials/csrf-field') %>
                 <button
                   type="submit"
                   class="db-btn-action <%= job.status === 'open' ? 'btn-red' : 'btn-green' %>">

@@ -117,4 +117,11 @@ router.post("/chatbot/create-ticket",
   utilities.handleErrors(accountController.chatbotCreateTicket));
   // end here.
 
+  // messages chatboat
+router.post("/chatbot/start-session", utilities.handleErrors(accountController.chatbotStartSession));
+router.post("/chatbot/ask", utilities.handleErrors(accountController.chatbotAsk));
+router.post("/chatbot/connect-agent", utilities.handleErrors(accountController.chatbotConnectAgent));
+router.post("/chat/:session_id/send", utilities.handleErrors(accountController.chatSendMessage));
+router.get("/chat/:session_id/messages", utilities.handleErrors(accountController.chatGetMessages));
+
   module.exports = router

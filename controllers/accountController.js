@@ -523,6 +523,7 @@ async function buildIctStaffDashboard(req, res) {
   for (const m of allMembersOnly) {
     memberDetailsMap[m.id] = await accountModel.getFullMemberDetailsForIct(m.id);
   }
+  const totalMembers = await accountModel.countMembersOnly();
 
   // ict view tasks
   const myTasks = await accountModel.getTasksForAccount(account.id);
@@ -543,6 +544,7 @@ async function buildIctStaffDashboard(req, res) {
     ticketCounts,
     recentTickets,
     allTeamMembers,
+    totalMembers,
     allMessages,
     unreadMessageCount,
     allMembersOnly,
@@ -2249,9 +2251,79 @@ async function buildRegisterGate(req, res) {
  * Delivery chatbot
  * 
  */
+// async function chatbotAsk(req, res) {
+//   try {
+//     const { message } = req.body;
+
+//     if (!message || message.trim().length === 0) {
+//       return res.json({ type: "bot", text: "Please type a question and I'll try to help." });
+//     }
+
+//     const match = await accountModel.findFaqMatch(message);
+
+//     if (match) {
+//       return res.json({ type: "bot", text: match.answer });
+//     }
+
+//     // No FAQ match — check for a live agent
+//     const agent = await accountModel.getAvailableIctStaff();
+
+//     if (agent) {
+//       return res.json({
+//         type: "agent_available",
+//         text: `I'm not sure about that one — but ${agent.name || agent.full_name} from our ICT team is online. Would you like me to connect you?`,
+//       });
+//     }
+
+//     return res.json({
+//       type: "no_agent",
+//       text: "I'm not sure about that, and no ICT staff are online right now. Would you like to leave a message and we'll get back to you?",
+//     });
+//   } catch (error) {
+//     console.error("CHATBOT ASK ERROR:", error);
+//     res.status(500).json({ type: "bot", text: "Something went wrong. Please try again." });
+//   }
+// }
+
+// async function chatbotCreateTicket(req, res) {
+//   try {
+//     const { name, email, message } = req.body;
+
+//     // Create a lightweight ticket for anonymous chatbot handoff
+//     const guestAccount = await db("accounts").where({ email }).first();
+//     let accountId = guestAccount ? guestAccount.id : null;
+
+//     if (!accountId) {
+//       return res.json({ success: false, text: "Please log in or register to create a support ticket, or use the Contact Us page." });
+//     }
+
+//     const ticket = await accountModel.createTicket(accountId, "Chatbot handoff request", message);
+//     await accountModel.notifyRoles(["ict_staff"], "New Support Ticket (via Chatbot)", `A visitor requested live support: "${message}"`, "/account/dashboard/ict-staff");
+
+//     res.json({ success: true, text: `Got it — ticket #${ticket.ticket_number} has been created. Our ICT team will follow up soon.` });
+//   } catch (error) {
+//     console.error("CHATBOT CREATE TICKET ERROR:", error);
+//     res.status(500).json({ success: false, text: "Something went wrong creating your request." });
+//   }
+// }
+// end here chatboat
+
+// messages
+
+async function chatbotStartSession(req, res) {
+  try {
+    const { visitor_name } = req.body;
+    const session = await accountModel.createChatSession(visitor_name);
+    res.json({ session_id: session.id, text: `Nice to meet you, ${visitor_name}! How can I help you today?` });
+  } catch (error) {
+    console.error("CHATBOT START SESSION ERROR:", error);
+    res.status(500).json({ text: "Something went wrong. Please refresh and try again." });
+  }
+}
+
 async function chatbotAsk(req, res) {
   try {
-    const { message } = req.body;
+    const { message, session_id } = req.body;
 
     if (!message || message.trim().length === 0) {
       return res.json({ type: "bot", text: "Please type a question and I'll try to help." });
@@ -2260,22 +2332,13 @@ async function chatbotAsk(req, res) {
     const match = await accountModel.findFaqMatch(message);
 
     if (match) {
+      if (session_id) await accountModel.addChatMessage(session_id, "bot", "Assistant", match.answer);
       return res.json({ type: "bot", text: match.answer });
     }
 
-    // No FAQ match — check for a live agent
-    const agent = await accountModel.getAvailableIctStaff();
-
-    if (agent) {
-      return res.json({
-        type: "agent_available",
-        text: `I'm not sure about that one — but ${agent.name || agent.full_name} from our ICT team is online. Would you like me to connect you?`,
-      });
-    }
-
     return res.json({
-      type: "no_agent",
-      text: "I'm not sure about that, and no ICT staff are online right now. Would you like to leave a message and we'll get back to you?",
+      type: "no_match",
+      text: "I don't have an answer for that one. Would you like me to connect you with a live ICT agent?",
     });
   } catch (error) {
     console.error("CHATBOT ASK ERROR:", error);
@@ -2283,28 +2346,84 @@ async function chatbotAsk(req, res) {
   }
 }
 
-async function chatbotCreateTicket(req, res) {
+async function chatbotConnectAgent(req, res) {
   try {
-    const { name, email, message } = req.body;
+    const { session_id } = req.body;
+    const agent = await accountModel.getAvailableIctStaff();
 
-    // Create a lightweight ticket for anonymous chatbot handoff
-    const guestAccount = await db("accounts").where({ email }).first();
-    let accountId = guestAccount ? guestAccount.id : null;
-
-    if (!accountId) {
-      return res.json({ success: false, text: "Please log in or register to create a support ticket, or use the Contact Us page." });
+    if (!agent) {
+      return res.json({ connected: false, text: "No ICT agents are online right now. Please try again shortly, or leave a message and we'll follow up." });
     }
 
-    const ticket = await accountModel.createTicket(accountId, "Chatbot handoff request", message);
-    await accountModel.notifyRoles(["ict_staff"], "New Support Ticket (via Chatbot)", `A visitor requested live support: "${message}"`, "/account/dashboard/ict-staff");
+    await accountModel.assignChatToAgent(session_id, agent.id);
+    await accountModel.notifyRoles(["ict_staff"], "New Live Chat", `A visitor is waiting for live chat support.`, "/account/dashboard/ict-staff");
 
-    res.json({ success: true, text: `Got it — ticket #${ticket.ticket_number} has been created. Our ICT team will follow up soon.` });
+    res.json({
+      connected: true,
+      agent_name: agent.full_name,
+      text: `Connecting you with ${agent.full_name} from our ICT team...`,
+    });
   } catch (error) {
-    console.error("CHATBOT CREATE TICKET ERROR:", error);
-    res.status(500).json({ success: false, text: "Something went wrong creating your request." });
+    console.error("CHATBOT CONNECT AGENT ERROR:", error);
+    res.status(500).json({ connected: false, text: "Failed to connect to an agent. Please try again." });
   }
 }
-// end here chatboat
+
+async function chatSendMessage(req, res) {
+  try {
+    const { session_id } = req.params;
+    const { message, sender_type, sender_name } = req.body;
+
+    await accountModel.addChatMessage(session_id, sender_type, sender_name, message);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("CHAT SEND MESSAGE ERROR:", error);
+    res.status(500).json({ error: true });
+  }
+}
+
+async function chatGetMessages(req, res) {
+  try {
+    const { session_id } = req.params;
+    const messages = await accountModel.getChatMessages(session_id);
+    res.json(messages);
+  } catch (error) {
+    console.error("CHAT GET MESSAGES ERROR:", error);
+    res.status(500).json([]);
+  }
+}
+
+async function chatGetWaitingSessions(req, res) {
+  try {
+    const sessions = await accountModel.getWaitingChatSessions();
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json([]);
+  }
+}
+
+async function chatIctAcceptSession(req, res) {
+  try {
+    const { session_id } = req.params;
+    const ictId = req.session.account.id;
+    await accountModel.assignChatToAgent(session_id, ictId);
+    await accountModel.addChatMessage(session_id, "bot", "System", `${req.session.account.full_name} has joined the chat.`);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+
+async function chatCloseSession(req, res) {
+  try {
+    const { session_id } = req.params;
+    await accountModel.closeChatSession(session_id);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+}
+// end here
 
 
 /* ****************************************
@@ -2331,5 +2450,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotAsk,chatbotCreateTicket,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,accountLogout
 }

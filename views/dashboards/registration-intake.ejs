@@ -16,6 +16,7 @@
         <%= new Date(activeIntake.close_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %>
       </p>
       <form action="/account/intakes/<%= activeIntake.id %>/close" method="POST" onsubmit="return confirm('Close registration now?');" style="margin-top:12px;">
+        <%- include('../partials/csrf-field') %>
         <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#c0392b;">
           <i class="bi bi-lock"></i> Close Registration Now
         </button>
@@ -29,6 +30,7 @@
 
   <h3 class="profile-section-title">Open New Intake</h3>
   <form action="/account/intakes/create" method="POST" class="auth-form">
+    <%- include('../partials/csrf-field') %>
     <div class="form-field">
       <label>Intake / Round Name</label>
       <div class="input-wrap">

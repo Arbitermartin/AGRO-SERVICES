@@ -31,11 +31,13 @@
             </div>
 
             <form action="/account/tickets/<%= ticket.id %>/reply" method="POST" class="ticket-reply-form">
+              <%- include('../partials/csrf-field') %>
               <input type="text" name="message" placeholder="Type your reply..." required>
               <button type="submit"><i class="bi bi-send"></i></button>
             </form>
 
             <form action="/account/tickets/<%= ticket.id %>/status" method="POST" class="ticket-status-form">
+              <%- include('../partials/csrf-field') %>
               <label>Status:</label>
               <select name="status" onchange="this.form.submit()">
                 <option value="open" <%= ticket.status === 'open' ? 'selected' : '' %>>Open</option>

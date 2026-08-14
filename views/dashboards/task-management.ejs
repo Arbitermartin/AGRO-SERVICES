@@ -7,6 +7,7 @@
 
   <% if (isSuperAdmin) { %>
     <form action="/account/tasks/create" method="POST" class="auth-form">
+      <%- include('../partials/csrf-field') %>
       <div class="form-field">
         <label>Task Title</label>
         <div class="input-wrap">
@@ -115,6 +116,7 @@
             <% }) %>
 
             <form action="/account/tasks/<%= task.id %>/delete" method="POST" onsubmit="return confirm('Delete this task?');" style="margin-top:14px;">
+              <%- include('../partials/csrf-field') %>
               <button type="submit" class="btn-outline-sm manage-delete-btn">Delete Task</button>
             </form>
           </div>

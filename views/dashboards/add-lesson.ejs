@@ -7,6 +7,7 @@
   </div>
   <form action="/account/lessons/create" method="POST" class="auth-form">
     <div class="form-field">
+      <%- include('../partials/csrf-field') %>
       <label>Training Program</label>
       <div class="input-wrap">
         <i class="bi bi-mortarboard input-icon"></i>

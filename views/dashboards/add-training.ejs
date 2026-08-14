@@ -6,6 +6,7 @@
   </div>
 
   <form action="/account/trainings/create" method="POST" class="auth-form" id="addTrainingForm">
+    <%- include('../partials/csrf-field') %>
 
     <div class="form-field">
       <label>Training Title</label>

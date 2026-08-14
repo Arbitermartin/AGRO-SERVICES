@@ -13,6 +13,7 @@
 
     <form action="/account/ict-staff/create" method="POST" class="auth-form">
       <div class="form-field">
+        <%- include('../partials/csrf-field') %>
         <label>Full Name</label>
         <div class="input-wrap">
           <i class="bi bi-person input-icon"></i>

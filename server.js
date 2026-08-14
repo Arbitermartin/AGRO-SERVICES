@@ -13,6 +13,7 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash =require("connect-flash");
+// const { doubleCsrf } = require("csrf-csrf");
 
 // ROUTES AND UTILITIES.
 const accountRoute = require("./routes/accountRoute");
@@ -34,6 +35,29 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+
+
+
+//3: Session Configuration (Improved Security)
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  name: 'sessionId',
+  cookie: {
+    httpOnly: true, // Prevents client-side JS from reading the cookie
+    secure: false,  // false in development (true in production with HTTPS)
+    sameSite: "lax",  // Good balance for development
+    maxAge: 1000 * 60 * 60 * 4 // 4 hours
+  }
+}));
+
+app.use((req,res, next) =>{
+  if(!req.session.visited)req.session.visited= true;
+  next();
+})
+
+//4:  rate limiter.
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // A bit more relaxed for development
@@ -48,19 +72,7 @@ const generalLimiter = rateLimit({
 app.use(generalLimiter);
 
 
-//4: Session Configuration (Improved Security)
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  name: 'sessionId',
-  cookie: {
-    httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: false,  // false in development (true in production with HTTPS)
-    sameSite: "lax",  // Good balance for development
-    maxAge: 1000 * 60 * 60 * 4 // 4 hours
-  }
-}));
+
 
 // 5: The Flash Message
 app.use(flash());
@@ -72,6 +84,34 @@ app.use((req,res,next)=>{
 
 // track online ict stafff
 app.use(utilities.trackPresence);
+
+const { doubleCsrf } = require("csrf-csrf");
+
+const {
+  generateCsrfToken,      // ✅ correct name for v4
+  doubleCsrfProtection,
+  invalidCsrfTokenError,
+} = doubleCsrf({
+  getSecret: () => process.env.SESSION_SECRET,
+  getSessionIdentifier: (req) => req.sessionID,
+  cookieName: "csrf-token",
+  cookieOptions: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+  },
+  getCsrfTokenFromRequest: (req) => {
+    return req.body?._csrf || req.headers["x-csrf-token"];
+  },
+});
+
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = generateCsrfToken(req, res);
+  next();
+});
+
+app.use(doubleCsrfProtection);
 
 
 
@@ -112,6 +152,20 @@ app.use("/", staticRoute);
 // Build Home View.
 
 app.get("/", utilities.handleErrors(baseController.buildHome));
+
+app.use((err, req, res, next) => {
+  if (err.code === "EBADCSRFTOKEN" /* or the real error export from step 1 */) {
+    req.flash("error", "Your session expired. Please try again.");
+    return res.redirect("back");
+  }
+  console.error(`Error at: "${req.originalUrl}": ${err.message}`);
+  res.status(err.status || 500);
+  res.render("errors/error", {
+    title: err.status || 'Server Error',
+    message: err.message,
+    nav: [],
+  });
+});
 
 
 /* ***********************

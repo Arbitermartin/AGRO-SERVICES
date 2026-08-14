@@ -35,10 +35,12 @@
                 <span style="font-size:0.78rem; color:#9ca3af;">Protected</span>
               <% } else if (acc.status === 'active') { %>
                 <form action="/account/accounts/<%= acc.id %>/deactivate" method="POST" onsubmit="return confirm('Deactivate this account?');">
+                  <%- include('../partials/csrf-field') %>
                   <button type="submit" class="btn-outline-sm manage-delete-btn">Deactivate</button>
                 </form>
               <% } else { %>
                 <form action="/account/accounts/<%= acc.id %>/reactivate" method="POST">
+                  <%- include('../partials/csrf-field') %>
                   <button type="submit" class="btn-outline-sm">Reactivate</button>
                 </form>
               <% } %>

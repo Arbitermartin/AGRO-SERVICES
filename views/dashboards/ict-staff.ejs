@@ -51,6 +51,8 @@
       </a>
           <a href="#" id="myTasksLink" class="db-nav-link"><i class="bi bi-list-task"></i> My Tasks
         </a>
+        <a href="#" id="liveChatsLink" class="db-nav-link"><i class="bi bi-chat-dots"></i> Live Chats</a>
+
         <a href="#" class="db-nav-link">
           <i class="bi bi-bar-chart"></i> Reports
         </a>
@@ -192,7 +194,7 @@
             <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-people-fill"></i></div>
             <div>
               <div class="db-stat-label">Total Members</div>
-              <div class="db-stat-value">1,248</div>
+              <div class="db-stat-value"><%= totalMembers %></div>
               <div class="db-stat-delta db-stat-delta-purple">View all members</div>
             </div>
           </div>
@@ -320,6 +322,7 @@
           </div>
 
           <form action="/account/change-password" method="POST" class="auth-form" id="changePasswordForm">
+            <%- include('../partials/csrf-field') %>
 
             <div class="form-field"id="passwordField">
               <label for="password">Current Password</label>
@@ -370,6 +373,7 @@
         <%- include('messages') %>
         <%- include('ict-all-members') %>
         <%- include('my-tasks') %>
+        <%- include('live-chats') %>
          
     </div>
   </div>

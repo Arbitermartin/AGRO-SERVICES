@@ -25,6 +25,7 @@
               </button>
             <% } else { %>
               <form action="/account/trainings/<%= t.training_id %>/register" method="POST">
+                <%- include('../partials/csrf-field') %>
                 <button type="submit" class="btn btn-filled training-enroll" style="width:100%;">Register Now</button>
               </form>
             <% } %>

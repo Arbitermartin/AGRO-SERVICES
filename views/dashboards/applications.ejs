@@ -60,6 +60,7 @@
               </div>
   
               <form action="/account/applications/<%= app.id %>/status" method="POST" class="application-status-form">
+                <%- include('../partials/csrf-field') %>
                 <label>Update Status:</label>
                 <select name="status" onchange="this.form.submit()">
                   <option value="submitted" <%= app.status === 'submitted' ? 'selected' : '' %>>Submitted</option>

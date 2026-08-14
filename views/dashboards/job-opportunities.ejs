@@ -45,6 +45,7 @@
           <!-- ✅ Inline apply form, hidden until "Apply Now" is clicked -->
           <div class="job-apply-form-wrap" style="display:none;">
             <form action="/account/dashboard/member/jobs/<%= job.id %>/apply" method="POST" enctype="multipart/form-data" class="auth-form job-apply-form">
+              <%- include('../partials/csrf-field') %>
   
               <div class="form-field">
                 <label>Full Name</label>

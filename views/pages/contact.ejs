@@ -61,6 +61,7 @@
         </div>
 
         <form class="contact-form" id="contactForm" action="/contact" method="POST" novalidate>
+          <%- include('../partials/csrf-field') %>
           <div class="contact-form-row">
             <div class="form-field">
               <label for="name">Full name</label>

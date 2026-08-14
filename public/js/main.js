@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', closeMobileNav);
     });
   }
+
+    // ✅ ADD THIS ONCE, near the top csrf
+  const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : '';
   // team page
 
 // /* =====================================================
@@ -554,9 +558,9 @@ if (testimonialSlider) {
 }
 // end here testmonials
 
-// chatboat
+
 /* =====================================================
-   CHATBOT WIDGET
+   CHATBOT WIDGET — name capture, FAQ, live agent handoff
 ===================================================== */
 const chatbotToggle = document.getElementById('chatbotToggle');
 const chatbotWindow = document.getElementById('chatbotWindow');
@@ -566,9 +570,17 @@ const chatbotInput = document.getElementById('chatbotInput');
 const chatbotMessages = document.getElementById('chatbotMessages');
 
 if (chatbotToggle && chatbotWindow) {
+  let chatState = 'awaiting_name';
+  let visitorName = '';
+  let sessionId = null;
+  let pollTimer = null;
+
   chatbotToggle.addEventListener('click', () => {
     const isOpen = chatbotWindow.style.display === 'flex';
     chatbotWindow.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen && chatState === 'awaiting_name' && chatbotMessages.children.length === 1) {
+      addBotMessage("Hi there! Before we get started, what's your name?");
+    }
   });
 
   if (chatbotClose) {
@@ -577,75 +589,108 @@ if (chatbotToggle && chatbotWindow) {
     });
   }
 
-  function addChatMessage(text, sender) {
+  function addMessage(text, sender) {
     const msg = document.createElement('div');
     msg.className = `chatbot-msg chatbot-msg-${sender}`;
     msg.textContent = text;
     chatbotMessages.appendChild(msg);
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
   }
+  function addBotMessage(text) { addMessage(text, 'bot'); }
 
   function addQuickButton(label, onClick) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'chatbot-quick-btn';
     btn.textContent = label;
-    btn.addEventListener('click', onClick);
+    btn.addEventListener('click', () => { btn.remove(); onClick(); });
     chatbotMessages.appendChild(btn);
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
   }
 
-  if (chatbotForm) {
-    chatbotForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const message = chatbotInput.value.trim();
-      if (!message) return;
+  function startPollingLiveChat() {
+    clearInterval(pollTimer);
+    let lastCount = 0;
+    pollTimer = setInterval(() => {
+      fetch(`/chat/${sessionId}/messages`)
+        .then(res => res.json())
+        .then(messages => {
+          if (messages.length > lastCount) {
+            const newOnes = messages.slice(lastCount);
+            newOnes.forEach(m => {
+              if (m.sender_type === 'ict' || m.sender_type === 'bot') {
+                addMessage(m.message, 'bot');
+              }
+            });
+            lastCount = messages.length;
+          }
+        });
+    }, 3000);
+  }
 
-      addChatMessage(message, 'user');
-      chatbotInput.value = '';
+  chatbotForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatbotInput.value.trim();
+    if (!text) return;
 
-      fetch('/chatbot/ask', {
+    addMessage(text, 'user');
+    chatbotInput.value = '';
+
+    if (chatState === 'awaiting_name') {
+      visitorName = text;
+      fetch('/chatbot/start-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
+        headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+        body: JSON.stringify({ visitor_name: visitorName }),
       })
         .then(res => res.json())
         .then(data => {
-          addChatMessage(data.text, 'bot');
+          sessionId = data.session_id;
+          chatState = 'chatting';
+          addBotMessage(data.text);
+        });
+      return;
+    }
 
-          if (data.type === 'no_agent' || data.type === 'agent_available') {
-            addQuickButton('Yes, leave a message', () => {
-              addChatMessage('Yes, leave a message', 'user');
-              addChatMessage('Please share your registered email so we can follow up:', 'bot');
+    if (chatState === 'live_chat') {
+      fetch(`/chat/${sessionId}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+        body: JSON.stringify({ message: text, sender_type: 'visitor', sender_name: visitorName }),
+      });
+      return;
+    }
 
-              const emailInput = document.createElement('input');
-              emailInput.type = 'email';
-              emailInput.placeholder = 'Your email';
-              emailInput.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:0.85rem;margin-top:6px;';
-              chatbotMessages.appendChild(emailInput);
+    // Default: ask FAQ bot
+    fetch('/chatbot/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+      body: JSON.stringify({ message: text, session_id: sessionId }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        addBotMessage(data.text);
 
-              const sendBtn = document.createElement('button');
-              sendBtn.type = 'button';
-              sendBtn.className = 'chatbot-quick-btn';
-              sendBtn.textContent = 'Send request';
-              sendBtn.style.marginTop = '6px';
-              sendBtn.addEventListener('click', () => {
-                fetch('/chatbot/create-ticket', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: emailInput.value, message }),
-                })
-                  .then(res => res.json())
-                  .then(res => addChatMessage(res.text, 'bot'));
+        if (data.type === 'no_match') {
+          addQuickButton('Connect me to a live agent', () => {
+            addMessage('Connect me to a live agent', 'user');
+            fetch('/chatbot/connect-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+              body: JSON.stringify({ session_id: sessionId }),
+            })
+              .then(res => res.json())
+              .then(connectData => {
+                addBotMessage(connectData.text);
+                if (connectData.connected) {
+                  chatState = 'live_chat';
+                  startPollingLiveChat();
+                }
               });
-              chatbotMessages.appendChild(sendBtn);
-              chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-            });
-          }
-        })
-        .catch(() => addChatMessage('Sorry, something went wrong. Please try again.', 'bot'));
-    });
-  }
+          });
+        }
+      });
+  });
 }
 // end here
 
@@ -1828,7 +1873,9 @@ function loadNotifications() {
         btn.addEventListener('click', () => {
           const item = btn.closest('.db-notif-item');
           const id = item.dataset.id;
-          fetch(`/account/notifications/${id}/read`, { method: 'POST' })
+          fetch(`/account/notifications/${id}/read`, { method: 'POST',
+             headers: { 'x-csrf-token': csrfToken },
+           })
             .then(() => { item.remove(); loadNotifications(); });
         });
       });
@@ -1837,7 +1884,9 @@ function loadNotifications() {
         btn.addEventListener('click', () => {
           const item = btn.closest('.db-notif-item');
           const id = item.dataset.id;
-          fetch(`/account/notifications/${id}/delete`, { method: 'POST' })
+          fetch(`/account/notifications/${id}/delete`, { method: 'POST',
+             headers: { 'x-csrf-token': csrfToken },
+           })
             .then(() => { item.remove(); loadNotifications(); });
         });
       });
@@ -1863,7 +1912,9 @@ if (notifToggle && notifDropdown) {
   if (markAllReadBtn) {
     markAllReadBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      fetch('/account/notifications/mark-all-read', { method: 'POST' })
+      fetch('/account/notifications/mark-all-read', { method: 'POST',
+         headers: { 'x-csrf-token': csrfToken },
+       })
         .then(() => loadNotifications());
     });
   }
@@ -1958,6 +2009,98 @@ if (testimonialUploadArea && testimonialUploadInput) {
       document.getElementById('testimonialUploadedFile').style.display = 'block';
       document.getElementById('testimonialFileName').textContent = e.target.files[0].name;
     }
+  });
+}
+// end here.
+
+// chatbots
+const liveChatsLink = document.getElementById('liveChatsLink');
+const liveChatsPanel = document.getElementById('liveChatsPanel');
+const cancelLiveChats = document.getElementById('cancelLiveChats');
+const waitingChatsList = document.getElementById('waitingChatsList');
+const activeChatThread = document.getElementById('activeChatThread');
+const activeChatMessages = document.getElementById('activeChatMessages');
+const ictChatReplyForm = document.getElementById('ictChatReplyForm');
+const ictChatReplyInput = document.getElementById('ictChatReplyInput');
+let activeSessionId = null;
+let ictPollTimer = null;
+
+if (liveChatsLink && liveChatsPanel && dbMainContent) {
+  liveChatsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    liveChatsPanel.style.display = 'block';
+    loadWaitingChats();
+  });
+}
+if (cancelLiveChats) cancelLiveChats.addEventListener('click', (e) => {
+  e.preventDefault();
+  liveChatsPanel.style.display = 'none';
+  dbMainContent.style.display = 'block';
+  clearInterval(ictPollTimer);
+});
+
+function loadWaitingChats() {
+  fetch('/account/chat/waiting')
+    .then(res => res.json())
+    .then(sessions => {
+      if (sessions.length === 0) {
+        waitingChatsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No visitors waiting right now.</p>';
+        return;
+      }
+      waitingChatsList.innerHTML = sessions.map(s => `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f5f5f5;">
+          <span>${s.visitor_name}</span>
+          <button type="button" class="btn-outline-sm accept-chat-btn" data-session-id="${s.id}">Accept</button>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.accept-chat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sid = btn.dataset.sessionId;
+          fetch(`/account/chat/${sid}/accept`, { method: 'POST',
+            headers: { 'x-csrf-token': csrfToken },
+           })
+            .then(() => openChatThread(sid));
+        });
+      });
+    });
+}
+
+function openChatThread(sid) {
+  activeSessionId = sid;
+  activeChatThread.style.display = 'block';
+  pollActiveChat();
+  clearInterval(ictPollTimer);
+  ictPollTimer = setInterval(pollActiveChat, 3000);
+}
+
+function pollActiveChat() {
+  fetch(`/chat/${activeSessionId}/messages`)
+    .then(res => res.json())
+    .then(messages => {
+      activeChatMessages.innerHTML = messages.map(m => `
+        <div style="align-self:${m.sender_type === 'ict' ? 'flex-end' : 'flex-start'}; background:${m.sender_type === 'ict' ? 'var(--primary-green)' : '#f1f8e9'}; color:${m.sender_type === 'ict' ? '#fff' : '#000'}; padding:8px 12px; border-radius:12px; max-width:75%; font-size:0.85rem;">
+          ${m.message}
+        </div>
+      `).join('');
+      activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+    });
+}
+
+if (ictChatReplyForm) {
+  ictChatReplyForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = ictChatReplyInput.value.trim();
+    if (!text || !activeSessionId) return;
+    fetch(`/chat/${activeSessionId}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+      body: JSON.stringify({ message: text, sender_type: 'ict', sender_name: '<%= account.full_name %>' }),
+    }).then(() => {
+      ictChatReplyInput.value = '';
+      pollActiveChat();
+    });
   });
 }
 // end here.

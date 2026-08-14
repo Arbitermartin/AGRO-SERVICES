@@ -759,6 +759,9 @@ router.post("/intakes/:id/close",
   utilities.checkRole("admin"), 
   utilities.handleErrors(accountController.closeIntakePost));
   // end here
+ router.get("/chat/waiting", utilities.checkLogin, utilities.checkRole("ict_staff"), utilities.handleErrors(accountController.chatGetWaitingSessions));
+router.post("/chat/:session_id/accept", utilities.checkLogin, utilities.checkRole("ict_staff"), utilities.handleErrors(accountController.chatIctAcceptSession));
+router.post("/chat/:session_id/close", utilities.checkLogin, utilities.checkRole("ict_staff"), utilities.handleErrors(accountController.chatCloseSession));
 
  
 

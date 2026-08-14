@@ -7,6 +7,7 @@
   </div>
 
   <form action="/account/update-profile" method="POST" enctype="multipart/form-data" class="auth-form" id="updateProfileForm">
+    <%- include('../partials/csrf-field') %>
 
     <!-- ===== Profile Photo ===== -->
       <div class="form-field" style="text-align:center;">

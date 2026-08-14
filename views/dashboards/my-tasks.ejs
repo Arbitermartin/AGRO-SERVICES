@@ -31,6 +31,7 @@
               </p>
             <% } else { %>
               <form action="/account/task-assignees/<%= t.id %>/submit-report" method="POST" enctype="multipart/form-data" class="auth-form">
+                <%- include('../partials/csrf-field') %>
                 <div class="form-field">
                   <label>Submit Report (PDF or DOC)</label>
                   <div class="upload-area">
