@@ -125,10 +125,29 @@ async function accountLogin(req, res) {
 
     const passwordMatch = await bcrypt.compare(password, account.password);
 
+    // if (!passwordMatch) {
+    //   req.flash("error", "Invalid email or password.");
+    //   return res.redirect("/account/login");
+    // }
+
     if (!passwordMatch) {
-      req.flash("error", "Invalid email or password.");
-      return res.redirect("/account/login");
-    }
+    const attempts = (account.failed_login_attempts || 0) + 1;
+     const updateData = { failed_login_attempts: attempts };
+       if (attempts >= 5) {
+        updateData.locked_until = new Date(Date.now() + 15 * 60 * 1000);
+       }
+        await accountModel.updateFailedAttempts(account.id, updateData);
+        req.flash("error", "Invalid email or password.");
+        return res.redirect("/account/login");
+       }
+
+          if (account.locked_until && new Date(account.locked_until) > new Date()) {
+         req.flash("error", "Account temporarily locked. Try again in a few minutes.");
+         return res.redirect("/account/login");
+         }
+
+         // on success, reset:
+        await accountModel.updateFailedAttempts(account.id, { failed_login_attempts: 0, locked_until: null });
 
     if (account.status !== "active") {
       req.flash("error", "Your account is not active yet. Please contact support.");
