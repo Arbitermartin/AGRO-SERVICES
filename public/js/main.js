@@ -2105,7 +2105,15 @@ if (ictChatReplyForm) {
 }
 // end here.
 
-
+// delivery FAQ
+          const siteFaqsLink = document.getElementById('siteFaqsLink');
+          const siteFaqsPanel = document.getElementById('siteFaqsPanel');
+          const cancelSiteFaqs = document.getElementById('cancelSiteFaqs');
+       if (siteFaqsLink && siteFaqsPanel && dbMainContent) {
+           siteFaqsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; siteFaqsPanel.style.display='block'; });
+       }
+       if (cancelSiteFaqs) cancelSiteFaqs.addEventListener('click', (e) => { e.preventDefault(); siteFaqsPanel.style.display='none'; dbMainContent.style.display='block'; });
+     // END HERE
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

@@ -1,0 +1,84 @@
+<div id="siteFaqsPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <div class="step-number" style="margin:0 auto 12px;"><i class="bi bi-question-circle"></i></div>
+    <h2>Frequently Asked Questions</h2>
+    <p>Manage the FAQs shown on the homepage</p>
+  </div>
+
+  <form action="/account/site-faqs/create" method="POST" class="auth-form">
+    <div class="form-field">
+      <%- include('../partials/csrf-field') %>
+      <label>Question</label>
+      <div class="input-wrap">
+        <i class="bi bi-question-circle input-icon"></i>
+        <input type="text" name="question" placeholder="e.g. How do I reset my password?" required>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Answer</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-chat-text input-icon" style="margin-top:12px;"></i>
+        <textarea name="answer" rows="3" placeholder="Write the answer..." style="padding-left:44px;" required></textarea>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Display Order</label>
+      <div class="input-wrap">
+        <i class="bi bi-sort-numeric-down input-icon"></i>
+        <input type="number" name="display_order" min="1" value="1" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-filled btn-block">Post FAQ</button>
+  </form>
+
+  <h3 class="profile-section-title" style="margin-top:30px;">Posted FAQs</h3>
+
+  <% if (allSiteFaqs && allSiteFaqs.length > 0) { %>
+    <% allSiteFaqs.forEach(faq => { %>
+      <div class="manage-item">
+        <div class="manage-item-summary">
+          <div class="manage-item-thumb-placeholder"><i class="bi bi-question-circle"></i></div>
+          <div class="manage-item-info">
+            <h4><%= faq.question %></h4>
+            <small>Order: <%= faq.display_order %></small>
+          </div>
+          <div class="manage-item-actions">
+            <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-eye"></i> View</button>
+          </div>
+        </div>
+
+        <div class="manage-edit-form" style="display:none;">
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;"><%= faq.answer %></p>
+
+          <form action="/account/site-faqs/<%= faq.id %>/update" method="POST" class="auth-form">
+            <%- include('../partials/csrf-field') %>
+            <div class="form-field">
+              <label>Question</label>
+              <div class="input-wrap"><i class="bi bi-question-circle input-icon"></i><input type="text" name="question" value="<%= faq.question %>" required></div>
+            </div>
+            <div class="form-field">
+              <label>Answer</label>
+              <div class="input-wrap" style="align-items:flex-start;"><i class="bi bi-chat-text input-icon" style="margin-top:12px;"></i><textarea name="answer" rows="3" style="padding-left:44px;" required><%= faq.answer %></textarea></div>
+            </div>
+            <div class="form-field">
+              <label>Display Order</label>
+              <div class="input-wrap"><i class="bi bi-sort-numeric-down input-icon"></i><input type="number" name="display_order" min="1" value="<%= faq.display_order %>" required></div>
+            </div>
+            <button type="submit" class="btn btn-filled" style="margin-top:8px;">Save Changes</button>
+          </form>
+
+          <form action="/account/site-faqs/<%= faq.id %>/delete" method="POST" onsubmit="return confirm('Delete this FAQ permanently?');" style="margin-top:14px;">
+            <%- include('../partials/csrf-field') %>
+            <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; color:#9ca3af; padding:20px;">No FAQs posted yet.</p>
+  <% } %>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;">
+    <a href="#" id="cancelSiteFaqs"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+  </div>
+</div>

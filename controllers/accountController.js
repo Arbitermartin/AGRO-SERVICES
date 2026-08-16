@@ -547,6 +547,9 @@ async function buildIctStaffDashboard(req, res) {
   // ict view tasks
   const myTasks = await accountModel.getTasksForAccount(account.id);
 
+  // deliver faq
+  const allSiteFaqs = await accountModel.getAllSiteFaqs();
+
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
     nav,
@@ -569,6 +572,7 @@ async function buildIctStaffDashboard(req, res) {
     allMembersOnly,
     memberDetailsMap,
     myTasks,
+    allSiteFaqs,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -2444,6 +2448,51 @@ async function chatCloseSession(req, res) {
 }
 // end here
 
+// Delivery faq 
+async function createSiteFaqPost(req, res) {
+  try {
+    const { question, answer, display_order } = req.body;
+    await accountModel.createSiteFaq(question, answer, parseInt(display_order, 10) || 1);
+
+    req.flash("success", "FAQ posted successfully.");
+    res.redirect("/account/dashboard/ict-staff?faqsUpdated=true");
+  } catch (error) {
+    console.error("CREATE FAQ ERROR:", error);
+    req.flash("error", "Failed to post FAQ.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function updateSiteFaqPost(req, res) {
+  try {
+    const { id } = req.params;
+    const { question, answer, display_order } = req.body;
+    await accountModel.updateSiteFaq(id, question, answer, parseInt(display_order, 10) || 1);
+
+    req.flash("success", "FAQ updated successfully.");
+    res.redirect("/account/dashboard/ict-staff?faqsUpdated=true");
+  } catch (error) {
+    console.error("UPDATE FAQ ERROR:", error);
+    req.flash("error", "Failed to update FAQ.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function deleteSiteFaqPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteSiteFaq(id);
+
+    req.flash("success", "FAQ deleted.");
+    res.redirect("/account/dashboard/ict-staff?faqsUpdated=true");
+  } catch (error) {
+    console.error("DELETE FAQ ERROR:", error);
+    req.flash("error", "Failed to delete FAQ.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+// end here
+
 
 /* ****************************************
  * Logout
@@ -2469,5 +2518,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,accountLogout
 }
