@@ -46,7 +46,7 @@ app.use(session({
   name: 'sessionId',
   cookie: {
     httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: true,  // false in development (true in production with HTTPS)
+    secure: false,  // false in development (true in production with HTTPS)
     sameSite: "lax",  // Good balance for development
     maxAge: 1000 * 60 * 60 * 4 // 4 hours
   }
