@@ -1418,7 +1418,8 @@ Deliverys style for manage news and events
 .faq-home-footer {
   text-align: center;
   margin-top: 30px;
-  font-size: 0.9rem;
+  margin-bottom: 3rem;
+  font-size: 1.5rem;
   color: var(--text-secondary);
 }
 
