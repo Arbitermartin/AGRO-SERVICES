@@ -2017,9 +2017,17 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .services-grid {
-    grid-template-columns: repeat(1fr);
-  }
+   .services-grid {
+        display: block;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .service-card {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto 20px;
+    }
   .service-item i{
     padding: 0.5rem;
   }
