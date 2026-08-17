@@ -2020,14 +2020,14 @@ button {
    .services-grid {
         display: block;
         margin: 0 auto;
-        width: 100%;
+        width: 90%;
     }
 
-    .service-card {
+    /* .service-card {
         width: 100%;
         max-width: 500px;
         margin: 0 auto 20px;
-    }
+    } */
   .service-item i{
     padding: 0.5rem;
   }
