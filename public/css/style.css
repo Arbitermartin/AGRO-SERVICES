@@ -2367,29 +2367,7 @@ Deliverys style for manage news and events
 }
 
 /* news registered style */
-/* ===== Registered Users Panel ===== */
-#registeredUsersPanel.db-card {
-  background: var(--bg-card, #ffffff);
-  border-radius: 16px;
-  padding: 28px 28px 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  max-width: 960px;
-  margin: 0 auto;
-}
 
-/* Header */
-#registeredUsersPanel .step-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-#registeredUsersPanel .step-header .step-number {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #1a7a4c, #2ecc71);
-  color:#0288D1;
-}
-  /* end here */
 .db-panel,
 .db-card {
   background: var(--bg-card);
