@@ -12,6 +12,7 @@ const env = require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 const flash =require("connect-flash");
 // const { doubleCsrf } = require("csrf-csrf");
 
@@ -39,18 +40,36 @@ app.use(cookieParser());
 
 
 //3: Session Configuration (Improved Security)
+// app.use(session({
+//   secret: process.env.SESSION_SECRET,
+//   resave: false,
+//   saveUninitialized: false,
+//   name: 'sessionId',
+//   cookie: {
+//     httpOnly: true, // Prevents client-side JS from reading the cookie
+//     secure: true,  // false in development (true in production with HTTPS)
+//     sameSite: "lax",  // Good balance for development
+//     maxAge: 1000 * 60 * 60 * 4 // 4 hours
+//   }
+// }));
 app.use(session({
+  store: new pgSession({
+    conString: `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    tableName: "session",       // will be auto-created
+    createTableIfMissing: true, // ✅ creates the sessions table automatically
+  }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   name: 'sessionId',
   cookie: {
-    httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: false,  // false in development (true in production with HTTPS)
-    sameSite: "lax",  // Good balance for development
-    maxAge: 1000 * 60 * 60 * 4 // 4 hours
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 4
   }
 }));
+
 
 app.use((req,res, next) =>{
   if(!req.session.visited)req.session.visited= true;
