@@ -2772,7 +2772,7 @@ Deliverys style for manage news and events
 
 
 /* field error style */
-/* .form-field.has-error .field-error {
+.form-field.has-error .field-error {
   display: block;
 }
 
@@ -2786,7 +2786,7 @@ Deliverys style for manage news and events
 .form-field.has-error input,
 .form-field.has-error textarea {
   border-color: #c0392b;
-} */
+}
 /* end here field error */
 
 /* message counter */
