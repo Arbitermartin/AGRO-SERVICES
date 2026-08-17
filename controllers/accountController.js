@@ -1278,11 +1278,11 @@ async function createTeamMemberPost(req, res) {
   console.log("FILE:", req.file);
   // ... rest of your existing code
   try {
-    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const { name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
     const photo_path = req.file ? `/images/team/${req.file.filename}` : null;
 
     await accountModel.createTeamMember({
-      full_name, title, category, bio,
+      name, title, category, bio,
       photo_path,
       linkedin_url: linkedin_url || null,
       twitter_url: twitter_url || null,
