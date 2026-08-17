@@ -12,7 +12,7 @@
       <label>Full Name</label>
       <div class="input-wrap">
         <i class="bi bi-person input-icon"></i>
-        <input type="text" name="name" placeholder="e.g. Grace Mwakasege" required>
+        <input type="text" name="full_name" placeholder="e.g. Grace Mwakasege" required>
       </div>
     </div>
 
@@ -119,7 +119,7 @@
             <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
           <% } %>
           <div class="manage-item-info">
-            <h4><%= m.name %></h4>
+            <h4><%= m.full_name %></h4>
             <small><%= m.title %> &middot; <%= m.category %></small>
           </div>
           <form action="/account/team/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Remove this team member?');">

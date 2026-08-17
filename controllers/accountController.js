@@ -1273,16 +1273,15 @@ async function reactivateAccountPost(req, res) {
  * Delivery team member
  */
 async function createTeamMemberPost(req, res) {
- console.log("===== CREATE TEAM MEMBER HIT =====");
+  console.log("===== CREATE TEAM MEMBER =====");
   console.log("BODY:", req.body);
   console.log("FILE:", req.file);
-  // ... rest of your existing code
   try {
-    const { name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
     const photo_path = req.file ? `/images/team/${req.file.filename}` : null;
 
     await accountModel.createTeamMember({
-      name, title, category, bio,
+      full_name, title, category, bio,
       photo_path,
       linkedin_url: linkedin_url || null,
       twitter_url: twitter_url || null,
