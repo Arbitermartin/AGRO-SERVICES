@@ -1273,6 +1273,9 @@ async function reactivateAccountPost(req, res) {
  * Delivery team member
  */
 async function createTeamMemberPost(req, res) {
+    console.log("===== CREATE TEAM MEMBER =====");
+  console.log("BODY:", req.body);
+  console.log("FILE:", req.file);
   try {
     const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
     const photo_path = req.file ? `/images/team/${req.file.filename}` : null;
