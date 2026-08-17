@@ -1474,6 +1474,16 @@ async function submitContactForm(req, res) {
   try {
     const { name, email, subject, message } = req.body;
 
+     if (!name || !email || !subject || !message) {
+      req.flash("error", "Please fill in all fields.");
+      return res.redirect("/contact");
+    }
+     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      req.flash("error", "Please enter a valid email address.");
+      return res.redirect("/contact");
+    }
+
     await accountModel.createContactMessage({
       full_name: name,
       email,

@@ -2769,6 +2769,25 @@ Deliverys style for manage news and events
 }
 /* end here update style */
 
+
+/* field error style */
+.form-field.has-error .field-error {
+  display: block;
+}
+
+.form-field .field-error {
+  display: none;
+  color: #c0392b;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.form-field.has-error input,
+.form-field.has-error textarea {
+  border-color: #c0392b;
+}
+/* end here field error */
+
 /* tost message */
 .toast-container {
   position: fixed;

@@ -694,6 +694,86 @@ if (chatbotToggle && chatbotWindow) {
 }
 // end here
 
+/* =====================================================
+   CONTACT FORM VALIDATION
+===================================================== */
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('cEmail');
+  const subjectInput = document.getElementById('subject');
+  const messageInput = document.getElementById('message');
+  const contactBtn = document.getElementById('contactBtn');
+  const charCount = document.getElementById('charCount');
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validateField(input, isValid) {
+    const field = input.closest('.form-field');
+    if (field) field.classList.toggle('has-error', !isValid);
+    return isValid;
+  }
+
+  function validateContactForm() {
+    let isValid = true;
+
+    if (!nameInput.value.trim()) {
+      validateField(nameInput, false);
+      isValid = false;
+    } else {
+      validateField(nameInput, true);
+    }
+
+    if (!emailInput.value.trim() || !emailPattern.test(emailInput.value.trim())) {
+      validateField(emailInput, false);
+      isValid = false;
+    } else {
+      validateField(emailInput, true);
+    }
+
+    if (!subjectInput.value.trim()) {
+      validateField(subjectInput, false);
+      isValid = false;
+    } else {
+      validateField(subjectInput, true);
+    }
+
+    if (!messageInput.value.trim()) {
+      validateField(messageInput, false);
+      isValid = false;
+    } else {
+      validateField(messageInput, true);
+    }
+
+    return isValid;
+  }
+
+  [nameInput, emailInput, subjectInput, messageInput].forEach((input) => {
+    input.addEventListener('blur', validateContactForm);
+    input.addEventListener('input', () => {
+      const field = input.closest('.form-field');
+      if (field) field.classList.remove('has-error');
+    });
+  });
+
+  if (messageInput && charCount) {
+    messageInput.addEventListener('input', () => {
+      charCount.textContent = messageInput.value.length;
+    });
+  }
+
+  contactForm.addEventListener('submit', (e) => {
+    if (!validateContactForm()) {
+      e.preventDefault();
+      return;
+    }
+
+    contactBtn.classList.add('is-loading');
+    contactBtn.disabled = true;
+  });
+}
+// end here
+
 // registration intake
 const registrationIntakeLink = document.getElementById('registrationIntakeLink');
 const registrationIntakePanel = document.getElementById('registrationIntakePanel');
