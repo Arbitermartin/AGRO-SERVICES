@@ -1613,7 +1613,6 @@ Deliverys style for manage news and events
 .db-shell {
   display: flex;
   height: 100vh;
-  min-height: 100vh;
   overflow: hidden;
 }
 
@@ -1803,7 +1802,6 @@ Deliverys style for manage news and events
 .db-main {
   flex: 1;
   min-width: 0;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2286,15 +2284,9 @@ Deliverys style for manage news and events
 
 /* ---------- Content ---------- */
 .db-content {
-   flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 24px 26px 80px;
-    -webkit-overflow-scrolling: touch;
-  /* padding: 24px 26px 50px;
+  padding: 24px 26px 50px;
   overflow-y: auto;
-  flex: 1; */
+  flex: 1;
 }
 
 /* Stat cards */
