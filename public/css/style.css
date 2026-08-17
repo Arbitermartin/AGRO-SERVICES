@@ -2788,6 +2788,19 @@ Deliverys style for manage news and events
 }
 /* end here field error */
 
+/* message counter */
+.char-counter {
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--text-muted, #9ca3af);
+  margin-top: 4px;
+}
+
+.char-counter #charCount {
+  font-weight: 600;
+}
+/* end here */
+
 /* tost message */
 .toast-container {
   position: fixed;

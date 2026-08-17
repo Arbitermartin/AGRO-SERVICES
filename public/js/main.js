@@ -756,11 +756,33 @@ if (contactForm) {
     });
   });
 
-  if (messageInput && charCount) {
-    messageInput.addEventListener('input', () => {
-      charCount.textContent = messageInput.value.length;
-    });
-  }
+ if (messageInput && charCount) {
+  const MAX_CHARS = 500;
+
+  // Enforce a maxlength attribute too, as a browser-level backstop
+  messageInput.setAttribute('maxlength', MAX_CHARS);
+
+  messageInput.addEventListener('input', () => {
+    const currentLength = messageInput.value.length;
+
+    // Hard stop — trim any excess characters (covers paste events too)
+    if (currentLength > MAX_CHARS) {
+      messageInput.value = messageInput.value.substring(0, MAX_CHARS);
+    }
+
+    const updatedLength = messageInput.value.length;
+    charCount.textContent = updatedLength;
+
+    // Visual warning when approaching the limit
+    if (updatedLength >= MAX_CHARS) {
+      charCount.style.color = '#c0392b';
+    } else if (updatedLength >= MAX_CHARS * 0.9) {
+      charCount.style.color = '#f57f17';
+    } else {
+      charCount.style.color = '';
+    }
+  });
+}
 
   contactForm.addEventListener('submit', (e) => {
     if (!validateContactForm()) {

@@ -1483,6 +1483,11 @@ async function submitContactForm(req, res) {
       req.flash("error", "Please enter a valid email address.");
       return res.redirect("/contact");
     }
+    if (message.length > 500) {
+       req.flash("error", "Your message must be 500 characters or fewer.");
+       return res.redirect("/contact");
+    }
+    
 
     await accountModel.createContactMessage({
       full_name: name,
