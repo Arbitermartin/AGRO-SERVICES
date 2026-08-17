@@ -2018,9 +2018,10 @@ button {
   }
 
    .services-grid {
-        display: block;
+    grid-template-columns: 1fr;
+        /* display: block;
         margin: 0 auto;
-        width: 90%;
+        width: 90%; */
     }
 
     /* .service-card {
