@@ -28,6 +28,7 @@ baseController.buildHome = async function(req, res) {
       latestNews: [],
       upcomingEvents: [],
       siteFaqs: [],
+      testimonials: [],
       heroSlides: [],
     });
   }
