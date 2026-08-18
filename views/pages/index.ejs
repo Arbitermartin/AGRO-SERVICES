@@ -1,6 +1,6 @@
 
   <!-- ===================== HERO ===================== -->
-  <section class="hero">
+  <!-- <section class="hero">
     <div class="hero-overlay"></div>
     <div class="container hero-content">
       <h1 class="hero-title">
@@ -15,10 +15,10 @@
         <a href="/account/register" class="btn btn-filled btn-lg">Join Our Network</a>
         <a href="/about" class="btn btn-outline-light btn-lg">Read More</a>
       </div>
-    </div>
+    </div> -->
 
     <!-- Feature cards overlapping hero bottom edge -->
-    <div class="container">
+    <!-- <div class="container">
       <div class="feature-cards">
         <div class="feature-card">
           <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
@@ -42,7 +42,42 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
+  <section class="hero">
+  <div class="hero-slider" id="heroSlider">
+    <% if (heroSlides && heroSlides.length > 0) { %>
+      <% heroSlides.forEach((slide, i) => { %>
+        <div class="hero-slide <%= i === 0 ? 'active' : '' %>" style="background-image:url('<%= slide.image_path %>');">
+          <div class="hero-overlay"></div>
+          <div class="container hero-content">
+            <h1 class="hero-title"><%= slide.title %></h1>
+            <p class="hero-text"><%= slide.description %></p>
+            <div class="hero-actions">
+              <% if (slide.primary_btn_text) { %>
+                <a href="<%= slide.primary_btn_link || '#' %>" class="btn btn-filled btn-lg"><%= slide.primary_btn_text %></a>
+              <% } %>
+              <% if (slide.secondary_btn_text) { %>
+                <a href="<%= slide.secondary_btn_link || '#' %>" class="btn btn-outline-light btn-lg"><%= slide.secondary_btn_text %></a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="hero-slide active" style="background:var(--primary-green,#2e7d32);">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+          <h1 class="hero-title">Empowering Farmers.<br><span class="text-accent">Growing</span> Together.</h1>
+          <p class="hero-text">AgroServices connects farmers, experts, and opportunities.</p>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="hero-dots" id="heroDots"></div>
+
+  
+</section>
 
   <!-- ===================== SERVICES ===================== -->
   <section class="services">

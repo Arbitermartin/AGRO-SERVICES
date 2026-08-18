@@ -796,6 +796,30 @@ if (contactForm) {
 }
 // end here
 
+// hero page for home
+const heroSlider = document.getElementById('heroSlider');
+if (heroSlider) {
+  const slides = Array.from(heroSlider.querySelectorAll('.hero-slide'));
+  const dotsContainer = document.getElementById('heroDots');
+  let idx = 0;
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => showSlide(i));
+    dotsContainer.appendChild(dot);
+  });
+  const dots = Array.from(dotsContainer.querySelectorAll('.hero-dot'));
+  function showSlide(i) {
+    slides[idx].classList.remove('active');
+    dots[idx].classList.remove('active');
+    idx = (i + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+  }
+  if (slides.length > 1) setInterval(() => showSlide(idx + 1), 6000);
+}
+// end here
+
 // registration intake
 const registrationIntakeLink = document.getElementById('registrationIntakeLink');
 const registrationIntakePanel = document.getElementById('registrationIntakePanel');
@@ -2216,6 +2240,165 @@ if (ictChatReplyForm) {
        }
        if (cancelSiteFaqs) cancelSiteFaqs.addEventListener('click', (e) => { e.preventDefault(); siteFaqsPanel.style.display='none'; dbMainContent.style.display='block'; });
      // END HERE
+
+    //  hero home
+    // Hero Slides
+// ===== Manage Hero / Hero Slides =====
+// ===== HERO SLIDES =====
+  const heroSlidesLink   = document.getElementById('heroSlidesLink');
+  const heroSlidesPanel  = document.getElementById('heroSlidesPanel');
+  const cancelHeroSlides = document.getElementById('cancelHeroSlides');
+  const mainContent      = document.getElementById('dbMainContent');
+
+  // Open panel
+  if (heroSlidesLink && heroSlidesPanel) {
+    heroSlidesLink.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      // Hide main dashboard
+      if (mainContent) mainContent.style.display = 'none';
+
+      // Hide all other panels
+      document.querySelectorAll('.db-card').forEach(function (panel) {
+        if (panel.id !== 'heroSlidesPanel') {
+          panel.style.display = 'none';
+        }
+      });
+
+      // Show hero panel
+      heroSlidesPanel.style.display = 'block';
+    });
+  }
+
+  // Close panel (Back to Dashboard)
+  if (cancelHeroSlides && heroSlidesPanel) {
+    cancelHeroSlides.addEventListener('click', function (e) {
+      e.preventDefault();          // ← this is the most important line
+      e.stopPropagation();
+
+      heroSlidesPanel.style.display = 'none';
+
+      // Show main dashboard again
+      if (mainContent) mainContent.style.display = 'block';
+    });
+  }
+
+  // ===== Image upload =====
+  const uploadArea   = document.getElementById('heroSlideUploadArea');
+  const uploadInput  = document.getElementById('heroSlideUploadInput');
+  const uploadedFile = document.getElementById('heroSlideUploadedFile');
+  const fileNameSpan = document.getElementById('heroSlideFileName');
+
+  if (uploadArea && uploadInput) {
+    uploadArea.addEventListener('click', function () {
+      uploadInput.click();
+    });
+
+    uploadInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) {
+        if (uploadedFile) uploadedFile.style.display = 'none';
+        return;
+      }
+
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        alert('Please select a JPG or PNG image only.');
+        this.value = '';
+        return;
+      }
+
+      if (file.size > 3 * 1024 * 1024) {
+        alert('Image must be smaller than 3MB.');
+        this.value = '';
+        return;
+      }
+
+      if (fileNameSpan) fileNameSpan.textContent = file.name;
+      if (uploadedFile) uploadedFile.style.display = 'block';
+    });
+  }
+
+
+// const heroSlidesLink  = document.getElementById('heroSlidesLink');
+// const heroSlidesPanel = document.getElementById('heroSlidesPanel');
+// const cancelHeroSlides = document.getElementById('cancelHeroSlides');
+
+// if (heroSlidesLink && heroSlidesPanel) {
+//   heroSlidesLink.addEventListener('click', function (e) {
+//     e.preventDefault();
+
+//     // Hide main dashboard content
+//     const mainContent = document.getElementById('dbMainContent');
+//     if (mainContent) mainContent.style.display = 'none';
+
+//     // Hide all other panels
+//     document.querySelectorAll('.db-card').forEach(panel => {
+//       if (panel.id !== 'heroSlidesPanel') {
+//         panel.style.display = 'none';
+//       }
+//     });
+
+//     // Show Hero panel
+//     heroSlidesPanel.style.display = 'block';
+//   });
+// }
+
+// if (cancelHeroSlides) {
+//   cancelHeroSlides.addEventListener('click', function (e) {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     heroSlidesPanel.style.display = 'none';
+
+//     // Show main dashboard again
+//     const mainContent = document.getElementById('dbMainContent');
+//     if (mainContent) mainContent.style.display = 'block';
+//   });
+// }
+
+// // ===== Hero Slide Image Upload =====
+//   const uploadArea   = document.getElementById('heroSlideUploadArea');
+//   const uploadInput  = document.getElementById('heroSlideUploadInput');
+//   const uploadedFile = document.getElementById('heroSlideUploadedFile');
+//   const fileNameSpan = document.getElementById('heroSlideFileName');
+
+//   if (uploadArea && uploadInput) {
+//     // When user clicks the big upload box → open file picker
+//     uploadArea.addEventListener('click', function () {
+//       uploadInput.click();
+//     });
+
+//     // When user selects a file
+//     uploadInput.addEventListener('change', function () {
+//       const file = this.files[0];
+
+//       if (!file) {
+//         if (uploadedFile) uploadedFile.style.display = 'none';
+//         return;
+//       }
+
+//       // Validate type
+//       if (!['image/jpeg', 'image/png'].includes(file.type)) {
+//         alert('Please select a JPG or PNG image only.');
+//         this.value = '';
+//         if (uploadedFile) uploadedFile.style.display = 'none';
+//         return;
+//       }
+
+//       // Validate size (3MB)
+//       if (file.size > 3 * 1024 * 1024) {
+//         alert('Image must be smaller than 3MB.');
+//         this.value = '';
+//         if (uploadedFile) uploadedFile.style.display = 'none';
+//         return;
+//       }
+
+//       // Show selected file name
+//       if (fileNameSpan) fileNameSpan.textContent = file.name;
+//       if (uploadedFile) uploadedFile.style.display = 'block';
+//     });
+//   }
+
+
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

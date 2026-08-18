@@ -7,7 +7,8 @@ baseController.buildHome = async function(req, res) {
     const latestNews = await accountModel.getLatestNews();
     const upcomingEvents = await accountModel.getUpcomingEvents();
     const testimonials = await accountModel.getActiveTestimonials();
-    const siteFaqs = await accountModel.getAllSiteFaqs();   
+    const siteFaqs = await accountModel.getAllSiteFaqs(); 
+    const heroSlides = await accountModel.getActiveHeroSlides();  
 
     let nav = await utilities.getNav();
     res.render("pages/index", {
@@ -17,6 +18,7 @@ baseController.buildHome = async function(req, res) {
       upcomingEvents,
       testimonials,
       siteFaqs,
+      heroSlides,
     });
   } catch (err) {
     console.error("Home page error:", err);
@@ -26,6 +28,7 @@ baseController.buildHome = async function(req, res) {
       latestNews: [],
       upcomingEvents: [],
       siteFaqs: [],
+      heroSlides: [],
     });
   }
 }

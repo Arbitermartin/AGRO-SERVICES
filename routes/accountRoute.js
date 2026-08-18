@@ -142,6 +142,25 @@ const uploadTestimonialPhoto = multer({
 });
 // end here testimonials.
 
+// hero slide show
+const heroSlidePath = path.join(__dirname, "..", "public", "images", "hero-slides");
+if (!fs.existsSync(heroSlidePath)) fs.mkdirSync(heroSlidePath, { recursive: true });
+
+const heroSlideStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, heroSlidePath),
+  filename: (req, file, cb) => cb(null, `hero-${Date.now()}${path.extname(file.originalname)}`),
+});
+
+const uploadHeroSlide = multer({
+  storage: heroSlideStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ok = /jpeg|jpg|png|webp/.test(path.extname(file.originalname).toLowerCase());
+    cb(ok ? null : new Error("Only JPG, PNG, or WEBP allowed."), ok);
+  },
+});
+// end here.
+
 /******************************
  * 
  * Delivery job application
@@ -797,6 +816,18 @@ router.post(
 );
 
   // end here.
+
+  // slide show
+router.post("/hero-slides/create", 
+  utilities.checkLogin, 
+  utilities.checkRole("ict_staff"), 
+  uploadHeroSlide.single("image"), 
+  utilities.handleErrors(accountController.createHeroSlidePost));
+
+router.post("/hero-slides/:id/delete",
+   utilities.checkLogin, 
+   utilities.checkRole("ict_staff"), 
+   utilities.handleErrors(accountController.deleteHeroSlidePost));
 
  
 

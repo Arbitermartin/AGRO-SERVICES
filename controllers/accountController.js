@@ -549,6 +549,7 @@ async function buildIctStaffDashboard(req, res) {
 
   // deliver faq
   const allSiteFaqs = await accountModel.getAllSiteFaqs();
+  const allHeroSlides = await accountModel.getAllHeroSlides()
 
   res.render("dashboards/ict-staff", {
     title: "ICT Staff Dashboard",
@@ -573,6 +574,7 @@ async function buildIctStaffDashboard(req, res) {
     memberDetailsMap,
     myTasks,
     allSiteFaqs,
+    allHeroSlides,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,
@@ -2510,6 +2512,47 @@ async function deleteSiteFaqPost(req, res) {
   }
 }
 // end here
+/******************
+ * 
+ * Delivery  hero
+ */
+async function createHeroSlidePost(req, res) {
+  try {
+    if (!req.file) {
+      req.flash("error", "Please upload a background image.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+    const { title, description, primary_btn_text, primary_btn_link, secondary_btn_text, secondary_btn_link, display_order } = req.body;
+
+    await accountModel.createHeroSlide({
+      title, description,
+      image_path: `/images/hero-slides/${req.file.filename}`,
+      primary_btn_text, primary_btn_link,
+      secondary_btn_text, secondary_btn_link,
+      display_order: parseInt(display_order, 10) || 1,
+    });
+
+    req.flash("success", "Hero slide posted successfully.");
+    res.redirect("/account/dashboard/ict-staff?slidesUpdated=true");
+  } catch (error) {
+    console.error("CREATE HERO SLIDE ERROR:", error);
+    req.flash("error", "Failed to post hero slide.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+
+async function deleteHeroSlidePost(req, res) {
+  try {
+    await accountModel.deleteHeroSlide(req.params.id);
+    req.flash("success", "Slide removed.");
+    res.redirect("/account/dashboard/ict-staff?slidesUpdated=true");
+  } catch (error) {
+    console.error("DELETE HERO SLIDE ERROR:", error);
+    req.flash("error", "Failed to remove slide.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+// end here.
 
 
 /* ****************************************
@@ -2536,5 +2579,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,accountLogout
 }

@@ -46,7 +46,8 @@ app.use(session({
   name: 'sessionId',
   cookie: {
     httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: false,  // false in development (true in production with HTTPS)
+    secure: process.env.NODE_ENV === "production",
+    // secure: false,  // false in development (true in production with HTTPS)
     sameSite: "lax",  // Good balance for development
     maxAge: 1000 * 60 * 60 * 4 // 4 hours
   }
@@ -98,8 +99,9 @@ const {
   cookieOptions: {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
-  },
+  //   secure: false,
+  secure: process.env.NODE_ENV === "production",
+   },
   getCsrfTokenFromRequest: (req) => {
     return req.body?._csrf || req.headers["x-csrf-token"];
   },
