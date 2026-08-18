@@ -218,7 +218,7 @@
   <div class="container">
     <h2 class="section-heading" style="text-align:center;">What Our Members Say</h2>
 
-    <% if (testimonials && testimonials.length > 0) { %>
+    <% if (typeof testimonials !== 'undefined' && testimonials.length > 0) { %>
       <div class="testimonial-slider" id="testimonialSlider">
         <% testimonials.forEach((t, i) => { %>
           <div class="testimonial-slide <%= i === 0 ? 'active' : '' %>">
