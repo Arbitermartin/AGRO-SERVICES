@@ -331,55 +331,61 @@
 
           <!-- ===================== MANAGEMENT PANELS ===================== -->
           <div class="db-panels-grid">
-
-            <div class="db-panel">
-              <div class="db-panel-title">Member Management</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>All Members</span><small>View, edit &amp; manage members</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Member</span><small>Create new member</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Member Reports</span><small>Statistics &amp; analytics</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Export Members</span><small>Download members list</small></div></a>
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-people-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Total Members</div>
+                <div class="db-stat-value"><%memberStats.total%></div>
+                <div class="db-stat-delta db-stat-delta-green">
+                  &uarr; <%= memberStats.thisMonth%> in <%= memberStats.monthLabel%>
+                  </div>
+              </div>
             </div>
-
-            <div class="db-panel">
-              <div class="db-panel-title">Events &amp; News</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-calendar3"></i><div><span>All Events</span><small>Manage all events</small></div></a>
-              <a href="#" id="addEventLink" class="db-panel-item"><i class="bi bi-calendar-plus"></i><div><span>Add Event</span><small>Create new event</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-person-check"></i><div><span>Registered Users</span><small>See who registered</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-newspaper"></i><div><span>All News</span><small>Manage news &amp; updates</small></div></a>
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-blue"><i class="bi bi-calendar-event-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Events</div>
+                <div class="db-stat-value"><%=eventCount%></div>
+                <div class="db-stat-delta db-stat-delta-blue"><%=upcomingEventCount%> Upcoming</div>
+              </div>
             </div>
-
-            <div class="db-panel">
-              <div class="db-panel-title">Job Postings</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-briefcase"></i><div><span>All Job Postings</span><small>View &amp; manage jobs</small></div></a>
-              <a href="#" id="addJobLink" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Job Posting</span><small>Create new job</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-person-lines-fill"></i><div><span>Applications</span><small>View all applicants</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Applications</span><small>Export to Excel</small></div></a>
+            <div class="db-stat-card">
+              <div class="db-stat-icon db-stat-icon-green"><i class="bi bi-briefcase-fill"></i></div>
+              <div>
+                <div class="db-stat-label">Job Postings</div>
+                <div class="db-stat-value"><%=jobCount%></div>
+                <div class="db-stat-delta db-stat-delta-green"><%=openJobCount%> Open Jobs</div>
+              </div>
             </div>
-
-            <div class="db-panel">
-              <div class="db-panel-title">Trainings</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-mortarboard"></i><div><span>All Trainings</span><small>Manage trainings</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-plus-square"></i><div><span>Add Training</span><small>Create new training</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-people"></i><div><span>Registrations</span><small>View registered members</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Registrations</span><small>Export to Excel</small></div></a>
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-mortarboard-fill"></i></div>
+            <div>
+              <div class="db-stat-label">Training</div>
+              <div class="db-stat-value"><%=allTrainingRegistrations.length%></div>
+               <div class="db-stat-delta db-stat-delta-orange">registrations</div>
             </div>
-
-            <div class="db-panel">
-              <div class="db-panel-title">Payments &amp; Approvals</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-hourglass-split"></i><div><span>Pending Payments</span><small>Approve or reject</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-clock-history"></i><div><span>Payment History</span><small>View all payments</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-graph-up"></i><div><span>Payment Reports</span><small>Statistics &amp; analytics</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-download"></i><div><span>Download Payments</span><small>Export to Excel</small></div></a>
+          </div>
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+              <div class="db-stat-label">Pending Payments</div>
+              <div class="db-stat-value"><%=pendingPaymentCount%></div>
+              <div class="db-stat-delta db-stat-delta-yellow">
+                 <a href="#" id="allPaymentsLink" style="color:inherit;text-decoration:none;">Review now</a>
+              </div>
             </div>
+          </div>
 
-            <div class="db-panel">
-              <div class="db-panel-title">Admin Management</div>
-              <a href="#" class="db-panel-item"><i class="bi bi-shield"></i><div><span>All Admins</span><small>View, edit &amp; delete admins</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-person-plus"></i><div><span>Add Admin</span><small>Create new admin</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-activity"></i><div><span>Admin Activity</span><small>View login &amp; actions</small></div></a>
-              <a href="#" class="db-panel-item"><i class="bi bi-envelope-check"></i><div><span>Send Credentials</span><small>Email login details</small></div></a>
+          <div class="db-stat-card">
+            <div class="db-stat-icon db-stat-icon-purple"><i class="bi bi-shield-fill"></i></div>
+            <div>
+              <div class="db-stat-label">Admins</div>
+              <div class="db-stat-label"><%=totalAdmins%></div>
+              <div class="db-stat-delta db-stat-delta-purple">
+                <a href="#" id="viewAllAdminsLink" style="color:inherit;text-decoration:none;">View all</a>
+              </div>
             </div>
-
+          </div>
           </div>
 
           <!-- ===================== BOTTOM ROW ===================== -->
@@ -740,18 +746,15 @@
 <%- include('training-registrations') %>
 <%- include('all-members') %>
 <%- include('all-team-members') %>
-
-      </div>
-<%- include('registered-users') %>
+<%- include('add-testimonial') %>
+<%- include('registration-intake') %>
 <%- include('all-payments') %>
 <%- include('admin-management') %>
+<%- include('registered-users') %>
 <%- include('add-ict-staff') %>
 <%- include('ict-management') %>
 <%- include('task-management') %>
-<%- include('add-testimonial') %>
-<%- include('registration-intake') %>
-
-
+      </div>
       <!-- end db-content -->
     </div>
   </div>

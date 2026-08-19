@@ -264,6 +264,9 @@ async function buildAdminDashboard(req, res) {
   const upcomingEventsForDashboard = await accountModel.getUpcomingEventsWithRegistrationCount();
   const recentActivity = await accountModel.getRecentActivityForDashboard(4); 
 
+  // member status
+  const memberStats = await accountModel.getMemberRegistrationStats();
+
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -303,6 +306,7 @@ async function buildAdminDashboard(req, res) {
     activeIntake,
     upcomingEventsForDashboard,
     recentActivity,
+    memberStats,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -2328,27 +2332,27 @@ async function buildRegisterGate(req, res) {
 //   }
 // }
 
-// async function chatbotCreateTicket(req, res) {
-//   try {
-//     const { name, email, message } = req.body;
+async function chatbotCreateTicket(req, res) {
+  try {
+    const { name, email, message } = req.body;
 
-//     // Create a lightweight ticket for anonymous chatbot handoff
-//     const guestAccount = await db("accounts").where({ email }).first();
-//     let accountId = guestAccount ? guestAccount.id : null;
+    // Create a lightweight ticket for anonymous chatbot handoff
+    const guestAccount = await db("accounts").where({ email }).first();
+    let accountId = guestAccount ? guestAccount.id : null;
 
-//     if (!accountId) {
-//       return res.json({ success: false, text: "Please log in or register to create a support ticket, or use the Contact Us page." });
-//     }
+    if (!accountId) {
+      return res.json({ success: false, text: "Please log in or register to create a support ticket, or use the Contact Us page." });
+    }
 
-//     const ticket = await accountModel.createTicket(accountId, "Chatbot handoff request", message);
-//     await accountModel.notifyRoles(["ict_staff"], "New Support Ticket (via Chatbot)", `A visitor requested live support: "${message}"`, "/account/dashboard/ict-staff");
+    const ticket = await accountModel.createTicket(accountId, "Chatbot handoff request", message);
+    await accountModel.notifyRoles(["ict_staff"], "New Support Ticket (via Chatbot)", `A visitor requested live support: "${message}"`, "/account/dashboard/ict-staff");
 
-//     res.json({ success: true, text: `Got it — ticket #${ticket.ticket_number} has been created. Our ICT team will follow up soon.` });
-//   } catch (error) {
-//     console.error("CHATBOT CREATE TICKET ERROR:", error);
-//     res.status(500).json({ success: false, text: "Something went wrong creating your request." });
-//   }
-// }
+    res.json({ success: true, text: `Got it — ticket #${ticket.ticket_number} has been created. Our ICT team will follow up soon.` });
+  } catch (error) {
+    console.error("CHATBOT CREATE TICKET ERROR:", error);
+    res.status(500).json({ success: false, text: "Something went wrong creating your request." });
+  }
+}
 // end here chatboat
 
 // messages
@@ -2518,28 +2522,35 @@ async function deleteSiteFaqPost(req, res) {
  */
 async function createHeroSlidePost(req, res) {
   try {
-    if (!req.file) {
-      req.flash("error", "Please upload a background image.");
-      return res.redirect("/account/dashboard/ict-staff");
-    }
     const { title, description, primary_btn_text, primary_btn_link, secondary_btn_text, secondary_btn_link, display_order } = req.body;
 
+    if (!req.file) {
+      req.flash("error", "Please upload background image.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    const image_path = `/images/hero-slides/${req.file.filename}`;
+
     await accountModel.createHeroSlide({
-      title, description,
-      image_path: `/images/hero-slides/${req.file.filename}`,
-      primary_btn_text, primary_btn_link,
-      secondary_btn_text, secondary_btn_link,
-      display_order: parseInt(display_order, 10) || 1,
+      title,
+      description,
+      image_path,
+      primary_btn_text,
+      primary_btn_link,
+      secondary_btn_text,
+      secondary_btn_link,
+      display_order
     });
 
-    req.flash("success", "Hero slide posted successfully.");
-    res.redirect("/account/dashboard/ict-staff?slidesUpdated=true");
+    req.flash("success", "Slide created successfully.");
+    res.redirect("/account/dashboard/ict-staff");
   } catch (error) {
     console.error("CREATE HERO SLIDE ERROR:", error);
-    req.flash("error", "Failed to post hero slide.");
+    req.flash("error", "Failed to create slide.");
     res.redirect("/account/dashboard/ict-staff");
   }
 }
+
 
 async function deleteHeroSlidePost(req, res) {
   try {

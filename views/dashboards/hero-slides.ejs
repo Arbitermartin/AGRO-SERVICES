@@ -7,7 +7,7 @@
     <p>Post slides shown at the top of the homepage</p>
   </div>
 
-  <form action="/account/hero-slides/create" method="POST" enctype="multipart/form-data" class="auth-form">
+  <form action="/account/hero-slides/create" method="POST"  class="auth-form">
     <%- include('../partials/csrf-field') %>
 
     <div class="form-field">
@@ -113,9 +113,9 @@
     <% }) %>
   <% } %>
 
-  <div class="auth-switch" style="margin-top:20px; text-align:center;">
-    <a href="#" id="cancelHeroSlides">
-      <i class="bi bi-arrow-left"></i> Back to Dashboard
-    </a>
-  </div>
+ <div class="auth-switch" style="margin-top:20px; text-align:center;">
+  <a href="#">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
 </div>

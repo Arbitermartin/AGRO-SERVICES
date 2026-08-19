@@ -13,6 +13,7 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash =require("connect-flash");
+
 // const { doubleCsrf } = require("csrf-csrf");
 
 // ROUTES AND UTILITIES.
@@ -46,8 +47,8 @@ app.use(session({
   name: 'sessionId',
   cookie: {
     httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: process.env.NODE_ENV === "production",
-    // secure: false,  // false in development (true in production with HTTPS)
+    // secure: process.env.NODE_ENV === "production",
+    secure: false,  // false in development (true in production with HTTPS)
     sameSite: "lax",  // Good balance for development
     maxAge: 1000 * 60 * 60 * 4 // 4 hours
   }
@@ -99,8 +100,8 @@ const {
   cookieOptions: {
     httpOnly: true,
     sameSite: "lax",
-  //   secure: false,
-  secure: process.env.NODE_ENV === "production",
+    secure: false,
+  // secure: process.env.NODE_ENV === "production",
    },
   getCsrfTokenFromRequest: (req) => {
     return req.body?._csrf || req.headers["x-csrf-token"];
@@ -174,16 +175,16 @@ app.use((err, req, res, next) => {
  * Local Server Information
  * Values from .env (environment) file
  *************************/
-// const port = process.env.PORT
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT
+// const PORT = process.env.PORT || 3000;
 const host = process.env.HOST
 
 /* ***********************
  * Log statement to confirm server operation
  *************************/
-// app.listen(port, () => {
-//   console.log(`app listening on ${host}:${port}`)
-// })
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(port, () => {
+  console.log(`app listening on ${host}:${port}`)
+})
+// app.listen(PORT, "0.0.0.0", () => {
+//   console.log(`Server running on port ${PORT}`);
+// });

@@ -14,10 +14,10 @@ module.exports = {
     client: "pg",
 
     connection: {
-      host: process.env.DB_HOST || "127.0.0.1",
-      port: Number(process.env.DB_PORT || 5432),
-      // host: process.env.DB_HOST,
-      // port: process.env.DB_PORT,
+      // host: process.env.DB_HOST || "127.0.0.1",
+      // port: Number(process.env.DB_PORT || 5432),
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
@@ -43,7 +43,7 @@ module.exports = {
 
     connection: {
       host: process.env.DB_HOST,
-     port: Number(process.env.DB_PORT || 5432),
+      port: process.env.DB_PORT,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
