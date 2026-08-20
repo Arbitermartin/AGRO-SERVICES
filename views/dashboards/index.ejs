@@ -390,18 +390,22 @@
 
           <!-- ===================== BOTTOM ROW ===================== -->
           <div class="db-bottom-grid">
-
+            
             <div class="db-card db-chart-card">
-              <div class="db-panel-title">Registrations Overview</div>
-              <svg viewBox="0 0 300 140" class="db-chart-svg" preserveAspectRatio="none">
-                <polyline points="0,120 40,95 80,80 120,88 160,55 200,45 240,20 280,15"
-                  fill="none" stroke="#2E7D32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <div class="db-chart-labels">
-                <span>May 16</span><span>May 17</span><span>May 18</span><span>May 19</span>
-                <span>May 20</span><span>May 21</span><span>May 22</span>
+              <div class="db-panel-title" style="display: flex; align-items: center; justify-content: center;">
+                <span>Members Registrations Overview</span>
+                <% if(canDownloadChart){%>
+                <button type="button" id="downloadChartBtn" class="btn-outline-sm">
+                  <i class="bi bi-download"></i> Download
+                </button>
+                <%}%>
               </div>
+              <canvas id="registrationsChart" height="140"></canvas>
+              <script id="registrationsChartData" type="application/json">
+                <%- JSON.stringify(monthlyRegistrations)%> 
+              </script>
             </div>
+
 
              <div class="db-card">
               <div class="db-panel-title">Recent Activities</div>

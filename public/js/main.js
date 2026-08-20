@@ -2398,6 +2398,48 @@ if (ictChatReplyForm) {
 //     });
 //   }
 
+// for charts graph
+
+       const registrationsChartCanvas = document.getElementById('registrationsChart');
+if (registrationsChartCanvas && typeof Chart !== 'undefined') {
+  const dataScript = document.getElementById('registrationsChartData');
+  const monthlyData = dataScript ? JSON.parse(dataScript.textContent) : [];
+
+  const chart = new Chart(registrationsChartCanvas, {
+    type: 'line',
+    data: {
+      labels: monthlyData.map(m => m.label),
+      datasets: [{
+        label: 'New Members',
+        data: monthlyData.map(m => m.count),
+        borderColor: '#2E7D32',
+        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: '#2E7D32',
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+      },
+    },
+  });
+
+  const downloadChartBtn = document.getElementById('downloadChartBtn');
+  if (downloadChartBtn) {
+    downloadChartBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = chart.toBase64Image();
+      link.download = `member-registrations-${new Date().toISOString().split('T')[0]}.png`;
+      link.click();
+    });
+  }
+}
+// end here.
 
 
     /* ---------- Approve / Reject button feedback ---------- */

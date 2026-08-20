@@ -266,6 +266,10 @@ async function buildAdminDashboard(req, res) {
 
   // member status
   const memberStats = await accountModel.getMemberRegistrationStats();
+  
+  // dashboard view for member in graph
+  const monthlyRegistrations = await accountModel.getMonthlyMemberRegistrations();
+  const canDownloadChart = monthlyRegistrations.length >= 3;
 
 
   res.render("dashboards/index", {
@@ -307,6 +311,8 @@ async function buildAdminDashboard(req, res) {
     upcomingEventsForDashboard,
     recentActivity,
     memberStats,
+    monthlyRegistrations,
+    canDownloadChart,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
