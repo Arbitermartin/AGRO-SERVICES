@@ -13,61 +13,90 @@
       </div>
 
       <nav class="db-nav">
+
         <a href="/account/dashboard/ict-staff/" class="db-nav-link is-active">
           <i class="bi bi-speedometer2"></i> Dashboard
         </a>
+
+        <div class="db-nav-heading">Support</div>
+
         <a href="#" id="supportTicketsLink" class="db-nav-link">
           <i class="bi bi-life-preserver"></i> Support Tickets
         </a>
-        <a href="#" id="ictAllMembersLink" class="db-nav-link"><i class="bi bi-people"></i> All Members</a>
-        <!-- <a href="#" class="db-nav-link">
-          <i class="bi bi-people"></i> All Members
-        </a> -->
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-exclamation-triangle"></i> System Issues
+        <a href="#" id="liveChatsLink" class="db-nav-link">
+          <i class="bi bi-chat-dots"></i> Live Chats
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-key"></i> Password Reset Requests
+        <a href="#" id="messagesLink" class="db-nav-link">
+          <i class="bi bi-envelope"></i> Messages
+          <% if (unreadMessageCount > 0) { %>
+            <span class="db-nav-badge"><%= unreadMessageCount %></span>
+          <% } %>
         </a>
+
+        <div class="db-nav-heading">Members &amp; Access</div>
+
+        <div class="db-nav-group">
+          <button type="button" class="db-nav-toggle" aria-expanded="false">
+            <span><i class="bi bi-people"></i> Members</span>
+            <i class="bi bi-chevron-down db-nav-caret"></i>
+          </button>
+          <div class="db-submenu">
+            <a href="#" id="ictAllMembersLink" class="db-submenu-link">All Members</a>
+            <a href="#" class="db-submenu-link">Password Reset Requests</a>
+          </div>
+        </div>
+
         <a href="#" id="trackLoginsLink" class="db-nav-link">
           <i class="bi bi-clock-history"></i> Track Logins
         </a>
-        <a href="#" id="uploadGuidesLink" class="db-nav-link">
-          <i class="bi bi-file-earmark-pdf"></i> Upload Guides
+        <a href="#" class="db-nav-link">
+          <i class="bi bi-exclamation-triangle"></i> System Issues
         </a>
-        <a href="#" id="addLessonLink" class="db-nav-link">
-          <i class="bi bi-journal-plus"></i> Add Lesson
-        </a>
-       <a href="#" id="uploadMaterialLink" class="db-nav-link">
-        <i class="bi bi-cloud-upload"></i> Upload Material
-      </a>
-      <a href="#" id="addTeamMemberLink" class="db-nav-link"><i class="bi bi-person-badge"></i> Add Team Member</a>
 
-      <a href="#" id="messagesLink" class="db-nav-link">
-        <i class="bi bi-envelope"></i> Messages
-      <% if (unreadMessageCount > 0) { %>
-      <span class="db-nav-badge"><%= unreadMessageCount %></span>
-      <% } %>
-      </a>
-          <a href="#" id="myTasksLink" class="db-nav-link"><i class="bi bi-list-task"></i> My Tasks
-        </a>
-        <a href="#" id="liveChatsLink" class="db-nav-link"><i class="bi bi-chat-dots"></i> Live Chats</a>
-        <a href="#" id="siteFaqsLink" class="db-nav-link"><i class="bi bi-question-circle"></i> Manage FAQs</a>
-        <a href="#" id="heroSlidesLink" class="db-nav-link">
-          <i class="bi bi-images"></i> Manage Hero
-         </a>
+        <div class="db-nav-heading">Training Content</div>
 
+        <div class="db-nav-group">
+          <button type="button" class="db-nav-toggle" aria-expanded="false">
+            <span><i class="bi bi-mortarboard"></i> Training</span>
+            <i class="bi bi-chevron-down db-nav-caret"></i>
+          </button>
+          <div class="db-submenu">
+            <a href="#" id="addLessonLink" class="db-submenu-link">Add Lesson</a>
+            <a href="#" id="uploadMaterialLink" class="db-submenu-link">Upload Material</a>
+            <a href="#" id="uploadGuidesLink" class="db-submenu-link">Upload Guides</a>
+          </div>
+        </div>
+
+        <div class="db-nav-heading">Website Content</div>
+
+        <div class="db-nav-group">
+          <button type="button" class="db-nav-toggle" aria-expanded="false">
+            <span><i class="bi bi-window"></i> Site Content</span>
+            <i class="bi bi-chevron-down db-nav-caret"></i>
+          </button>
+          <div class="db-submenu">
+            <a href="#" id="heroSlidesLink" class="db-submenu-link">Manage Hero</a>
+            <a href="#" id="siteFaqsLink" class="db-submenu-link">Manage FAQs</a>
+            <a href="#" id="addTeamMemberLink" class="db-submenu-link">Add Team Member</a>
+          </div>
+        </div>
+
+        <div class="db-nav-heading">Work</div>
+
+        <a href="#" id="myTasksLink" class="db-nav-link">
+          <i class="bi bi-list-task"></i> My Tasks
+        </a>
         <a href="#" class="db-nav-link">
           <i class="bi bi-bar-chart"></i> Reports
         </a>
-        <a href="#" class="db-nav-link">
-          <i class="bi bi-person"></i> Profile
-        </a>
+        
 
         <div class="db-nav-footer">
+          <a href="#" id="ictProfileLink" class="db-nav-link"><i class="bi bi-person"></i> Profile</a>
           <a href="#" class="db-nav-link"><i class="bi bi-gear"></i> Settings</a>
           <a href="/account/logout" class="db-nav-link"><i class="bi bi-box-arrow-right"></i> Logout</a>
         </div>
+
       </nav>
     </aside>
 

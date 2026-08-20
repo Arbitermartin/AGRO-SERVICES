@@ -2171,7 +2171,9 @@ button {
   FOOTER STYLE
 ********************/
 .footer {
-  background: var(--bg-footer);
+  background-image: url("../images/site/irrigation.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
   color: rgba(255, 255, 255, 0.85);
   padding-top: 60px;
 }
