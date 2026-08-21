@@ -392,8 +392,19 @@
           <div class="db-bottom-grid">
             
             <div class="db-card db-chart-card">
-              <div class="db-panel-title" style="display: flex; align-items: center; justify-content: center;">
+              <div class="db-panel-title" style="display: flex; align-items: center; justify-content:space-between;">
                 <span>Members Registrations Overview</span>
+                <% if (monthlyRegistrations.length >= 2) {
+       const latest = monthlyRegistrations[monthlyRegistrations.length - 1].count;
+       const prev = monthlyRegistrations[monthlyRegistrations.length - 2].count;
+       const diff = latest - prev;
+       const pct = prev > 0 ? Math.round((diff / prev) * 100) : 0;
+  %>
+                   <span style="font-size:0.82rem; font-weight:700; color: <%= diff >= 0 ? '#2E7D32' : '#c0392b' %>;">
+                    <i class="bi bi-<%= diff >= 0 ? 'arrow-up' : 'arrow-down' %>"></i>
+                    <%= Math.abs(pct)%>% vs last month
+                      </span>
+                <%}%>
                 <% if(canDownloadChart){%>
                 <button type="button" id="downloadChartBtn" class="btn-outline-sm">
                   <i class="bi bi-download"></i> Download
