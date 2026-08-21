@@ -44,7 +44,7 @@
 
           <h5 style="font-size:0.8rem; font-weight:700; color:var(--primary-green); text-transform:uppercase; margin:16px 0 8px;">Reset Password</h5>
           <form action="/account/members/<%= m.id %>/reset-password" method="POST" class="auth-form">
-            <%- include('../partials/csrf-field') %>
+          
             <div class="form-field">
               <label>New Password</label>
               <div class="input-wrap">
@@ -63,7 +63,7 @@
           </form>
 
           <form action="/account/members/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Permanently delete this member? This cannot be undone.');" style="margin-top:16px;">
-            <%- include('../partials/csrf-field') %>
+           
             <button type="submit" class="btn btn-outline" style="color:#c0392b; border-color:#c0392b; width:100%;">
               <i class="bi bi-trash"></i> Delete Permanently
             </button>

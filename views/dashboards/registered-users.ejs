@@ -69,7 +69,7 @@
                 <td>
                   <form action="/account/event-registrations/<%= r.id %>/delete" method="POST" 
                         onsubmit="return confirm('Remove this registration?');">
-                        <%- include('../partials/csrf-field') %>
+                       
                     <button type="submit" class="btn-outline-sm manage-delete-btn">
                       <i class="bi bi-trash"></i>
                     </button>

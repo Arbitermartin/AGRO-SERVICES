@@ -8,7 +8,7 @@
   </div>
 
   <form action="/account/hero-slides/create" method="POST"  class="auth-form">
-    <%- include('../partials/csrf-field') %>
+   
 
     <div class="form-field">
       <label>Title</label>
@@ -102,7 +102,7 @@
           <div class="manage-item-actions">
             <form action="/account/hero-slides/<%= s.id %>/delete" method="POST"
                   onsubmit="return confirm('Delete this slide permanently?');">
-              <%- include('../partials/csrf-field') %>
+              
               <button type="submit" class="btn-outline-sm manage-delete-btn">
                 <i class="bi bi-trash"></i> Delete
               </button>

@@ -44,7 +44,7 @@
             </td>
             <td>
               <form action="/account/training-registrations/<%= reg.id %>/status" method="POST" style="display:flex; gap:6px; align-items:center;">
-                <%- include('../partials/csrf-field') %>
+               
                 <select name="status" onchange="this.form.submit()" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border-color); font-size:0.8rem;">
                   <option value="registered" <%= reg.status === 'registered' ? 'selected' : '' %>>Registered</option>
                   <option value="attended" <%= reg.status === 'attended' ? 'selected' : '' %>>Attended</option>

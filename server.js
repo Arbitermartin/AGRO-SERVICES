@@ -14,6 +14,7 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const flash =require("connect-flash");
 
+
 // const { doubleCsrf } = require("csrf-csrf");
 
 // ROUTES AND UTILITIES.
@@ -87,34 +88,34 @@ app.use((req,res,next)=>{
 // track online ict stafff
 app.use(utilities.trackPresence);
 
-const { doubleCsrf } = require("csrf-csrf");
+// const { doubleCsrf } = require("csrf-csrf");
 
-const {
-  generateCsrfToken,      // ✅ correct name for v4
-  doubleCsrfProtection,
-  invalidCsrfTokenError,
-} = doubleCsrf({
-  getSecret: () => process.env.SESSION_SECRET,
-  getSessionIdentifier: (req) => req.sessionID,
-  cookieName: "csrf-token",
-  cookieOptions: {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-  // secure: process.env.NODE_ENV === "production",
-   },
-  getCsrfTokenFromRequest: (req) => {
-    return req.body?._csrf || req.headers["x-csrf-token"];
-  },
-});
+// const {
+//   generateCsrfToken,      // ✅ correct name for v4
+//   doubleCsrfProtection,
+//   invalidCsrfTokenError,
+// } = doubleCsrf({
+//   getSecret: () => process.env.SESSION_SECRET,
+//   getSessionIdentifier: (req) => req.sessionID,
+//   cookieName: "csrf-token",
+//   cookieOptions: {
+//     httpOnly: true,
+//     sameSite: "lax",
+//     secure: false,
+//   // secure: process.env.NODE_ENV === "production",
+//    },
+//   getCsrfTokenFromRequest: (req) => {
+//     return req.body?._csrf || req.headers["x-csrf-token"];
+//   },
+// });
 
 
-app.use((req, res, next) => {
-  res.locals.csrfToken = generateCsrfToken(req, res);
-  next();
-});
+// app.use((req, res, next) => {
+//   res.locals.csrfToken = generateCsrfToken(req, res);
+//   next();
+// });
 
-app.use(doubleCsrfProtection);
+// app.use(doubleCsrfProtection);
 
 
 
@@ -156,19 +157,19 @@ app.use("/", staticRoute);
 
 app.get("/", utilities.handleErrors(baseController.buildHome));
 
-app.use((err, req, res, next) => {
-  if (err.code === "EBADCSRFTOKEN" /* or the real error export from step 1 */) {
-    req.flash("error", "Your session expired. Please try again.");
-    return res.redirect("back");
-  }
-  console.error(`Error at: "${req.originalUrl}": ${err.message}`);
-  res.status(err.status || 500);
-  res.render("errors/error", {
-    title: err.status || 'Server Error',
-    message: err.message,
-    nav: [],
-  });
-});
+// app.use((err, req, res, next) => {
+//   if (err.code === "EBADCSRFTOKEN" /* or the real error export from step 1 */) {
+//     req.flash("error", "Your session expired. Please try again.");
+//     return res.redirect("back");
+//   }
+//   console.error(`Error at: "${req.originalUrl}": ${err.message}`);
+//   res.status(err.status || 500);
+//   res.render("errors/error", {
+//     title: err.status || 'Server Error',
+//     message: err.message,
+//     nav: [],
+//   });
+// });
 
 
 /* ***********************

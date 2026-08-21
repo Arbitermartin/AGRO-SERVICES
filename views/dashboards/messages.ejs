@@ -23,7 +23,7 @@
             <% } %>
             <% if (!msg.is_read) { %>
               <form action="/account/messages/<%= msg.id %>/read" method="POST">
-                <%- include('../partials/csrf-field') %>
+              
                 <button type="submit" class="btn-outline-sm">Mark as Read</button>
               </form>
             <% } %>

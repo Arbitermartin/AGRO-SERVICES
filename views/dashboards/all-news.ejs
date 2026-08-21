@@ -21,7 +21,7 @@
             <div class="manage-item-actions">
               <button type="button" class="btn-outline-sm manage-edit-toggle"><i class="bi bi-pencil"></i> Edit</button>
               <form action="/account/news/<%= item.news_id %>/delete" method="POST" onsubmit="return confirm('Delete this news post permanently?');">
-                <%- include('../partials/csrf-field') %>
+                
                 <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
               </form>
             </div>
@@ -29,7 +29,7 @@
   
           <div class="manage-edit-form" style="display:none;">
             <form action="/account/news/<%= item.news_id %>/update" method="POST" enctype="multipart/form-data" class="auth-form">
-              <%- include('../partials/csrf-field') %>
+           
               <div class="form-field">
                 <label>Title</label>
                 <div class="input-wrap">

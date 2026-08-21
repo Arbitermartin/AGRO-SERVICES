@@ -7,7 +7,7 @@
 
   <form action="/account/site-faqs/create" method="POST" class="auth-form">
     <div class="form-field">
-      <%- include('../partials/csrf-field') %>
+     
       <label>Question</label>
       <div class="input-wrap">
         <i class="bi bi-question-circle input-icon"></i>
@@ -51,7 +51,7 @@
           <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;"><%= faq.answer %></p>
 
           <form action="/account/site-faqs/<%= faq.id %>/update" method="POST" class="auth-form">
-            <%- include('../partials/csrf-field') %>
+         
             <div class="form-field">
               <label>Question</label>
               <div class="input-wrap"><i class="bi bi-question-circle input-icon"></i><input type="text" name="question" value="<%= faq.question %>" required></div>
@@ -68,7 +68,7 @@
           </form>
 
           <form action="/account/site-faqs/<%= faq.id %>/delete" method="POST" onsubmit="return confirm('Delete this FAQ permanently?');" style="margin-top:14px;">
-            <%- include('../partials/csrf-field') %>
+            
             <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
           </form>
         </div>

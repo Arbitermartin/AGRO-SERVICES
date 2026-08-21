@@ -6,7 +6,7 @@
   </div>
 
   <form action="/account/training-guides/upload" method="POST" enctype="multipart/form-data" class="auth-form" id="uploadGuideForm">
-    <%- include('../partials/csrf-field') %>
+   
 
     <div class="form-field">
       <label>Guide Title</label>
@@ -59,7 +59,7 @@
           <div class="manage-item-actions">
             <a href="<%= g.file_path %>" target="_blank" class="btn-outline-sm"><i class="bi bi-eye"></i> View</a>
             <form action="/account/training-guides/<%= g.id %>/delete" method="POST" onsubmit="return confirm('Delete this guide permanently?');">
-              <%- include('../partials/csrf-field') %>
+             
               <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
             </form>
           </div>

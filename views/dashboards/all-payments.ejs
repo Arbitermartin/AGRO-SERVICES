@@ -28,11 +28,11 @@
             <td><a href="<%= p.payment_proof %>" target="_blank"><i class="bi bi-eye"></i> View</a></td>
             <td>
               <form action="/account/payments/<%= p.id %>/approve" method="POST" style="display:inline;">
-                <%- include('../partials/csrf-field') %>
+            
                 <button type="submit" class="db-btn-approve" style="padding:6px 14px;">Approve</button>
               </form>
               <form action="/account/payments/<%= p.id %>/reject" method="POST" style="display:inline;">
-                <%- include('../partials/csrf-field') %>
+            
                 <button type="submit" class="db-btn-reject" style="padding:6px 14px;">Reject</button>
               </form>
             </td>

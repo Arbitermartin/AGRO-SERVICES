@@ -6,9 +6,10 @@
   </div>
 
   <form action="/account/team/create" method="POST" enctype="multipart/form-data" class="auth-form">
-    <%- include('../partials/csrf-field') %>
+   
 
     <div class="form-field">
+       
       <label>Full Name</label>
       <div class="input-wrap">
         <i class="bi bi-person input-icon"></i>
@@ -123,7 +124,7 @@
             <small><%= m.title %> &middot; <%= m.category %></small>
           </div>
           <form action="/account/team/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Remove this team member?');">
-            <%- include('../partials/csrf-field') %>
+           
             <button type="submit" class="btn-outline-sm manage-delete-btn">Delete</button>
           </form>
         </div>

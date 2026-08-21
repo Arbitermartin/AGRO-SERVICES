@@ -31,7 +31,7 @@
             </div>
 
             <form action="/account/tickets/<%= ticket.id %>/reply" method="POST" class="ticket-reply-form">
-              <%- include('../partials/csrf-field') %>
+         
               <input type="text" name="message" placeholder="Type your reply..." required>
               <button type="submit"><i class="bi bi-send"></i></button>
             </form>

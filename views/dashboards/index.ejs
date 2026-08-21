@@ -477,11 +477,11 @@
         </div>
         <div class="db-approval-actions">
           <form action="/account/payments/<%= p.id %>/approve" method="POST" style="display:inline;">
-            <%- include('../partials/csrf-field') %>
+            
             <button type="submit" class="db-btn-approve">Approve</button>
           </form>
           <form action="/account/payments/<%= p.id %>/reject" method="POST" style="display:inline;">
-            <%- include('../partials/csrf-field') %>
+         
             <button type="submit" class="db-btn-reject">Reject</button>
           </form>
         </div>
@@ -494,14 +494,15 @@
   <a href="#" id="allPaymentsLink" class="db-view-all">View all payments <i class="bi bi-arrow-right"></i></a>
         </div>
        </div>
-          <!-- end db-bottom-grid -->
-         
-    </div>
-     <div class="bottom-footer-yasnet">
+       <div class="bottom-footer-yasnet">
              <div class="footer-title">
               <p>Copyright &copy; <span id="year"></span>  <span class="yasnet">Yasnet Portal.</span> Designed By <small class="yas">Yasnet Developers</small> </p>
               </div>
             </div>
+          <!-- end db-bottom-grid -->
+         
+    </div>
+     
         <!-- end #dbMainContent -->
 
         <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->
@@ -513,7 +514,7 @@
           </div>
 
           <form action="/account/change-password" method="POST" class="auth-form" id="changePasswordForm">
-            <%- include('../partials/csrf-field') %>
+          
 
             <div class="form-field"id="passwordField">
               <label for="password">Current Password</label>
@@ -564,7 +565,7 @@
   </div>
 
   <form action="/account/update-profile" method="POST" class="auth-form" id="updateProfileForm">
-    <%- include('../partials/csrf-field') %>
+  
       <div class="form-field" style="text-align:center;">
     <label>Profile Photo</label>
     <div class="profile-photo-upload" id="profilePhotoUpload">
