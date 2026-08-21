@@ -395,12 +395,12 @@
               <div class="db-panel-title" style="display: flex; align-items: center; justify-content:space-between;">
                 <span>Members Registrations Overview</span>
                 <% if (monthlyRegistrations.length >= 2) {
-       const latest = monthlyRegistrations[monthlyRegistrations.length - 1].count;
-       const prev = monthlyRegistrations[monthlyRegistrations.length - 2].count;
-       const diff = latest - prev;
-       const pct = prev > 0 ? Math.round((diff / prev) * 100) : 0;
-  %>
-                   <span style="font-size:0.82rem; font-weight:700; color: <%= diff >= 0 ? '#2E7D32' : '#c0392b' %>;">
+                 const latest = monthlyRegistrations[monthlyRegistrations.length - 1].count;
+                 const prev = monthlyRegistrations[monthlyRegistrations.length - 2].count;
+                const diff = latest - prev;
+                const pct = prev > 0 ? Math.round((diff / prev) * 100) : 0;
+                   %>
+                   <span style="font-size:0.82rem; font-weight:700;">
                     <i class="bi bi-<%= diff >= 0 ? 'arrow-up' : 'arrow-down' %>"></i>
                     <%= Math.abs(pct)%>% vs last month
                       </span>
@@ -495,7 +495,13 @@
         </div>
        </div>
           <!-- end db-bottom-grid -->
+         
     </div>
+     <div class="bottom-footer-yasnet">
+             <div class="footer-title">
+              <p>Copyright &copy; <span id="year"></span>  <span class="yasnet">Yasnet Portal.</span> Designed By <small class="yas">Yasnet Developers</small> </p>
+              </div>
+            </div>
         <!-- end #dbMainContent -->
 
         <!-- ✅ Change Password panel — sibling of #dbMainContent, hidden by default -->

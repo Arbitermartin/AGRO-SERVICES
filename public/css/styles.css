@@ -538,7 +538,7 @@ button {
 }
 
 .hero-title {
-  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  /* font-size: clamp(2.1rem, 5vw, 3.6rem); */
   font-weight: 800;
   line-height: 1.15;
   margin-bottom: 18px;
@@ -550,7 +550,7 @@ button {
 }
 
 .hero-text {
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  /* font-size: clamp(1rem, 2.2vw, 1.25rem); */
   line-height: 1.6;
   margin-bottom: 28px;
   max-width: 560px;
@@ -1473,7 +1473,7 @@ button {
 }
 
 .about-hero-content h1 {
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  /* font-size: clamp(2.2rem, 5vw, 3.4rem); */
   font-weight: 700;
   line-height: 1.15;
   margin-bottom: 20px;
@@ -1624,7 +1624,7 @@ button {
 
 .contact-hero h1 {
   position: relative;
-  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  /* font-size: clamp(1.8rem, 3.5vw, 2.4rem); */
   font-weight: 700;
   margin-bottom: 12px;
 }
@@ -2263,6 +2263,21 @@ button {
   padding: 18px 0;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
+}
+.bottom-footer-yasnet{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+.yasnet{
+  color: var(--btn-primary);
+}
+.yas{
+  color: var(--blue);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 /* =====================================================
