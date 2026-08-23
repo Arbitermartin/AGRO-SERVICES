@@ -13,7 +13,7 @@
       enctype="multipart/form-data"
       class="auth-form"
     >
-  
+
 
       <div id="registrationSteps">
 
@@ -98,6 +98,18 @@
             <!-- ✅ NEW: placeholder for the password-match error message -->
             <div id="passwordMatchError" class="field-error"></div>
           </div>
+          <div class="form-field">
+              <label>Registered By</label>
+                <div class="input-wrap">
+                 <i class="bi bi-person-check input-icon"></i>
+                  <select id="referrerId" name="referrer_id" required>
+                 <option value="">Select who is registering you</option>
+                <% referrers.forEach(r => { %>
+                <option value="<%= r.id %>"><%= r.full_name %></option>
+                 <% }) %>
+              </select>
+            </div>
+         </div>
 
           <button type="button" onclick="nextStep(1)" class="btn btn-filled btn-block btn-lg">
             Next

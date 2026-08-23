@@ -28,6 +28,7 @@ async function buildRegister(req, res) {
     req.flash("error", "Registration is not currently open.");
     return res.redirect("/account/register");
   }
+  
 
   const today = new Date(); today.setHours(0,0,0,0);
   const closeDate = new Date(intake.close_date); closeDate.setHours(0,0,0,0);
@@ -37,11 +38,14 @@ async function buildRegister(req, res) {
     return res.redirect("/account/register");
   }
 
+  const referrers = await accountModel.getAllReferrers();
+
   let nav = await utilities.getNav();
   res.render("account/register", {
     title: "Registration",
     nav,
     errors: null,
+    referrers,
   });
 }
 /***************************
@@ -73,10 +77,11 @@ async function registerAccount(req, res) {
       transaction_reference,
       bank_name,
       bank_account_number,
+      referrer_id
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword);
+    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword,referrer_id);
 
     if (req.file) {
       const planPrices = { Basic: 10000, Standard: 25000, Premium: 50000 };
@@ -272,6 +277,11 @@ async function buildAdminDashboard(req, res) {
   const canDownloadChart = monthlyRegistrations.length >= 3;
 
 
+  // member referres
+const allReferrers = await accountModel.getAllReferrers();
+const membersByReferrer = await accountModel.getMembersByReferrer();
+
+
   res.render("dashboards/index", {
     title: "Admin Dashboard",
     nav,
@@ -313,6 +323,8 @@ async function buildAdminDashboard(req, res) {
     memberStats,
     monthlyRegistrations,
     canDownloadChart,
+    allReferrers,
+    membersByReferrer,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -2568,6 +2580,68 @@ async function deleteHeroSlidePost(req, res) {
 }
 // end here.
 
+// delivery referral
+
+async function createReferrerPost(req, res) {
+  try {
+    const { full_name } = req.body;
+    await accountModel.createReferrer(full_name);
+    req.flash("success", "Name added successfully.");
+    res.redirect("/account/dashboard/admin?referrersUpdated=true");
+  } catch (error) {
+    console.error("CREATE REFERRER ERROR:", error);
+    req.flash("error", "Failed to add name.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function deleteReferrerPost(req, res) {
+  try {
+    await accountModel.deleteReferrer(req.params.id);
+    req.flash("success", "Name removed.");
+    res.redirect("/account/dashboard/admin?referrersUpdated=true");
+  } catch (error) {
+    console.error("DELETE REFERRER ERROR:", error);
+    req.flash("error", "Failed to remove name.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+
+async function downloadMembersByReferrerPdf(req, res) {
+  try {
+    const members = await accountModel.getMembersByReferrer();
+
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=members-by-referrer.pdf`);
+    doc.pipe(res);
+
+    doc.fontSize(16).fillColor("#2E7D32").font("Helvetica-Bold").text("AgroServices — Members by Registered By", { align: "center" });
+    doc.moveDown(1);
+
+    let currentReferrer = null;
+    members.forEach((m) => {
+      const referrerLabel = m.referrer_name || "Not specified";
+      if (referrerLabel !== currentReferrer) {
+        currentReferrer = referrerLabel;
+        doc.moveDown(0.8);
+        doc.fontSize(12).fillColor("#000").font("Helvetica-Bold").text(`Registered by: ${currentReferrer}`);
+        doc.moveDown(0.3);
+      }
+      doc.fontSize(10).font("Helvetica").fillColor("#333")
+        .text(`${m.full_name} — ${m.email} — ${m.phone_number || 'N/A'} — ${new Date(m.created_at).toLocaleDateString('en-GB')}`);
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error("DOWNLOAD MEMBERS BY REFERRER PDF ERROR:", error);
+    req.flash("error", "Failed to generate PDF.");
+    res.redirect("/account/dashboard/admin");
+  }
+}
+//end here
+
+
 
 /* ****************************************
  * Logout
@@ -2593,5 +2667,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,accountLogout
 }

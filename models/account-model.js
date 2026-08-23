@@ -9,7 +9,7 @@ function sanitizeInput(input) {
   return input;
 }
 
-async function registerAccount(fullName, email, Phone_number, hashedPassword) {
+async function registerAccount(fullName, email, Phone_number, hashedPassword,referrerId) {
   try {
     const safeFullName = sanitizeInput(fullName);
     const safeEmail = sanitizeInput(email).toLowerCase();
@@ -21,6 +21,7 @@ async function registerAccount(fullName, email, Phone_number, hashedPassword) {
         phone_number: safePhone,
         password: hashedPassword,
         account_type: "member",
+        referrer_id: referrerId || null,
       })
       .returning("*");
 
@@ -1371,6 +1372,29 @@ async function getMonthlyMemberRegistrations(monthsBack = 12) {
 }
 // end here.
 
+// delivery referrers
+async function createReferrer(fullName) {
+  const inserted = await db("member_referrers").insert({ full_name: fullName }).returning("*");
+  return inserted[0];
+}
+
+async function getAllReferrers() {
+  return await db("member_referrers").orderBy("full_name", "asc");
+}
+
+async function deleteReferrer(id) {
+  return await db("member_referrers").where({ id }).del();
+}
+
+async function getMembersByReferrer() {
+  return await db("accounts as a")
+    .leftJoin("member_referrers as r", "a.referrer_id", "r.id")
+    .where("a.account_type", "member")
+    .select("a.id", "a.full_name", "a.email", "a.phone_number", "a.status", "a.created_at", "r.full_name as referrer_name")
+    .orderBy("r.full_name", "asc")
+    .orderBy("a.created_at", "desc");
+}
+// end here
 
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
@@ -1379,6 +1403,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer
 
 };

@@ -829,6 +829,22 @@ router.post("/hero-slides/:id/delete",
    utilities.checkRole("ict_staff"), 
    utilities.handleErrors(accountController.deleteHeroSlidePost));
 
- 
+
+  //  delivery referrers
+router.post("/referrers/create", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.createReferrerPost));
+
+router.post("/referrers/:id/delete", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.deleteReferrerPost));
+
+router.get("/referrers/download-pdf", 
+  utilities.checkLogin, 
+  utilities.checkRole("admin"), 
+  utilities.handleErrors(accountController.downloadMembersByReferrerPdf));
+  // end here
 
 module.exports= router

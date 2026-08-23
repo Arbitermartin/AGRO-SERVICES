@@ -291,7 +291,7 @@
 }
 
 .news-details-title {
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  /* font-size: clamp(1.4rem, 3vw, 2rem); */
   font-weight: 700;
   color: var(--text-primary, #1b1b1b);
   line-height: 1.3;
@@ -423,7 +423,7 @@ Deliverys style for manage news and events
 
 .page-hero h1 {
   position: relative;
-  font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+  /* font-size: clamp(1.7rem, 3.5vw, 2.3rem); */
   font-weight: 700;
   margin-bottom: 14px;
 }
@@ -2877,7 +2877,7 @@ Deliverys style for manage news and events
 }
 
 .portal-hero h1 {
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  /* font-size: clamp(1.6rem, 3vw, 2.2rem); */
   color: var(--text-primary);
   border-bottom: 3px solid var(--primary-green);
   display: inline-block;
@@ -3493,6 +3493,8 @@ Delivery style for job view in admin dashboard
   color: #9ca3af;
   font-size: 0.82rem;
 }
+
+
 
 /* Status badges — reuse existing ones, add "resolved" */
 .db-badge-resolved {

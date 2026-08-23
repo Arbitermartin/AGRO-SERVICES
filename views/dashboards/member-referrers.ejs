@@ -1,0 +1,49 @@
+<div id="memberReferrersPanel" class="db-card" style="display:none; max-width:640px; margin:0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <h2>Registration Names</h2>
+    <p>Manage the names members can select when registering</p>
+  </div>
+
+  <form action="/account/referrers/create" method="POST" class="auth-form">
+    
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap"><i class="bi bi-person input-icon"></i><input type="text" name="full_name" required></div>
+    </div>
+    <button type="submit" class="btn btn-filled btn-block">Add Name</button>
+  </form>
+
+  <h3 class="profile-section-title" style="margin-top:24px;">Current Names</h3>
+  <% allReferrers.forEach(r => { %>
+    <div class="manage-item">
+      <div class="manage-item-summary">
+        <div class="manage-item-thumb-placeholder"><i class="bi bi-person"></i></div>
+        <div class="manage-item-info"><h4><%= r.full_name %></h4></div>
+        <form action="/account/referrers/<%= r.id %>/delete" method="POST" onsubmit="return confirm('Remove this name?');">
+         
+          <button type="submit" class="btn-outline-sm manage-delete-btn">Delete</button>
+        </form>
+      </div>
+    </div>
+  <% }) %>
+
+  <h3 class="profile-section-title" style="margin-top:24px;">Members Registered</h3>
+  <a href="/account/referrers/download-pdf" class="btn btn-filled btn-block" style="margin-bottom:16px;">
+    <i class="bi bi-download"></i> Download PDF
+  </a>
+
+  <table class="db-table">
+    <thead><tr><th>Member</th><th>Registered By</th><th>Date</th></tr></thead>
+    <tbody>
+      <% membersByReferrer.forEach(m => { %>
+        <tr>
+          <td><%= m.full_name %></td>
+          <td><%= m.referrer_name || 'Not specified' %></td>
+          <td><%= new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;"><a href="#" id="cancelMemberReferrers">Back to Dashboard</a></div>
+</div>

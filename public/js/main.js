@@ -2513,6 +2513,34 @@ if (registrationsChartCanvas && typeof Chart !== 'undefined') {
 // }
 // end here.
 
+// MEM
+/* ---------- Member Referrers (Registration Names) panel ---------- */
+const memberReferrersLink = document.getElementById('memberReferrersLink');
+const memberReferrersPanel = document.getElementById('memberReferrersPanel');
+const cancelMemberReferrers = document.getElementById('cancelMemberReferrers');
+
+if (memberReferrersLink && memberReferrersPanel && dbMainContent) {
+  memberReferrersLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    memberReferrersPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (cancelMemberReferrers && memberReferrersPanel && dbMainContent) {
+  cancelMemberReferrers.addEventListener('click', (e) => {
+    e.preventDefault();
+    memberReferrersPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+if (window.location.search.includes('referrersUpdated=true')) {
+  if (memberReferrersPanel) memberReferrersPanel.style.display = 'block';
+  if (dbMainContent) dbMainContent.style.display = 'none';
+}
+// end here
+
 
     /* ---------- Approve / Reject button feedback ---------- */
     document.querySelectorAll('.db-btn-approve, .db-btn-reject').forEach((btn) => {

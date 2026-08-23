@@ -26,6 +26,9 @@
           </button>
           <div class="db-submenu">
             <a href="#" id="allMembersLink" class="db-submenu-link"> All Users</a>
+            <a href="#" id="memberReferrersLink" class="db-submenu-link">
+                Registration Names
+             </a>
             <a href="#" id="allTeamMembersLink" class="db-submenu-link">
               <div><span>Team &amp; Advisory</span>
               </div>
@@ -721,16 +724,19 @@
 <%- include('training-registrations') %>
 <%- include('all-members') %>
 <%- include('all-team-members') %>
-<%- include('add-testimonial') %>
-<%- include('registration-intake') %>
-<%- include('all-payments') %>
-<%- include('admin-management') %>
-<%- include('registered-users') %>
-<%- include('add-ict-staff') %>
-<%- include('ict-management') %>
-<%- include('task-management') %>
+
+
       </div>
       <!-- end db-content -->
     </div>
+    <%- include('add-testimonial') %>
+    <%- include('registration-intake') %>
+    <%- include('all-payments') %>
+    <%- include('admin-management') %>
+    <%- include('registered-users') %>
+    <%- include('add-ict-staff') %>
+    <%- include('ict-management') %>
+    <%- include('task-management') %>
+    <%- include('member-referrers') %>
   </div>
 </body>
