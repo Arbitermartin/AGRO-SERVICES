@@ -2613,24 +2613,81 @@ async function downloadMembersByReferrerPdf(req, res) {
 
     const doc = new PDFDocument({ margin: 40, size: "A4" });
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=members-by-referrer.pdf`);
+    res.setHeader("Content-Disposition", `attachment; filename=members-registered-by.pdf`);
     doc.pipe(res);
 
-    doc.fontSize(16).fillColor("#2E7D32").font("Helvetica-Bold").text("AgroServices — Members by Registered By", { align: "center" });
+    // ===== HEADER =====
+    doc.fontSize(20).fillColor("#2E7D32").font("Helvetica-Bold")
+      .text("YOUTH AGROSERVICE NETWORK", { align: "center" });
+    doc.moveDown(0.2);
+    doc.fontSize(13).fillColor("#000").font("Helvetica-Bold")
+      .text("Members Registered on YASNET Portal", { align: "center" });
+    doc.moveDown(0.2);
+
+    const now = new Date();
+    const generatedOn = now.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    doc.fontSize(9).fillColor("#666").font("Helvetica")
+      .text(`Generated on ${generatedOn}`, { align: "center" });
+
+    doc.moveDown(0.8);
+    doc.strokeColor("#2E7D32").lineWidth(1.5).moveTo(40, doc.y).lineTo(555, doc.y).stroke();
     doc.moveDown(1);
 
-    let currentReferrer = null;
-    members.forEach((m) => {
-      const referrerLabel = m.referrer_name || "Not specified";
-      if (referrerLabel !== currentReferrer) {
-        currentReferrer = referrerLabel;
-        doc.moveDown(0.8);
-        doc.fontSize(12).fillColor("#000").font("Helvetica-Bold").text(`Registered by: ${currentReferrer}`);
-        doc.moveDown(0.3);
+    // ===== TABLE SETUP =====
+    const startX = 40;
+    const colWidths = [130, 130, 100, 90, 65];
+    const headers = ["Member Name", "Email", "Phone", "Registered By", "Date"];
+
+    const drawTableHeader = (y) => {
+      doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), 22).fill("#2E7D32");
+      doc.fillColor("#fff").font("Helvetica-Bold").fontSize(9.5);
+      let x = startX;
+      headers.forEach((h, i) => {
+        doc.text(h, x + 6, y + 6, { width: colWidths[i] - 8 });
+        x += colWidths[i];
+      });
+      return y + 22;
+    };
+
+    let y = drawTableHeader(doc.y);
+    doc.font("Helvetica").fontSize(9).fillColor("#000");
+
+    members.forEach((m, index) => {
+      if (y > 760) {
+        doc.addPage();
+        y = drawTableHeader(40);
+        doc.font("Helvetica").fontSize(9).fillColor("#000");
       }
-      doc.fontSize(10).font("Helvetica").fillColor("#333")
-        .text(`${m.full_name} — ${m.email} — ${m.phone_number || 'N/A'} — ${new Date(m.created_at).toLocaleDateString('en-GB')}`);
+
+      const rowHeight = 22;
+      const rowColor = index % 2 === 0 ? "#F4F8F2" : "#FFFFFF";
+      doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), rowHeight).fill(rowColor);
+      doc.fillColor("#1b1b1b");
+
+      const rowData = [
+        m.full_name,
+        m.email,
+        m.phone_number || "N/A",
+        m.referrer_name || "Not specified",
+        new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      ];
+
+      let x = startX;
+      rowData.forEach((val, i) => {
+        doc.text(val, x + 6, y + 6, { width: colWidths[i] - 8, ellipsis: true });
+        x += colWidths[i];
+      });
+
+      y += rowHeight;
     });
+
+    // ===== FOOTER =====
+    doc.moveDown(2);
+    if (y > 760) { doc.addPage(); y = 40; }
+    doc.fontSize(9).fillColor("#666").font("Helvetica")
+      .text(`Total members: ${members.length}`, startX, y + 20);
 
     doc.end();
   } catch (error) {

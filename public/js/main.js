@@ -1102,6 +1102,30 @@ if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click',
       });
     }
 
+    // edit profile
+    /* ---------- Profile section tabs (Personal / Education / Profession / Experience) ---------- */
+const profileNavItems = document.querySelectorAll('.profile-nav-item');
+const profileSections = document.querySelectorAll('.profile-section');
+
+if (profileNavItems.length && profileSections.length) {
+  profileNavItems.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.section;
+
+      profileNavItems.forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      profileSections.forEach((sec) => {
+        const isMatch = sec.id === `profile-section-${target}`;
+        sec.classList.toggle('is-active', isMatch);
+        sec.style.display = isMatch ? 'block' : 'none';
+      });
+    });
+  });
+}
+// end here
+
+
     // Add Experience button
     const addExperienceBtn = document.getElementById('addExperienceBtn');
     const experienceList = document.getElementById('experienceList');

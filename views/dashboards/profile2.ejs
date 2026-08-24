@@ -1,0 +1,274 @@
+========== UPDATE PROFILE PANEL ==========
+<div id="updateProfilePanel" class="db-card" style="display:none; max-width: 780px; margin: 0 auto;">
+  <div class="step-header" style="text-align:center; margin-bottom: 24px;">
+    <div class="step-number" style="margin: 0 auto 12px;"><i class="bi bi-person-gear"></i></div>
+    <h2>Update Profile</h2>
+    <p>Keep your personal, education and work details up to date</p>
+  </div>
+
+  <form action="/account/update-profile" method="POST" enctype="multipart/form-data" class="auth-form" id="updateProfileForm">
+ 
+
+    <!-- ===== Profile Photo ===== -->
+      <div class="form-field" style="text-align:center;">
+    <label>Profile Photo</label>
+    <div class="profile-photo-upload" id="profilePhotoUpload">
+      <% if (account.profile_photo) { %>
+        <img src="<%= account.profile_photo %>" alt="" id="profilePhotoPreview" class="profile-photo-preview">
+      <% } else { %>
+        <div class="profile-photo-placeholder" id="profilePhotoPreview"><%= initials %></div>
+      <% } %>
+      <div class="profile-photo-edit-badge"><i class="bi bi-camera-fill"></i></div>
+    </div>
+    <input
+      type="file"
+      id="profilePhotoInput"
+      name="profile_photo"
+      accept="image/jpeg,image/png,image/webp"
+      style="display:none;"
+    >
+    <small class="field-hint">JPG, PNG, or WEBP. Max 2MB.</small>
+  </div>
+
+    <!-- ===== Basic Info ===== -->
+    <h3 class="profile-section-title">Personal Information</h3>
+
+    <div class="form-field">
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" name="full_name" value="<%= account.full_name || '' %>" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Email</label>
+      <div class="input-wrap">
+        <i class="bi bi-envelope input-icon"></i>
+        <input type="email" value="<%= account.email || '' %>" disabled>
+      </div>
+      <small class="field-hint">Email cannot be changed.</small>
+    </div>
+
+    <div class="form-field">
+      <label>Phone Number</label>
+      <div class="input-wrap">
+        <i class="bi bi-telephone input-icon"></i>
+        <input type="text" name="phone_number" value="<%= account.phone_number || '' %>" placeholder="+255...">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Date of Birth</label>
+        <div class="input-wrap">
+          <i class="bi bi-calendar-event input-icon"></i>
+          <input type="date" name="date_of_birth"
+            value="<%= profile.date_of_birth ? new Date(profile.date_of_birth).toISOString().split('T')[0] : '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Gender</label>
+        <div class="input-wrap">
+          <i class="bi bi-person-badge input-icon"></i>
+          <select name="gender">
+            <option value="">Select</option>
+            <option value="male"   <%= profile.gender === 'male'   ? 'selected' : '' %>>Male</option>
+            <option value="female" <%= profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+            <option value="other"  <%= profile.gender === 'other'  ? 'selected' : '' %>>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Nationality</label>
+      <div class="input-wrap">
+        <i class="bi bi-flag input-icon"></i>
+        <input type="text" name="nationality" value="<%= profile.nationality || '' %>" placeholder="e.g. Tanzanian">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Bio</label>
+      <div class="input-wrap" style="align-items:flex-start;">
+        <i class="bi bi-card-text input-icon" style="margin-top:12px;"></i>
+        <textarea name="bio" rows="3" style="padding-left:44px;"><%= profile.bio || '' %></textarea>
+      </div>
+    </div>
+
+    <!-- ===== Birth Place ===== -->
+    <h3 class="profile-section-title">Place of Birth</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Region</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo-alt input-icon"></i>
+          <input type="text" name="region" value="<%= birthPlace.region || '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>District</label>
+        <div class="input-wrap">
+          <i class="bi bi-geo input-icon"></i>
+          <input type="text" name="district" value="<%= birthPlace.district || '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Ward</label>
+        <div class="input-wrap">
+          <i class="bi bi-pin-map input-icon"></i>
+          <input type="text" name="ward" value="<%= birthPlace.ward || '' %>">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Member Details ===== -->
+    <h3 class="profile-section-title">Member / Student Details</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Student Number</label>
+        <div class="input-wrap">
+          <i class="bi bi-card-heading input-icon"></i>
+          <input type="text" name="student_number" value="<%= member.student_number || '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Programme</label>
+        <div class="input-wrap">
+          <i class="bi bi-journal-text input-icon"></i>
+          <input type="text" name="programme" value="<%= member.programme || '' %>">
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Year of Study</label>
+        <div class="input-wrap">
+          <i class="bi bi-123 input-icon"></i>
+          <input type="number" name="year_of_study" min="1" max="6" value="<%= member.year_of_study || '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Employment Status</label>
+        <div class="input-wrap">
+          <i class="bi bi-briefcase input-icon"></i>
+          <select name="employment_status">
+            <option value="">Select</option>
+            <% ['Employed','Self-employed','Student','Unemployed'].forEach(s => { %>
+              <option value="<%= s %>" <%= member.employment_status === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Company Name</label>
+        <div class="input-wrap">
+          <i class="bi bi-building input-icon"></i>
+          <input type="text" name="company_name" value="<%= member.company_name || '' %>">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Position</label>
+        <div class="input-wrap">
+          <i class="bi bi-person-badge input-icon"></i>
+          <input type="text" name="position" value="<%= member.position || '' %>">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Education ===== -->
+    <h3 class="profile-section-title">Education</h3>
+    <div id="educationList">
+      <% if (educations && educations.length) { %>
+        <% educations.forEach(edu => { %>
+          <div class="item-block">
+            <button type="button" class="remove-item-btn">&times;</button>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Level</label>
+                <select name="edu_level[]">
+                  <% ['Primary','Secondary','Certificate','Diploma','Bachelor','Master','PhD'].forEach(l => { %>
+                    <option value="<%= l %>" <%= edu.level === l ? 'selected' : '' %>><%= l %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Institution</label>
+                <input type="text" name="edu_institution[]" value="<%= edu.institution || '' %>" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Course</label>
+                <input type="text" name="edu_course[]" value="<%= edu.course_name || '' %>">
+              </div>
+              <div class="form-field">
+                <label>Graduation Year</label>
+                <input type="number" name="edu_year[]" value="<%= edu.graduation_year || '' %>">
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+    <button type="button" class="add-item-btn" id="addEducationBtn">
+      <i class="bi bi-plus-lg"></i> Add Education
+    </button>
+
+    <!-- ===== Experience ===== -->
+    <h3 class="profile-section-title" style="margin-top:24px;">Work Experience</h3>
+    <div id="experienceList">
+      <% if (experiences && experiences.length) { %>
+        <% experiences.forEach(exp => { %>
+          <div class="item-block">
+            <button type="button" class="remove-item-btn">&times;</button>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Company</label>
+                <input type="text" name="exp_company[]" value="<%= exp.company_name || '' %>">
+              </div>
+              <div class="form-field">
+                <label>Job Title</label>
+                <input type="text" name="exp_title[]" value="<%= exp.job_title || '' %>">
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Roles</label>
+              <textarea name="exp_roles[]" rows="2"><%= exp.roles || '' %></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Years Exp</label>
+                <input type="number" name="exp_years[]" value="<%= exp.years_exp || '' %>">
+              </div>
+              <div class="form-field">
+                <label>Start Date</label>
+                <input type="date" name="exp_start[]"
+                  value="<%= exp.start_date ? new Date(exp.start_date).toISOString().split('T')[0] : '' %>">
+              </div>
+              <div class="form-field">
+                <label>End Date</label>
+                <input type="date" name="exp_end[]"
+                  value="<%= exp.end_date ? new Date(exp.end_date).toISOString().split('T')[0] : '' %>">
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+    <button type="button" class="add-item-btn" id="addExperienceBtn">
+      <i class="bi bi-plus-lg"></i> Add Experience
+    </button>
+
+    <button type="submit" class="btn btn-filled btn-block btn-lg" style="margin-top: 28px;">
+      Save Changes
+    </button>
+
+    <div class="auth-switch" style="margin-top:20px;text-align:center;">
+      <a href="#" id="cancelUpdateProfile"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </form>
+</div>
