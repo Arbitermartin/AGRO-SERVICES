@@ -929,13 +929,13 @@ Deliverys style for manage news and events
   margin: 0 0 8px 0;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--btn-secondary);
+  color: #1f2937;
 }
 
 .step-header p {
   margin: 0;
   font-size: 0.9rem;
-  color: var(--bg-dashboard);
+  color: #6b7280;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2774,7 +2774,7 @@ Deliverys style for manage news and events
 
 /* member pofile */
 /* ===== Profile sidebar layout (JSC-style) ===== */
-.profile-layout-wrap { background: var(--bg-sidebar); }
+.profile-layout-wrap { background: #f3f6fb; }
 .profile-layout {
   display: flex;
   min-height: 520px;
@@ -2785,7 +2785,7 @@ Deliverys style for manage news and events
 .profile-sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: var(--bg-sidebar);
+  background: #eef2f8;
   padding: 20px 0;
   border-right: 1px solid #e0e7f1;
 }
@@ -2797,7 +2797,7 @@ Deliverys style for manage news and events
   padding: 12px 20px;
   border: none;
   background: transparent;
-  color: var(--bg-dashboard);
+  color: #6b7a90;
   font-size: 0.95rem;
   text-align: left;
   cursor: pointer;

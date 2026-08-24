@@ -72,6 +72,48 @@ if (countrySelect && regionSelect) {
 }
 // // end here for form for events
 
+// location track
+
+const locationConsent = document.getElementById('locationConsent');
+const latitudeInput = document.getElementById('latitudeInput');
+const longitudeInput = document.getElementById('longitudeInput');
+const locationStatus = document.getElementById('locationStatus');
+
+if (locationConsent) {
+  locationConsent.addEventListener('change', () => {
+    if (!locationConsent.checked) {
+      latitudeInput.value = '';
+      longitudeInput.value = '';
+      locationStatus.textContent = '';
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      locationStatus.textContent = 'Location is not supported on this device.';
+      locationConsent.checked = false;
+      return;
+    }
+
+    locationStatus.textContent = 'Requesting location access...';
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        latitudeInput.value = position.coords.latitude;
+        longitudeInput.value = position.coords.longitude;
+        locationStatus.textContent = 'Location captured successfully.';
+        locationStatus.style.color = '#2e7d32';
+      },
+      (error) => {
+        locationStatus.textContent = 'Could not access your location. You can still register without it.';
+        locationStatus.style.color = '#c0392b';
+        locationConsent.checked = false;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+// end here
+
 
 
 /* =====================================================
@@ -2563,6 +2605,83 @@ if (window.location.search.includes('referrersUpdated=true')) {
   if (memberReferrersPanel) memberReferrersPanel.style.display = 'block';
   if (dbMainContent) dbMainContent.style.display = 'none';
 }
+// end here
+
+// view map location
+const memberLocationsMapEl = document.getElementById('memberLocationsMap');
+if (memberLocationsMapEl && typeof L !== 'undefined') {
+  const dataScript = document.getElementById('memberLocationsData');
+  const locations = dataScript ? JSON.parse(dataScript.textContent) : [];
+
+  const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  locations.forEach(loc => {
+    L.marker([loc.latitude, loc.longitude])
+      .addTo(map)
+      .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
+  });
+}
+
+// Member Locations panel toggle
+/* ---------- Member Locations panel ---------- */
+const memberLocationsLink = document.getElementById('memberLocationsLink');
+const memberLocationsPanel = document.getElementById('memberLocationsPanel');
+const cancelMemberLocations = document.getElementById('cancelMemberLocations');
+
+if (memberLocationsLink && memberLocationsPanel && dbMainContent) {
+  memberLocationsLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    memberLocationsPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Initialize map only once when panel opens
+    if (typeof L !== 'undefined' && !window._memberLocationsMapInitialized) {
+      const mapEl = document.getElementById('memberLocationsMap');
+      const dataScript = document.getElementById('memberLocationsData');
+      if (mapEl && dataScript) {
+        const locations = JSON.parse(dataScript.textContent || '[]');
+
+        const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const bounds = [];
+        locations.forEach((loc) => {
+          const lat = parseFloat(loc.latitude);
+          const lng = parseFloat(loc.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            L.marker([lat, lng])
+              .addTo(map)
+              .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
+            bounds.push([lat, lng]);
+          }
+        });
+
+        if (bounds.length > 0) {
+          map.fitBounds(bounds, { padding: [30, 30] });
+        }
+
+        // Force Leaflet to recalculate size after panel becomes visible
+        setTimeout(() => map.invalidateSize(), 200);
+        window._memberLocationsMapInitialized = true;
+      }
+    }
+  });
+}
+
+if (cancelMemberLocations && memberLocationsPanel && dbMainContent) {
+  cancelMemberLocations.addEventListener('click', (e) => {
+    e.preventDefault();
+    memberLocationsPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
 // end here
 
 

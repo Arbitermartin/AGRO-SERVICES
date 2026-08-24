@@ -77,11 +77,17 @@ async function registerAccount(req, res) {
       transaction_reference,
       bank_name,
       bank_account_number,
-      referrer_id
+      referrer_id,
+      latitude, 
+      longitude, 
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword,referrer_id);
+    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword,referrer_id,latitude, longitude );
+        // DELIVERY latitude and longitude
+    if (latitude && longitude) {
+      await accountModel.updateAccountLocation(newAccount.id, parseFloat(latitude), parseFloat(longitude));
+         } 
 
     if (req.file) {
       const planPrices = { Basic: 10000, Standard: 25000, Premium: 50000 };
@@ -281,6 +287,9 @@ async function buildAdminDashboard(req, res) {
 const allReferrers = await accountModel.getAllReferrers();
 const membersByReferrer = await accountModel.getMembersByReferrer();
 
+// delivery member view map
+const memberLocations = await accountModel.getAllMemberLocations();
+
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -325,6 +334,7 @@ const membersByReferrer = await accountModel.getMembersByReferrer();
     canDownloadChart,
     allReferrers,
     membersByReferrer,
+    memberLocations,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,

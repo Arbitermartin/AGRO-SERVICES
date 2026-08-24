@@ -111,6 +111,16 @@
             </div>
          </div>
 
+         <div class="form-field">
+          <label style="display:flex; align-items:flex-start; gap:8px; font-weight:400; font-size:0.85rem;">
+            <input type="checkbox" id="locationConsent" style="margin-top:3px;">
+            <span>Allow AgroServices to capture my location to help connect me with nearby services and field officers. </span>
+          </label>
+          <div id="locationStatus" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;"></div>
+         </div>
+         <input type="hidden" id="latitudeInput" name="latitude">
+         <input type="hidden" id="longitudeInput" name="longitude">
+
           <button type="button" onclick="nextStep(1)" class="btn btn-filled btn-block btn-lg">
             Next
           </button>
