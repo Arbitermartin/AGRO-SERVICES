@@ -659,7 +659,7 @@ async function buildMemberDashboard(req, res) {
   if (account.gender) completed++;
   // add/remove fields according to what exists in your users/accounts table
 
-  const profileCompletion = Math.round((completed / totalFields) * 100);
+  const profileCompletion = await accountModel.calculateProfileCompletion(account.id);
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
@@ -2708,6 +2708,77 @@ async function downloadMembersByReferrerPdf(req, res) {
 }
 //end here
 
+// calculator which calculate cost for farm
+async function getCalculatorRegions(req, res) {
+  const regions = await accountModel.getDistinctRegionsForCalculator();
+  res.json(regions);
+}
+
+async function getCalculatorDistricts(req, res) {
+  const { region } = req.query;
+  const districts = await accountModel.getDistrictsByRegion(region);
+  res.json(districts);
+}
+
+async function getCalculatorCrops(req, res) {
+  const { region, district } = req.query;
+  const crops = await accountModel.getCropsByRegionDistrict(region, district);
+  res.json(crops);
+}
+
+async function calculateFarmCost(req, res) {
+  try {
+    const { region, district, crop_name, farm_size, farming_method } = req.body;
+    const acres = parseFloat(farm_size);
+
+    const benchmark = await accountModel.getCropBenchmark(region, district, crop_name, farming_method);
+
+    if (!benchmark) {
+      return res.json({ success: false, message: "No cost data available for this crop in the selected location and method yet." });
+    }
+
+    const seedCost = benchmark.seed_cost_per_acre * acres;
+    const fertilizerCost = benchmark.fertilizer_cost_per_acre * acres;
+    const landPrepCost = benchmark.land_prep_cost_per_acre * acres;
+    const laborCost = benchmark.labor_cost_per_acre * acres;
+    const irrigationCost = benchmark.irrigation_cost_per_acre * acres;
+    const pesticideCost = benchmark.pesticide_cost_per_acre * acres;
+    const machineryCost = benchmark.machinery_cost_per_acre * acres;
+    const harvestingCost = benchmark.harvesting_cost_per_acre * acres;
+    const transportCost = benchmark.transport_cost_per_acre * acres;
+
+    const totalCost = seedCost + fertilizerCost + landPrepCost + laborCost + irrigationCost + pesticideCost + machineryCost + harvestingCost + transportCost;
+
+    const expectedProduction = benchmark.expected_yield_per_acre * acres;
+    const expectedRevenue = expectedProduction * benchmark.market_price_per_kg;
+    const estimatedProfit = expectedRevenue - totalCost;
+    const costPerAcre = totalCost / acres;
+    const breakEvenPrice = totalCost / expectedProduction;
+    const roi = totalCost > 0 ? (estimatedProfit / totalCost) * 100 : 0;
+
+    if (req.session.account) {
+      await accountModel.saveCostCalculation(req.session.account.id, {
+        region, district, crop_name, farm_size: acres, farming_method,
+        total_cost: totalCost, expected_revenue: expectedRevenue, estimated_profit: estimatedProfit,
+      });
+    }
+
+    res.json({
+      success: true,
+      breakdown: {
+        seedCost, fertilizerCost, landPrepCost, laborCost, irrigationCost,
+        pesticideCost, machineryCost, harvestingCost, transportCost,
+      },
+      totalCost, expectedProduction, expectedRevenue, estimatedProfit,
+      costPerAcre, breakEvenPrice, roi,
+    });
+  } catch (error) {
+    console.error("CALCULATE FARM COST ERROR:", error);
+    res.status(500).json({ success: false, message: "Something went wrong calculating costs." });
+  }
+}
+// end here.
+
 
 
 /* ****************************************
@@ -2734,5 +2805,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,accountLogout
 }

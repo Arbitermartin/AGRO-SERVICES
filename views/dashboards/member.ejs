@@ -198,7 +198,11 @@
               <div class="db-stat-icon db-stat-icon-orange"><i class="bi bi-person-check-fill"></i></div>
               <div>
                 <div class="db-stat-label">Profile Completion</div>
-                <div class="db-stat-value">85%</div>
+                 <div class="db-progress-ring" style="--progress: <%= profileCompletion %>%;">
+                  <div class="db-progress-ring-hole">
+                    <%= profileCompletion %>%
+                  </div>
+                </div>
                 <div class="db-stat-delta db-stat-delta-orange">Complete</div>
               </div>
             </div>
@@ -427,7 +431,7 @@
             
                   <div class="db-profile-row">
                     <span>Phone</span>
-                    <b><%= profile.Phone || account.Phone || '—' %></b>
+                     <b><%= account.phone_number || '—' %></b>
                   </div>
             
                   <div class="db-profile-row">

@@ -434,6 +434,84 @@ if (toastContainer) {
     showStep(1);
   }
 
+  // calculator for farm
+  const calcRegion = document.getElementById('calcRegion');
+const calcDistrict = document.getElementById('calcDistrict');
+const calcCrop = document.getElementById('calcCrop');
+const calculatorForm = document.getElementById('calculatorForm');
+const calculatorResults = document.getElementById('calculatorResults');
+
+if (calcRegion) {
+  fetch('/calculator/regions').then(r => r.json()).then(regions => {
+    calcRegion.innerHTML = '<option value="">Select region</option>' + regions.map(r => `<option value="${r}">${r}</option>`).join('');
+  });
+
+  calcRegion.addEventListener('change', () => {
+    fetch(`/calculator/districts?region=${encodeURIComponent(calcRegion.value)}`)
+      .then(r => r.json())
+      .then(districts => {
+        calcDistrict.innerHTML = '<option value="">Select district</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+        calcCrop.innerHTML = '<option value="">Select district first</option>';
+      });
+  });
+
+  calcDistrict.addEventListener('change', () => {
+    fetch(`/calculator/crops?region=${encodeURIComponent(calcRegion.value)}&district=${encodeURIComponent(calcDistrict.value)}`)
+      .then(r => r.json())
+      .then(crops => {
+        calcCrop.innerHTML = '<option value="">Select crop</option>' + crops.map(c => `<option value="${c}">${c}</option>`).join('');
+      });
+  });
+
+  calculatorForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(calculatorForm);
+    const payload = Object.fromEntries(formData.entries());
+
+    fetch('/calculator/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) {
+          calculatorResults.innerHTML = `<p style="text-align:center;color:#c0392b;">${data.message}</p>`;
+          calculatorResults.style.display = 'block';
+          return;
+        }
+
+        const fmt = (n) => 'TZS ' + Math.round(n).toLocaleString();
+
+        calculatorResults.innerHTML = `
+          <h3 class="profile-section-title">Cost Breakdown</h3>
+          <div class="calc-breakdown-row"><span>Seed/Seedlings</span><b>${fmt(data.breakdown.seedCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Fertilizer</span><b>${fmt(data.breakdown.fertilizerCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Land Preparation</span><b>${fmt(data.breakdown.landPrepCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Labor</span><b>${fmt(data.breakdown.laborCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Irrigation</span><b>${fmt(data.breakdown.irrigationCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Pesticides/Herbicides</span><b>${fmt(data.breakdown.pesticideCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Machinery</span><b>${fmt(data.breakdown.machineryCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Harvesting</span><b>${fmt(data.breakdown.harvestingCost)}</b></div>
+          <div class="calc-breakdown-row"><span>Transportation</span><b>${fmt(data.breakdown.transportCost)}</b></div>
+
+          <div class="calc-result-grid">
+            <div class="calc-result-card"><div class="value">${fmt(data.totalCost)}</div><div class="label">Total Cost</div></div>
+            <div class="calc-result-card"><div class="value">${Math.round(data.expectedProduction).toLocaleString()} kg</div><div class="label">Expected Production</div></div>
+            <div class="calc-result-card"><div class="value">${fmt(data.expectedRevenue)}</div><div class="label">Expected Revenue</div></div>
+            <div class="calc-result-card"><div class="value">${fmt(data.estimatedProfit)}</div><div class="label">Estimated Profit</div></div>
+            <div class="calc-result-card"><div class="value">${fmt(data.costPerAcre)}</div><div class="label">Cost per Acre</div></div>
+            <div class="calc-result-card"><div class="value">TZS ${data.breakEvenPrice.toFixed(1)}/kg</div><div class="label">Break-even Price</div></div>
+            <div class="calc-result-card"><div class="value">${data.roi.toFixed(1)}%</div><div class="label">ROI</div></div>
+          </div>
+        `;
+        calculatorResults.style.display = 'block';
+        calculatorResults.scrollIntoView({ behavior: 'smooth' });
+      });
+  });
+}
+// end here calculator.
+
   /* =====================================================
      JOB OPPORTUNITIES PAGE — LIVE SEARCH & FILTER
   ===================================================== */

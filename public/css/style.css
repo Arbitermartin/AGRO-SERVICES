@@ -2375,6 +2375,7 @@ Deliverys style for manage news and events
   padding: 18px 20px;
   box-shadow: 0 4px 14px var(--shadow-light);
   min-width: 0;
+  margin: 2rem 0 2rem;
 }
 
 .db-panel-title {
@@ -2774,6 +2775,38 @@ Deliverys style for manage news and events
 
 /* member pofile */
 /* ===== Profile sidebar layout (JSC-style) ===== */
+
+.db-progress-ring {
+  --progress: 0%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #2E7D32 var(--progress),
+    #E0E0E0 var(--progress)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.4s ease;
+}
+
+.db-progress-ring-hole {
+  width: 68px;
+  height: 68px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #2e7d32;
+}
+/* end here  */
+
+
 .profile-layout-wrap { background: #f3f6fb; }
 .profile-layout {
   display: flex;
@@ -3384,7 +3417,53 @@ Delivery style for job view in admin dashboard
   font-family: var(--font-base);
 }
 
+/* calculator style */
+.calc-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+.calc-result-card { background: var(--bg-light-green,#e8f5e9); border-radius: 10px; padding: 14px; text-align: center; }
+.calc-result-card .value { font-size: 1.15rem; font-weight: 700; color: var(--primary-green,#2e7d32); }
+.calc-result-card .label { font-size: 0.75rem; color: var(--text-secondary,#4b5563); margin-top: 2px; }
+.calc-breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.88rem; }
 
+/* end here */
+/* video movie */
+.page-hero-1{
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--bg-dashboard);
+}
+.hero-video{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.hero-overlay{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1;
+}
+.hero-content{
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.hero-content h1{
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+.hero-content p{
+  font-size: 1.2rem;
+  margin: 0;
+}
 
 /* =====================================================
    MEMBER DASHBOARD — APPLICATIONS / EVENTS / PROFILE
@@ -3938,6 +4017,17 @@ Delivery style for job view in admin dashboard
 
   .db-content {
     padding: 18px;
+  }
+
+  /* video calc */
+  .page-hero-1{
+    min-height: 320px;
+  }
+  .hero-content h1{
+    font-size: 2.2rem;
+  }
+  .hero-content p{
+    font-size: 1rem;
   }
 }
 @media (max-width: 640px) {

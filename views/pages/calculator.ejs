@@ -1,0 +1,60 @@
+<section class="page-hero-1">
+  <!-- Background Video -->
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="/videos/farm_background.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Dark overlay -->
+  <div class="hero-overlay"></div>
+
+  <!-- Content -->
+  <div class="container hero-content">
+    <h1>Farm Cost Calculator</h1>
+    <p>Plan your farming investment before you spend a single shilling.</p>
+  </div>
+</section>
+
+<section class="calculator-section">
+  <div class="container" style="max-width: 700px;">
+    <div class="db-card">
+      <form id="calculatorForm" class="auth-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Region</label>
+            <div class="input-wrap"><select id="calcRegion" name="region" required><option value="">Select region</option></select></div>
+          </div>
+          <div class="form-field">
+            <label>District</label>
+            <div class="input-wrap"><select id="calcDistrict" name="district" required><option value="">Select region first</option></select></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Crop</label>
+            <div class="input-wrap"><select id="calcCrop" name="crop_name" required><option value="">Select district first</option></select></div>
+          </div>
+          <div class="form-field">
+            <label>Farm Size (acres)</label>
+            <div class="input-wrap"><input type="number" name="farm_size" min="0.5" max="1000" step="0.1" placeholder="e.g. 10" required></div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Farming Method</label>
+          <div class="input-wrap">
+            <select name="farming_method" required>
+              <option value="rain_fed">Rain-fed</option>
+              <option value="irrigated">Irrigated</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-filled btn-block btn-lg">Calculate</button>
+      </form>
+
+      <div id="calculatorResults" style="display:none; margin-top:30px;"></div>
+    </div>
+  </div>
+</section>

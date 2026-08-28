@@ -12,6 +12,19 @@ router.get("/about", utilities.handleErrors(async (req, res) => {
     nav 
   })
 }))
+
+ 
+
+//  farm calculator
+router.get("/calculator", utilities.handleErrors(async (req, res) => {
+  let nav = await utilities.getNav();
+  res.render("pages/calculator", 
+    { title: "Farm Cost Calculator", 
+      nav 
+    });
+}));
+// end here
+
 router.get("/contact", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/contact", { 
@@ -59,6 +72,8 @@ router.get("/contact", utilities.handleErrors(async (req, res) => {
       nav 
     })
   }))
+
+  
   router.get("/yasnet-portal", utilities.handleErrors(async (req, res) => {
     let nav = await utilities.getNav()
     res.render("pages/yasnet-portal", { 
@@ -123,5 +138,13 @@ router.post("/chatbot/ask", utilities.handleErrors(accountController.chatbotAsk)
 router.post("/chatbot/connect-agent", utilities.handleErrors(accountController.chatbotConnectAgent));
 router.post("/chat/:session_id/send", utilities.handleErrors(accountController.chatSendMessage));
 router.get("/chat/:session_id/messages", utilities.handleErrors(accountController.chatGetMessages));
+
+
+
+ // new calculator
+router.get("/calculator/regions", utilities.handleErrors(accountController.getCalculatorRegions));
+router.get("/calculator/districts", utilities.handleErrors(accountController.getCalculatorDistricts));
+router.get("/calculator/crops", utilities.handleErrors(accountController.getCalculatorCrops));
+router.post("/calculator/calculate", utilities.handleErrors(accountController.calculateFarmCost));
 
   module.exports = router
