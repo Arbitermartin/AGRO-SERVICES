@@ -392,11 +392,6 @@ if (toastContainer) {
       });
     };
 
-    // window.selectPayment = (index) => {
-    //   document.querySelectorAll('.payment-method').forEach((el, i) => {
-    //     el.classList.toggle('selected', i === index);
-    //   });
-    // };
     window.selectPayment = (index) => {
   document.querySelectorAll('.payment-method').forEach((el, i) => {
     el.classList.toggle('selected', i === index);
@@ -783,33 +778,72 @@ if (chatbotToggle && chatbotWindow) {
 
     // Default: ask FAQ bot
     fetch('/chatbot/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-      body: JSON.stringify({ message: text, session_id: sessionId }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        addBotMessage(data.text);
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message: text, session_id: sessionId }),
+})
+  .then(res => res.json())
+  .then(data => {
+    addBotMessage(data.text);
 
-        if (data.type === 'no_match') {
-          addQuickButton('Connect me to a live agent', () => {
-            addMessage('Connect me to a live agent', 'user');
-            fetch('/chatbot/connect-agent', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-              body: JSON.stringify({ session_id: sessionId }),
-            })
-              .then(res => res.json())
-              .then(connectData => {
-                addBotMessage(connectData.text);
-                if (connectData.connected) {
-                  chatState = 'live_chat';
-                  startPollingLiveChat();
-                }
-              });
-          });
-        }
+    if (data.type === 'confirm_close') {
+      addQuickButton('Yes, close chat', () => {
+        addMessage('Yes, close chat', 'user');
+        addBotMessage('Thanks for chatting with AgroServices! Have a great day.');
+        setTimeout(() => {
+          chatbotWindow.style.display = 'none';
+          // Reset for next time the widget is opened
+          chatState = 'awaiting_name';
+          visitorName = '';
+          sessionId = null;
+          chatbotMessages.innerHTML = '';
+          addBotMessage("Hi there! Before we get started, what's your name?");
+        }, 1200);
       });
+
+      addQuickButton('No, I have another question', () => {
+        addMessage('No, I have another question', 'user');
+        addBotMessage("Sure, go ahead and ask!");
+      });
+      return;
+    }
+
+    if (data.type === 'no_match') {
+      addQuickButton('Connect me to a live agent', () => {
+        addMessage('Connect me to a live agent', 'user');
+        fetch('/chatbot/connect-agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId }),
+        })
+          .then(res => res.json())
+          .then(connectData => {
+            addBotMessage(connectData.text);
+            if (connectData.connected) {
+              chatState = 'live_chat';
+              startPollingLiveChat();
+            }
+          });
+      });
+    }
+
+    // ✅ After any normal FAQ answer, gently offer to close too
+    if (data.offer_close) {
+      addQuickButton('That answered my question — close chat', () => {
+        addMessage('That answered my question — close chat', 'user');
+        addBotMessage('Great! Thanks for chatting with AgroServices. Have a good day!');
+        setTimeout(() => {
+          chatbotWindow.style.display = 'none';
+          chatState = 'awaiting_name';
+          visitorName = '';
+          sessionId = null;
+          chatbotMessages.innerHTML = '';
+          addBotMessage("Hi there! Before we get started, what's your name?");
+        }, 1200);
+      });
+    }
+  })
+  .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
   });
 }
 // end here
@@ -2463,85 +2497,6 @@ if (ictChatReplyForm) {
   }
 
 
-// const heroSlidesLink  = document.getElementById('heroSlidesLink');
-// const heroSlidesPanel = document.getElementById('heroSlidesPanel');
-// const cancelHeroSlides = document.getElementById('cancelHeroSlides');
-
-// if (heroSlidesLink && heroSlidesPanel) {
-//   heroSlidesLink.addEventListener('click', function (e) {
-//     e.preventDefault();
-
-//     // Hide main dashboard content
-//     const mainContent = document.getElementById('dbMainContent');
-//     if (mainContent) mainContent.style.display = 'none';
-
-//     // Hide all other panels
-//     document.querySelectorAll('.db-card').forEach(panel => {
-//       if (panel.id !== 'heroSlidesPanel') {
-//         panel.style.display = 'none';
-//       }
-//     });
-
-//     // Show Hero panel
-//     heroSlidesPanel.style.display = 'block';
-//   });
-// }
-
-// if (cancelHeroSlides) {
-//   cancelHeroSlides.addEventListener('click', function (e) {
-//     e.preventDefault();
-//     e.stopPropagation();
-//     heroSlidesPanel.style.display = 'none';
-
-//     // Show main dashboard again
-//     const mainContent = document.getElementById('dbMainContent');
-//     if (mainContent) mainContent.style.display = 'block';
-//   });
-// }
-
-// // ===== Hero Slide Image Upload =====
-//   const uploadArea   = document.getElementById('heroSlideUploadArea');
-//   const uploadInput  = document.getElementById('heroSlideUploadInput');
-//   const uploadedFile = document.getElementById('heroSlideUploadedFile');
-//   const fileNameSpan = document.getElementById('heroSlideFileName');
-
-//   if (uploadArea && uploadInput) {
-//     // When user clicks the big upload box → open file picker
-//     uploadArea.addEventListener('click', function () {
-//       uploadInput.click();
-//     });
-
-//     // When user selects a file
-//     uploadInput.addEventListener('change', function () {
-//       const file = this.files[0];
-
-//       if (!file) {
-//         if (uploadedFile) uploadedFile.style.display = 'none';
-//         return;
-//       }
-
-//       // Validate type
-//       if (!['image/jpeg', 'image/png'].includes(file.type)) {
-//         alert('Please select a JPG or PNG image only.');
-//         this.value = '';
-//         if (uploadedFile) uploadedFile.style.display = 'none';
-//         return;
-//       }
-
-//       // Validate size (3MB)
-//       if (file.size > 3 * 1024 * 1024) {
-//         alert('Image must be smaller than 3MB.');
-//         this.value = '';
-//         if (uploadedFile) uploadedFile.style.display = 'none';
-//         return;
-//       }
-
-//       // Show selected file name
-//       if (fileNameSpan) fileNameSpan.textContent = file.name;
-//       if (uploadedFile) uploadedFile.style.display = 'block';
-//     });
-//   }
-
 // for charts graph
 const registrationsChartCanvas = document.getElementById('registrationsChart');
 if (registrationsChartCanvas && typeof Chart !== 'undefined') {
@@ -2616,48 +2571,7 @@ if (registrationsChartCanvas && typeof Chart !== 'undefined') {
   }
 }
 
-//        const registrationsChartCanvas = document.getElementById('registrationsChart');
-// if (registrationsChartCanvas && typeof Chart !== 'undefined') {
-//   const dataScript = document.getElementById('registrationsChartData');
-//   const monthlyData = dataScript ? JSON.parse(dataScript.textContent) : [];
 
-//   const chart = new Chart(registrationsChartCanvas, {
-//     type: 'line',
-//     data: {
-//       labels: monthlyData.map(m => m.label),
-//       datasets: [{
-//         label: 'New Members',
-//         data: monthlyData.map(m => m.count),
-//         borderColor: '#2E7D32',
-//         backgroundColor: 'rgba(46, 125, 50, 0.1)',
-//         fill: true,
-//         tension: 0.35,
-//         pointRadius: 3,
-//         pointBackgroundColor: '#2E7D32',
-//       }],
-//     },
-//     options: {
-//       responsive: true,
-//       plugins: { legend: { display: false } },
-//       scales: {
-//         y: { beginAtZero: true, ticks: { precision: 0 } },
-//       },
-//     },
-//   });
-
-//   const downloadChartBtn = document.getElementById('downloadChartBtn');
-//   if (downloadChartBtn) {
-//     downloadChartBtn.addEventListener('click', () => {
-//       const link = document.createElement('a');
-//       link.href = chart.toBase64Image();
-//       link.download = `member-registrations-${new Date().toISOString().split('T')[0]}.png`;
-//       link.click();
-//     });
-//   }
-// }
-// end here.
-
-// MEM
 /* ---------- Member Referrers (Registration Names) panel ---------- */
 const memberReferrersLink = document.getElementById('memberReferrersLink');
 const memberReferrersPanel = document.getElementById('memberReferrersPanel');
