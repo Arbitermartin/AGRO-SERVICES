@@ -21,12 +21,20 @@
             <% if (msg.phone_number) { %>
               <p style="font-size:0.85rem; color:var(--text-secondary);"><i class="bi bi-telephone"></i> <%= msg.phone_number %></p>
             <% } %>
-            <% if (!msg.is_read) { %>
-              <form action="/account/messages/<%= msg.id %>/read" method="POST">
-              
-                <button type="submit" class="btn-outline-sm">Mark as Read</button>
+
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <% if (!msg.is_read) { %>
+                <form action="/account/messages/<%= msg.id %>/read" method="POST">
+                
+                  <button type="submit" class="btn-outline-sm">Mark as Read</button>
+                </form>
+              <% } %>
+
+              <form action="/account/messages/<%= msg.id %>/delete" method="POST" onsubmit="return confirm('Delete this message permanently?');">
+                
+                <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>
               </form>
-            <% } %>
+            </div>
           </div>
         </div>
       </div>

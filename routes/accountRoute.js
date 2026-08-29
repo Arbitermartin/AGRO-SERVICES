@@ -515,6 +515,12 @@ router.post("/tickets/:id/reply",
     utilities.checkLogin,
     utilities.handleErrors(accountController.getTicketMessagesJson));
 
+    // here message
+    router.post("/messages/:id/delete", 
+      utilities.checkLogin, 
+      utilities.checkRole("ict_staff"), 
+      utilities.handleErrors(accountController.deleteContactMessagePost));
+
     /*********************
      * 
      * deactivate post and reactivate post
