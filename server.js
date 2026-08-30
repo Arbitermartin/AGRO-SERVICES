@@ -15,7 +15,7 @@ const session = require("express-session");
 const flash =require("connect-flash");
 
 
-// const { doubleCsrf } = require("csrf-csrf");
+
 
 // ROUTES AND UTILITIES.
 const accountRoute = require("./routes/accountRoute");
@@ -86,36 +86,10 @@ app.use((req,res,next)=>{
 
 
 // track online ict stafff
+
 app.use(utilities.trackPresence);
 
-// const { doubleCsrf } = require("csrf-csrf");
 
-// const {
-//   generateCsrfToken,      // ✅ correct name for v4
-//   doubleCsrfProtection,
-//   invalidCsrfTokenError,
-// } = doubleCsrf({
-//   getSecret: () => process.env.SESSION_SECRET,
-//   getSessionIdentifier: (req) => req.sessionID,
-//   cookieName: "csrf-token",
-//   cookieOptions: {
-//     httpOnly: true,
-//     sameSite: "lax",
-//     secure: false,
-//   // secure: process.env.NODE_ENV === "production",
-//    },
-//   getCsrfTokenFromRequest: (req) => {
-//     return req.body?._csrf || req.headers["x-csrf-token"];
-//   },
-// });
-
-
-// app.use((req, res, next) => {
-//   res.locals.csrfToken = generateCsrfToken(req, res);
-//   next();
-// });
-
-// app.use(doubleCsrfProtection);
 
 
 
@@ -134,42 +108,13 @@ app.use("/account", accountRoute);
 app.use(static);
 app.use("/", staticRoute);
 
-// // File Not Found Route - must be last route in list
-// app.use(async (req, res, next) => {
-//   next({status: 404, message: 'Sorry, we appear to have lost that page.'})
-// })
 
-// /* ***********************
-// * Express Error Handler
-// * Place after all other middleware
-// *************************/
-// app.use(async (err, req, res, next) => {
-//   let nav = await utilities.getNav()
-//   console.error(`Error at: "${req.originalUrl}": ${err.message}`)
-//   res.render("errors/error", {
-//     title: err.status || 'Server Error',
-//     message: err.message,
-//     nav
-//   })
-// })
 
 // Build Home View.
 
 app.get("/", utilities.handleErrors(baseController.buildHome));
 
-// app.use((err, req, res, next) => {
-//   if (err.code === "EBADCSRFTOKEN" /* or the real error export from step 1 */) {
-//     req.flash("error", "Your session expired. Please try again.");
-//     return res.redirect("back");
-//   }
-//   console.error(`Error at: "${req.originalUrl}": ${err.message}`);
-//   res.status(err.status || 500);
-//   res.render("errors/error", {
-//     title: err.status || 'Server Error',
-//     message: err.message,
-//     nav: [],
-//   });
-// });
+
 
 
 /* ***********************
