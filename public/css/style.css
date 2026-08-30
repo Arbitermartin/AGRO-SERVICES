@@ -407,7 +407,7 @@ Deliverys style for manage news and events
 
 .page-hero h1 {
   position: relative;
-  font-size: 5rem;
+  font-size: 1.5rem;
   font-weight: 900;
   margin-bottom: 14px;
 }
@@ -417,7 +417,7 @@ Deliverys style for manage news and events
   max-width: 560px;
   margin: 0 auto;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 1.5rem;
+  font-size: .9rem;
   font-weight: 500;
 }
 

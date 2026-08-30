@@ -1552,6 +1552,32 @@ async function markMessageReadPost(req, res) {
 }
 // end here contact message from contact us page.
 
+/**************************8
+ * Delivery convert contact message to ticket
+ * 
+ */
+async function convertMessageToTicketPost(req, res) {
+  try {
+    const { id } = req.params;
+    const ictStaffId = req.session.account.id;
+
+    const ticket = await accountModel.convertMessageToTicket(id, ictStaffId);
+
+    if (!ticket) {
+      req.flash("error", "Message not found.");
+      return res.redirect("/account/dashboard/ict-staff");
+    }
+
+    req.flash("success", `Converted to ticket #${ticket.ticket_number}.`);
+    res.redirect("/account/dashboard/ict-staff?messageRead=true");
+  } catch (error) {
+    console.error("CONVERT MESSAGE TO TICKET ERROR:", error);
+    req.flash("error", "Failed to convert message to ticket.");
+    res.redirect("/account/dashboard/ict-staff");
+  }
+}
+// end here message converter.
+
 /*********************************
  * 
  * Delivery event registrtations form for event.
@@ -2826,5 +2852,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,accountLogout
 }

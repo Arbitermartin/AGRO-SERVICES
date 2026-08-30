@@ -30,6 +30,18 @@
                 </form>
               <% } %>
 
+                  <% if (!msg.converted_ticket_id) { %>
+                 <form action="/account/messages/<%= msg.id %>/convert-to-ticket" method="POST">
+      
+                  <button type="submit" class="btn-outline-sm"><i class="bi bi-arrow-repeat"></i> Convert to Ticket</button>
+                   </form>
+                <% } else { %>
+                   <span style="font-size:0.78rem; color:var(--primary-green,#2e7d32); display:flex; align-items:center; gap:4px;">
+                  <i class="bi bi-check-circle"></i> Already converted
+                     </span>
+                     <% } %>
+                </div>
+
               <form action="/account/messages/<%= msg.id %>/delete" method="POST" onsubmit="return confirm('Delete this message permanently?');">
                 
                 <button type="submit" class="btn-outline-sm manage-delete-btn"><i class="bi bi-trash"></i> Delete</button>

@@ -853,6 +853,18 @@ router.get("/referrers/download-pdf",
   utilities.handleErrors(accountController.downloadMembersByReferrerPdf));
   // end here
 
+  /**************************
+   * 
+   * Delivery convert message to ticket this is contact us message
+   * 
+   */
+  router.post("/messages/:id/convert-to-ticket",
+    utilities.checkLogin,
+    utilities.checkRole("ict_staff"),
+    utilities.handleErrors(accountController.convertMessageToTicketPost
+    ));
+    // end here.
+
 
 
 module.exports= router
