@@ -82,7 +82,9 @@ async function registerAccount(req, res) {
       referrer_id,
       latitude, 
       longitude,
-      referred_by_account_id,  
+      referred_by_account_id,
+      website,
+      form_rendered_at,  
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -95,6 +97,20 @@ async function registerAccount(req, res) {
       // ✅ Award referral tier if this registration completes a referral
     if (referred_by_account_id) {
       await accountModel.awardReferralTierIfEligible(referred_by_account_id);
+    }
+
+    // Honeypot check
+    if(website && website.trim() !== ""){
+      console.log("Honeypot trigger on registration-bot blocked");
+      return res.redirect("/account/register")
+    }
+    // end here.
+    
+    // Timing check
+    const elapsedMs= date.now() - parseInt(form_rendered_at,10);
+    if (isNaN(elapsedMs) || elapsedMs <2000){
+      console.log("Registration submitted too quickly- likely bot");
+       return res.redirect("/account/register");
     }
 
     if (req.file) {
@@ -1527,7 +1543,24 @@ async function downloadMemberProfilePdf(req, res) {
  */
 async function submitContactForm(req, res) {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, subject, message,website,form_rendered_at } = req.body;
+
+  
+    // 1: Honeypot check-real users never fill this field
+    if (website && website.trim() !== ""){
+      console.log("Honeypot triggered -likely bot submission blocked");
+      return res.redirect("/contact");
+    }
+
+    // 2. Timing check
+    const renderedAt = parseInt(form_rendered_at, 10);
+    const elapsedMs = Date.now() - renderedAt;
+
+    if (!form_rendered_at || isNaN(renderedAt) || elapsedMs < 2000) {
+      console.log("Contact form submitted too quickly or missing timestamp — likely bot");
+      return res.redirect("/contact");
+    }
+     
 
      if (!name || !email || !subject || !message) {
       req.flash("error", "Please fill in all fields.");
