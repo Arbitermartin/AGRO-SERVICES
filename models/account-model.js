@@ -9,7 +9,7 @@ function sanitizeInput(input) {
   return input;
 }
 
-async function registerAccount(fullName, email, Phone_number, hashedPassword,referrerId) {
+async function registerAccount(fullName, email, Phone_number, hashedPassword,referrerId,referredByAccountId) {
   try {
     const safeFullName = sanitizeInput(fullName);
     const safeEmail = sanitizeInput(email).toLowerCase();
@@ -22,6 +22,7 @@ async function registerAccount(fullName, email, Phone_number, hashedPassword,ref
         password: hashedPassword,
         account_type: "member",
         referrer_id: referrerId || null,
+        referred_by_account_id: referredByAccountId || null,
       })
       .returning("*");
 
@@ -1514,6 +1515,112 @@ async function convertMessageToTicket(messageId, ictStaffId) {
 }
 // end here.
 
+/*********************
+ * 
+ * Delivery referal link
+ * 
+ */
+const REWARD_TIERS = [
+  { name: "Bronze Referrer", threshold: 3 },
+  { name: "Silver Referrer", threshold: 10 },
+  { name: "Gold Referrer", threshold: 25 },
+  { name: "Platinum Referrer", threshold: 50 },
+];
+
+async function getDirectReferrals(accountId) {
+  return await db("accounts")
+    .where("referred_by_account_id", accountId)
+    .select("id", "full_name", "email", "status", "created_at");
+}
+
+async function getReferralTree(accountId, depth = 3) {
+  async function buildNode(id, currentDepth) {
+    if (currentDepth > depth) return [];
+    const children = await getDirectReferrals(id);
+    const tree = [];
+    for (const child of children) {
+      tree.push({
+        ...child,
+        children: await buildNode(child.id, currentDepth + 1),
+      });
+    }
+    return tree;
+  }
+  return await buildNode(accountId, 1);
+}
+
+async function countTotalReferrals(accountId) {
+  async function countRecursive(id) {
+    const direct = await getDirectReferrals(id);
+    let total = direct.length;
+    for (const d of direct) {
+      total += await countRecursive(d.id);
+    }
+    return total;
+  }
+  return await countRecursive(accountId);
+}
+
+function getCurrentTier(referralCount) {
+  let current = null;
+  for (const tier of REWARD_TIERS) {
+    if (referralCount >= tier.threshold) current = tier;
+  }
+  return current;
+}
+
+function getNextTier(referralCount) {
+  return REWARD_TIERS.find(tier => referralCount < tier.threshold) || null;
+}
+
+async function calculateReferralHealth(accountId) {
+  const directReferrals = await getDirectReferrals(accountId);
+  if (directReferrals.length === 0) {
+    return { score: 0, label: "No referrals yet" };
+  }
+
+  const activeCount = directReferrals.filter(r => r.status === "active").length;
+  const activeRatio = activeCount / directReferrals.length;
+
+  const now = new Date();
+  const recentCount = directReferrals.filter(r => {
+    const daysAgo = (now - new Date(r.created_at)) / (1000 * 60 * 60 * 24);
+    return daysAgo <= 90;
+  }).length;
+  const recencyRatio = Math.min(recentCount / directReferrals.length, 1);
+
+  const score = Math.round((activeRatio * 0.7 + recencyRatio * 0.3) * 100);
+
+  let label = "Needs attention";
+  if (score >= 80) label = "Excellent";
+  else if (score >= 60) label = "Good";
+  else if (score >= 40) label = "Fair";
+
+  return { score, label };
+}
+
+async function awardReferralTierIfEligible(accountId) {
+  const totalReferrals = await countTotalReferrals(accountId);
+  const tier = getCurrentTier(totalReferrals);
+  if (!tier) return null;
+
+  const existing = await db("referral_rewards").where({ referrer_account_id: accountId, tier: tier.name }).first();
+  if (existing) return null;
+
+  const inserted = await db("referral_rewards").insert({
+    referrer_account_id: accountId,
+    tier: tier.name,
+    referral_count_at_award: totalReferrals,
+  }).returning("*");
+
+  return inserted[0];
+}
+
+async function getReferralRewards(accountId) {
+  return await db("referral_rewards").where({ referrer_account_id: accountId }).orderBy("created_at", "desc");
+}
+// end here
+
 
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
@@ -1522,6 +1629,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer,updateAccountLocation,getAllMemberLocations,calculateProfileCompletion,getDistinctRegionsForCalculator,getDistrictsByRegion,getCropsByRegionDistrict,getCropBenchmark,saveCostCalculation,detectClosingIntent,deleteContactMessage,convertMessageToTicket
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer,updateAccountLocation,getAllMemberLocations,calculateProfileCompletion,getDistinctRegionsForCalculator,getDistrictsByRegion,getCropsByRegionDistrict,getCropBenchmark,saveCostCalculation,detectClosingIntent,deleteContactMessage,convertMessageToTicket,getDirectReferrals,countTotalReferrals,getReferralTree,getNextTier, calculateReferralHealth,awardReferralTierIfEligible,getReferralRewards
 
 };

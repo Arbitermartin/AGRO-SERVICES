@@ -39,6 +39,7 @@ async function buildRegister(req, res) {
   }
 
   const referrers = await accountModel.getAllReferrers();
+  const referredByAccountId = req.query.ref || null; 
 
   let nav = await utilities.getNav();
   res.render("account/register", {
@@ -46,6 +47,7 @@ async function buildRegister(req, res) {
     nav,
     errors: null,
     referrers,
+    referredByAccountId,
   });
 }
 /***************************
@@ -79,7 +81,8 @@ async function registerAccount(req, res) {
       bank_account_number,
       referrer_id,
       latitude, 
-      longitude, 
+      longitude,
+      referred_by_account_id,  
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -88,6 +91,11 @@ async function registerAccount(req, res) {
     if (latitude && longitude) {
       await accountModel.updateAccountLocation(newAccount.id, parseFloat(latitude), parseFloat(longitude));
          } 
+
+      // ✅ Award referral tier if this registration completes a referral
+    if (referred_by_account_id) {
+      await accountModel.awardReferralTierIfEligible(referred_by_account_id);
+    }
 
     if (req.file) {
       const planPrices = { Basic: 10000, Standard: 25000, Premium: 50000 };
@@ -660,6 +668,13 @@ async function buildMemberDashboard(req, res) {
   // add/remove fields according to what exists in your users/accounts table
 
   const profileCompletion = await accountModel.calculateProfileCompletion(account.id);
+  const referralTree = await accountModel.getReferralTree(account.id);
+  const totalReferrals = await accountModel.countTotalReferrals(account.id);
+  const referralHealth = await accountModel.calculateReferralHealth(account.id);
+  const currentTier = accountModel.getCurrentTier ? require("../models/account-model") : null;
+  const referralRewards = await accountModel.getReferralRewards(account.id);
+  const referralLink = `${req.protocol}://${req.get('host')}/account/register?ref=${account.id}`;
+
   res.render("dashboards/member", {
     title: "Member Dashboard",
     nav,
@@ -679,6 +694,12 @@ async function buildMemberDashboard(req, res) {
     myLearningProgress,
     myTickets,
     profileCompletion,
+    referralTree,
+    totalReferrals,
+    referralHealth,
+    currentTier,
+    referralRewards,
+    referralLink,
      // Add these two lines 👇
      showNav: false,
      showFooter: false,

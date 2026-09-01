@@ -1,0 +1,47 @@
+<div id="referralNetworkPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <h2>My Referral Network</h2>
+    <p>Grow your network and earn rewards</p>
+  </div>
+
+  <div style="display:flex; gap:10px; margin-bottom:20px;">
+    <input type="text" readonly value="<%= referralLink %>" id="referralLinkInput" style="flex:1; padding:10px 14px; border-radius:8px; border:1.5px solid var(--border-color,#e0e0e0); font-size:0.85rem;">
+    <button type="button" id="copyReferralLink" class="btn btn-filled">Copy Link</button>
+  </div>
+
+  <div class="calc-result-grid" style="margin-bottom:24px;">
+    <div class="calc-result-card"><div class="value"><%= totalReferrals %></div><div class="label">Total Referrals</div></div>
+    <div class="calc-result-card"><div class="value"><%= referralHealth.score %>%</div><div class="label"><%= referralHealth.label %></div></div>
+  </div>
+
+  <% if (referralRewards.length > 0) { %>
+    <h3 class="profile-section-title">Reward Tiers Earned</h3>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;">
+      <% referralRewards.forEach(r => { %>
+        <span class="db-badge-status db-badge-open"><i class="bi bi-trophy"></i> <%= r.tier %></span>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <h3 class="profile-section-title">Your Referral Tree</h3>
+  <div id="referralTreeContainer">
+    <% 
+      function renderTree(nodes) {
+        if (!nodes || nodes.length === 0) return '';
+        let html = '<ul style="list-style:none; padding-left:20px; border-left:2px solid var(--border-color,#e0e0e0); margin:0;">';
+        nodes.forEach(n => {
+          html += `<li style="margin:10px 0; position:relative;">
+            <span style="font-weight:600; font-size:0.88rem;">${n.full_name}</span>
+            <span class="db-badge-status ${n.status === 'active' ? 'db-badge-open' : 'db-badge-priority db-badge-high'}" style="margin-left:8px; font-size:0.7rem;">${n.status}</span>
+            ${renderTree(n.children)}
+          </li>`;
+        });
+        html += '</ul>';
+        return html;
+      }
+    %>
+    <%- referralTree.length > 0 ? renderTree(referralTree) : '<p style="text-align:center; color:#9ca3af; padding:20px;">No referrals yet. Share your link to start growing your network!</p>' %>
+  </div>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;"><a href="#" id="cancelReferralNetwork">Back to Dashboard</a></div>
+</div>

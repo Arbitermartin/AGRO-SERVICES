@@ -72,6 +72,9 @@ if (countrySelect && regionSelect) {
 }
 // // end here for form for events
 
+
+// end here
+
 // location track
 
 const locationConsent = document.getElementById('locationConsent');
@@ -2675,6 +2678,56 @@ if (cancelMemberLocations && memberLocationsPanel && dbMainContent) {
 }
 
 // end here
+
+//referral
+// Copy referral link
+
+/* ---------- Referral Network panel ---------- */
+const referralNetworkLink = document.getElementById('referralNetworkLink');
+const referralNetworkPanel = document.getElementById('referralNetworkPanel');
+const cancelReferralNetwork = document.getElementById('cancelReferralNetwork');
+
+if (referralNetworkLink && referralNetworkPanel && dbMainContent) {
+  referralNetworkLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    referralNetworkPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelReferralNetwork && referralNetworkPanel && dbMainContent) {
+  cancelReferralNetwork.addEventListener('click', (e) => {
+    e.preventDefault();
+    referralNetworkPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+
+/* ---------- Copy Referral Link ---------- */
+const copyReferralLinkBtn = document.getElementById('copyReferralLink');
+if (copyReferralLinkBtn) {
+  copyReferralLinkBtn.addEventListener('click', () => {
+    const input = document.getElementById('referralLinkInput');
+    if (!input) return;
+
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+      const originalText = copyReferralLinkBtn.textContent;
+      copyReferralLinkBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyReferralLinkBtn.textContent = originalText;
+      }, 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      document.execCommand('copy');
+      copyReferralLinkBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyReferralLinkBtn.textContent = 'Copy Link';
+      }, 2000);
+    });
+  });
+}
 
 
     /* ---------- Approve / Reject button feedback ---------- */
