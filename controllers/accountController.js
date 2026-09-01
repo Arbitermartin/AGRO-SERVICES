@@ -1548,7 +1548,7 @@ async function submitContactForm(req, res) {
   
     // 1: Honeypot check-real users never fill this field
     if (website && website.trim() !== ""){
-      console.log("Honeypot triggered -likely bot submission blocked");
+
       return res.redirect("/contact");
     }
 
@@ -1557,7 +1557,7 @@ async function submitContactForm(req, res) {
     const elapsedMs = Date.now() - renderedAt;
 
     if (!form_rendered_at || isNaN(renderedAt) || elapsedMs < 2000) {
-      console.log("Contact form submitted too quickly or missing timestamp — likely bot");
+      
       return res.redirect("/contact");
     }
      
