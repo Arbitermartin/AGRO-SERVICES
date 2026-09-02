@@ -865,6 +865,28 @@ router.get("/referrers/download-pdf",
     ));
     // end here.
 
+    /*************
+     * 
+     * 1: CHANGES MADE ON 01/09/2026 Delivery face ID
+     */
+router.post("/webauthn/register-options", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.webauthnRegisterOptions));
+
+router.post("/webauthn/register-verify", 
+  utilities.checkLogin, 
+  utilities.handleErrors(accountController.webauthnRegisterVerify));
+
+router.post("/webauthn/login-options", 
+  utilities.handleErrors(accountController.webauthnLoginOptions));
+
+router.post("/webauthn/login-verify", 
+  utilities.handleErrors(accountController.webauthnLoginVerify));
+
+router.post("/webauthn/:id/delete", 
+  utilities.checkLogin, utilities.handleErrors(accountController.deleteWebauthnCredentialPost));
+  // END HERE.
+
 
 
 module.exports= router

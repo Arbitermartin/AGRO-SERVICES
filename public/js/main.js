@@ -117,6 +117,85 @@ if (locationConsent) {
 }
 // end here
 
+function showToast(message, type = 'success') {
+  let toastContainer = document.getElementById('toastContainer');
+
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toastContainer';
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast-msg ${type}`;
+  toast.innerHTML = `
+    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}"></i>
+    <span>${message}</span>
+  `;
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('toast-hide');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+
+// FACE ID RECOGNION
+const faceIdLoginBtn = document.getElementById('faceIdLoginBtn');
+if (faceIdLoginBtn) {
+  faceIdLoginBtn.addEventListener('click', async () => {
+    const emailInput = document.getElementById('email');
+    const email = emailInput ? emailInput.value.trim() : '';
+
+    if (!email) {
+      showToast('Please enter your email first, then tap Face ID login.', 'error');
+      return;
+    }
+
+    try {
+      showToast('Preparing biometric verification...', 'success');
+
+      const optionsRes = await fetch('/account/webauthn/login-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!optionsRes.ok) {
+        const err = await optionsRes.json();
+        showToast(err.error || 'Biometric login not set up for this account.', 'error');
+        return;
+      }
+
+      const options = await optionsRes.json();
+
+      const credential = await SimpleWebAuthnBrowser.startAuthentication(options);
+
+      const verifyRes = await fetch('/account/webauthn/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+
+      const result = await verifyRes.json();
+
+      if (result.success) {
+        showToast('Verified! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = result.redirect;
+        }, 800);
+      } else {
+        showToast(result.message || 'Verification failed.', 'error');
+      }
+    } catch (error) {
+      showToast('Biometric login was cancelled or failed.', 'error');
+    }
+  });
+}
+// END HERE.
+
 
 
 /* =====================================================
@@ -2728,6 +2807,36 @@ if (copyReferralLinkBtn) {
     });
   });
 }
+
+// FACE ID RECOGNITION
+const enableFaceIdBtn = document.getElementById('enableFaceIdBtn');
+if (enableFaceIdBtn) {
+  enableFaceIdBtn.addEventListener('click', async () => {
+    const statusEl = document.getElementById('enableFaceIdStatus');
+    try {
+      statusEl.textContent = 'Preparing setup...';
+      const optionsRes = await fetch('/account/webauthn/register-options', { method: 'POST' });
+      const options = await optionsRes.json();
+
+      statusEl.textContent = 'Follow the prompt on your device...';
+      const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+
+      const verifyRes = await fetch('/account/webauthn/register-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, deviceName: navigator.platform }),
+      });
+
+      const result = await verifyRes.json();
+      statusEl.textContent = result.message;
+      statusEl.style.color = result.success ? '#2e7d32' : '#c0392b';
+    } catch (error) {
+      statusEl.textContent = 'Setup was cancelled or failed.';
+      statusEl.style.color = '#c0392b';
+    }
+  });
+}
+// END HERE
 
 
     /* ---------- Approve / Reject button feedback ---------- */

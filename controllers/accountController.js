@@ -2880,6 +2880,304 @@ async function deleteContactMessagePost(req, res) {
 }
 // end here.
 
+/**********************
+ * 
+ * 1: changes made on 01/09/206 Delivery face id autheticate
+ */
+const {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} = require("@simplewebauthn/server");
+
+const rpName = "AgroServices";
+const rpID = process.env.NODE_ENV === "production" ? "your-domain.com" : "localhost";
+const origin = process.env.NODE_ENV === "production" ? `https://${rpID}` : `http://localhost:3000`;
+
+/* ---------- Setting up Face ID / biometric login (done from inside a logged-in dashboard) ---------- */
+async function webauthnRegisterOptions(req, res) {
+  try {
+    const account = req.session.account;
+    const existing = await accountModel.getWebauthnCredentialsByAccount(account.id);
+
+    const options = await generateRegistrationOptions({
+      rpName,
+      rpID,
+      userID: Buffer.from(String(account.id)),
+      userName: account.email,
+      userDisplayName: account.full_name,
+      attestationType: "none",
+      excludeCredentials: existing.map(c => ({ id: c.credential_id, type: "public-key" })),
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",   // ✅ forces device biometric (Face ID/Windows Hello), not USB keys
+        userVerification: "required",
+      },
+    });
+
+    req.session.webauthnChallenge = options.challenge;
+    res.json(options);
+  } catch (error) {
+    console.error("WEBAUTHN REGISTER OPTIONS ERROR:", error);
+    res.status(500).json({ error: "Failed to start registration." });
+  }
+}
+
+// async function webauthnRegisterVerify(req, res) {
+//   try {
+//     const account = req.session.account;
+//     const { credential, deviceName } = req.body;
+
+//     const verification = await verifyRegistrationResponse({
+//       response: credential,
+//       expectedChallenge: req.session.webauthnChallenge,
+//       expectedOrigin: origin,
+//       expectedRPID: rpID,
+//     });
+
+//     if (!verification.verified) {
+//       return res.status(400).json({ success: false, message: "Verification failed." });
+//     }
+
+//     const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
+
+//     await accountModel.saveWebauthnCredential(
+//       account.id,
+//       Buffer.from(credentialID).toString("base64url"),
+//       Buffer.from(credentialPublicKey).toString("base64url"),
+//       counter,
+//       deviceName || "Unnamed device"
+//     );
+
+//     res.json({ success: true, message: "Face ID / biometric login enabled successfully." });
+//   } catch (error) {
+//     console.error("WEBAUTHN REGISTER VERIFY ERROR:", error);
+//     res.status(500).json({ success: false, message: "Failed to enable biometric login." });
+//   }
+// }
+async function webauthnRegisterVerify(req, res) {
+  try {
+    const account = req.session.account;
+    const { credential, deviceName } = req.body;
+
+    const verification = await verifyRegistrationResponse({
+      response: credential,
+      expectedChallenge: req.session.webauthnChallenge,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+    });
+
+    if (!verification.verified || !verification.registrationInfo) {
+      return res.status(400).json({ success: false, message: "Verification failed." });
+    }
+
+    // ✅ New structure (works with latest @simplewebauthn/server)
+    const { credential: regCredential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
+
+    const credentialID = Buffer.from(regCredential.id).toString("base64url");
+    const publicKey = Buffer.from(regCredential.publicKey).toString("base64url");
+    const counter = regCredential.counter;
+
+    await accountModel.saveWebauthnCredential(
+      account.id,
+      credentialID,
+      publicKey,
+      counter,
+      deviceName || "Unnamed device"
+    );
+
+    // Clear the challenge
+    delete req.session.webauthnChallenge;
+
+    res.json({ success: true, message: "Face ID / biometric login enabled successfully." });
+  } catch (error) {
+    console.error("WEBAUTHN REGISTER VERIFY ERROR:", error);
+    res.status(500).json({ success: false, message: "Failed to enable biometric login." });
+  }
+}
+
+/* ---------- Logging in with Face ID / biometrics ---------- */
+async function webauthnLoginOptions(req, res) {
+  try {
+    const { email } = req.body;
+    const account = await accountModel.getAccountByEmail(email);
+
+    if (!account) {
+      return res.status(404).json({ error: "No account found with that email." });
+    }
+
+    const credentials = await accountModel.getWebauthnCredentialsByAccount(account.id);
+    if (credentials.length === 0) {
+      return res.status(404).json({ error: "No biometric login set up for this account." });
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID,
+      allowCredentials: credentials.map(c => ({ id: c.credential_id, type: "public-key" })),
+      userVerification: "required",
+    });
+
+    req.session.webauthnChallenge = options.challenge;
+    req.session.webauthnLoginEmail = email;
+    res.json(options);
+  } catch (error) {
+    console.error("WEBAUTHN LOGIN OPTIONS ERROR:", error);
+    res.status(500).json({ error: "Failed to start biometric login." });
+  }
+}
+
+// async function webauthnLoginVerify(req, res) {
+//   try {
+//     const { credential } = req.body;
+//     const email = req.session.webauthnLoginEmail;
+//     const account = await accountModel.getAccountByEmail(email);
+
+//     if (!account) {
+//       return res.status(400).json({ success: false, message: "Session expired. Please try again." });
+//     }
+
+//     const credentialId = credential.id;
+//     const stored = await accountModel.getWebauthnCredentialById(credentialId);
+
+//     if (!stored) {
+//       return res.status(400).json({ success: false, message: "Credential not recognized." });
+//     }
+
+//     const verification = await verifyAuthenticationResponse({
+//       response: credential,
+//       expectedChallenge: req.session.webauthnChallenge,
+//       expectedOrigin: origin,
+//       expectedRPID: rpID,
+//       authenticator: {
+//         credentialID: Buffer.from(stored.credential_id, "base64url"),
+//         credentialPublicKey: Buffer.from(stored.public_key, "base64url"),
+//         counter: stored.counter,
+//       },
+//     });
+
+//     if (!verification.verified) {
+//       return res.status(400).json({ success: false, message: "Biometric verification failed." });
+//     }
+
+//     await accountModel.updateWebauthnCounter(credentialId, verification.authenticationInfo.newCounter);
+
+//     if (account.status !== "active") {
+//       return res.status(403).json({ success: false, message: "Account is not active." });
+//     }
+
+//     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+//     const loginLog = await accountModel.createLoginLog(account.id, account.full_name, account.account_type, ip);
+//     const profilePhoto = await accountModel.getProfilePhotoByAccountId(account.id);
+
+//     req.session.regenerate((err) => {
+//       if (err) return res.status(500).json({ success: false, message: "Login failed." });
+
+//       req.session.account = {
+//         id: account.id,
+//         full_name: account.full_name,
+//         email: account.email,
+//         account_type: account.account_type,
+//         admin_level: account.admin_level || null,
+//         loginLogId: loginLog.id,
+//         profile_photo: profilePhoto || null,
+//       };
+
+//       let redirectUrl = "/account/dashboard/member";
+//       if (account.account_type === "admin") redirectUrl = "/account/dashboard/admin";
+//       if (account.account_type === "ict_staff") redirectUrl = "/account/dashboard/ict-staff";
+
+//       res.json({ success: true, redirect: redirectUrl });
+//     });
+//   } catch (error) {
+//     console.error("WEBAUTHN LOGIN VERIFY ERROR:", error);
+//     res.status(500).json({ success: false, message: "Biometric login failed." });
+//   }
+// }
+
+async function webauthnLoginVerify(req, res) {
+  try {
+    const { credential } = req.body;
+    const email = req.session.webauthnLoginEmail;
+    const account = await accountModel.getAccountByEmail(email);
+
+    if (!account) {
+      return res.status(400).json({ success: false, message: "Session expired. Please try again." });
+    }
+
+    const stored = await accountModel.getWebauthnCredentialById(credential.id);
+
+    if (!stored) {
+      return res.status(400).json({ success: false, message: "Credential not recognized." });
+    }
+
+    const verification = await verifyAuthenticationResponse({
+      response: credential,
+      expectedChallenge: req.session.webauthnChallenge,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+      authenticator: {
+        credentialID: Buffer.from(stored.credential_id, "base64url"),
+        credentialPublicKey: Buffer.from(stored.public_key, "base64url"),
+        counter: stored.counter,
+      },
+    });
+
+    if (!verification.verified) {
+      return res.status(400).json({ success: false, message: "Biometric verification failed." });
+    }
+
+    // Update counter
+    await accountModel.updateWebauthnCounter(
+      stored.credential_id,
+      verification.authenticationInfo.newCounter
+    );
+
+    if (account.status !== "active") {
+      return res.status(403).json({ success: false, message: "Account is not active." });
+    }
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const loginLog = await accountModel.createLoginLog(account.id, account.full_name, account.account_type, ip);
+    const profilePhoto = await accountModel.getProfilePhotoByAccountId(account.id);
+
+    req.session.regenerate((err) => {
+      if (err) return res.status(500).json({ success: false, message: "Login failed." });
+
+      req.session.account = {
+        id: account.id,
+        full_name: account.full_name,
+        email: account.email,
+        account_type: account.account_type,
+        admin_level: account.admin_level || null,
+        loginLogId: loginLog.id,
+        profile_photo: profilePhoto || null,
+      };
+
+      let redirectUrl = "/account/dashboard/member";
+      if (account.account_type === "admin") redirectUrl = "/account/dashboard/admin";
+      if (account.account_type === "ict_staff") redirectUrl = "/account/dashboard/ict-staff";
+
+      res.json({ success: true, redirect: redirectUrl });
+    });
+  } catch (error) {
+    console.error("WEBAUTHN LOGIN VERIFY ERROR:", error);
+    res.status(500).json({ success: false, message: "Biometric login failed." });
+  }
+}
+
+async function deleteWebauthnCredentialPost(req, res) {
+  try {
+    const { id } = req.params;
+    await accountModel.deleteWebauthnCredential(id);
+    req.flash("success", "Biometric login removed for this device.");
+    res.redirect("back");
+  } catch (error) {
+    console.error("DELETE WEBAUTHN CREDENTIAL ERROR:", error);
+    req.flash("error", "Failed to remove biometric login.");
+    res.redirect("back");
+  }
+}
+// end here face id
+
 
 
 /* ****************************************
@@ -2906,5 +3204,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,webauthnRegisterOptions,webauthnRegisterVerify,webauthnLoginOptions,webauthnLoginVerify,deleteWebauthnCredentialPost,accountLogout
 }
