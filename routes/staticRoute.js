@@ -147,4 +147,8 @@ router.get("/calculator/districts", utilities.handleErrors(accountController.get
 router.get("/calculator/crops", utilities.handleErrors(accountController.getCalculatorCrops));
 router.post("/calculator/calculate", utilities.handleErrors(accountController.calculateFarmCost));
 
+
+// verify identity
+router.post("/chatbot/verify-identity", utilities.handleErrors(accountController.chatbotVerifyIdentity));
+router.post("/chatbot/apply-change", utilities.handleErrors(accountController.chatbotApplyChange));
   module.exports = router

@@ -589,6 +589,36 @@ if (calcRegion) {
 }
 // end here calculator.
 
+// trust devices track
+const registrationBehaviorForm = document.querySelector('.registration-page form');
+if (registrationBehaviorForm) {
+  let mouseMoves = 0;
+  let keystrokes = 0;
+  let pasteEvents = 0;
+  let tabBlurCount = 0;
+  const formStartTime = Date.now();
+
+  document.addEventListener('mousemove', () => { mouseMoves++; }, { passive: true });
+  document.addEventListener('keydown', () => { keystrokes++; }, { passive: true });
+  document.addEventListener('paste', () => { pasteEvents++; }, { passive: true });
+  window.addEventListener('blur', () => { tabBlurCount++; }, { passive: true });
+
+  registrationBehaviorForm.addEventListener('submit', () => {
+    const behaviorData = {
+      mouseMoves,
+      keystrokes,
+      pasteEvents,
+      tabBlurCount,
+      timeOnFormMs: Date.now() - formStartTime,
+      screenSize: `${screen.width}x${screen.height}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      userAgent: navigator.userAgent,
+    };
+    document.getElementById('behaviorData').value = JSON.stringify(behaviorData);
+  });
+}
+// end here
+
   /* =====================================================
      JOB OPPORTUNITIES PAGE — LIVE SEARCH & FILTER
   ===================================================== */
@@ -754,11 +784,9 @@ if (testimonialSlider) {
   resetAutoplay();
 }
 // end here testmonials
-
-
-/* =====================================================
-   CHATBOT WIDGET — name capture, FAQ, live agent handoff
-===================================================== */
+// =====================================================
+// PUBLIC CHATBOT (with Popular Questions + Password/Email change)
+// =====================================================
 const chatbotToggle = document.getElementById('chatbotToggle');
 const chatbotWindow = document.getElementById('chatbotWindow');
 const chatbotClose = document.getElementById('chatbotClose');
@@ -766,18 +794,22 @@ const chatbotForm = document.getElementById('chatbotForm');
 const chatbotInput = document.getElementById('chatbotInput');
 const chatbotMessages = document.getElementById('chatbotMessages');
 
-if (chatbotToggle && chatbotWindow) {
+if (chatbotToggle && chatbotWindow && chatbotForm) {
+
   let chatState = 'awaiting_name';
   let visitorName = '';
   let sessionId = null;
   let pollTimer = null;
 
+  // ✅ These MUST be declared here (outside the submit handler)
+  let pendingFlow = null;
+  let pendingAccountId = null;
+  let pendingStep = null;
+
+  // Open / Close
   chatbotToggle.addEventListener('click', () => {
     const isOpen = chatbotWindow.style.display === 'flex';
     chatbotWindow.style.display = isOpen ? 'none' : 'flex';
-    if (!isOpen && chatState === 'awaiting_name' && chatbotMessages.children.length === 1) {
-      addBotMessage("Hi there! Before we get started, what's your name?");
-    }
   });
 
   if (chatbotClose) {
@@ -793,14 +825,20 @@ if (chatbotToggle && chatbotWindow) {
     chatbotMessages.appendChild(msg);
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
   }
-  function addBotMessage(text) { addMessage(text, 'bot'); }
+
+  function addBotMessage(text) {
+    addMessage(text, 'bot');
+  }
 
   function addQuickButton(label, onClick) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'chatbot-quick-btn';
     btn.textContent = label;
-    btn.addEventListener('click', () => { btn.remove(); onClick(); });
+    btn.addEventListener('click', () => {
+      btn.remove();
+      onClick();
+    });
     chatbotMessages.appendChild(btn);
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
   }
@@ -809,12 +847,12 @@ if (chatbotToggle && chatbotWindow) {
     clearInterval(pollTimer);
     let lastCount = 0;
     pollTimer = setInterval(() => {
+      if (!sessionId) return;
       fetch(`/chat/${sessionId}/messages`)
         .then(res => res.json())
         .then(messages => {
           if (messages.length > lastCount) {
-            const newOnes = messages.slice(lastCount);
-            newOnes.forEach(m => {
+            messages.slice(lastCount).forEach(m => {
               if (m.sender_type === 'ict' || m.sender_type === 'bot') {
                 addMessage(m.message, 'bot');
               }
@@ -825,6 +863,19 @@ if (chatbotToggle && chatbotWindow) {
     }, 3000);
   }
 
+  // Popular questions
+  document.querySelectorAll('.chatbot-quick-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const question = pill.getAttribute('data-question');
+      const popular = document.getElementById('chatbotPopularQuestions');
+      if (popular) popular.style.display = 'none';
+
+      chatbotInput.value = question;
+      chatbotForm.dispatchEvent(new Event('submit'));
+    });
+  });
+
+  // ========== ONLY ONE submit handler ==========
   chatbotForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const text = chatbotInput.value.trim();
@@ -833,12 +884,75 @@ if (chatbotToggle && chatbotWindow) {
     addMessage(text, 'user');
     chatbotInput.value = '';
 
+    // ----- Identity flow steps (must be first) -----
+    if (pendingStep === 'awaiting_name') {
+      pendingFlow.fullName = text;
+      pendingStep = 'awaiting_email';
+      addBotMessage('Thanks. Now please confirm the email address on your account.');
+      return;
+    }
+
+    if (pendingStep === 'awaiting_email') {
+      fetch('/chatbot/verify-identity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: pendingFlow.fullName,
+          email: text
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          addBotMessage(data.text);
+          if (data.verified) {
+            pendingAccountId = data.account_id;
+            pendingStep = 'awaiting_new_value';
+          } else {
+            pendingStep = null;
+            pendingFlow = null;
+          }
+        })
+        .catch(() => {
+          addBotMessage('Something went wrong. Please try again.');
+          pendingStep = null;
+          pendingFlow = null;
+        });
+      return;
+    }
+
+    if (pendingStep === 'awaiting_new_value') {
+      fetch('/chatbot/apply-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          account_id: pendingAccountId,
+          flow: pendingFlow.type,
+          new_value: text
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          addBotMessage(data.text);
+          if (data.success) {
+            pendingStep = null;
+            pendingFlow = null;
+            pendingAccountId = null;
+          }
+        })
+        .catch(() => addBotMessage('Something went wrong applying the change.'));
+      return;
+    }
+
+    // ----- Normal chat states -----
     if (chatState === 'awaiting_name') {
       visitorName = text;
       fetch('/chatbot/start-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-        body: JSON.stringify({ visitor_name: visitorName }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
+        },
+        body: JSON.stringify({ visitor_name: visitorName })
       })
         .then(res => res.json())
         .then(data => {
@@ -852,80 +966,90 @@ if (chatbotToggle && chatbotWindow) {
     if (chatState === 'live_chat') {
       fetch(`/chat/${sessionId}/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-        body: JSON.stringify({ message: text, sender_type: 'visitor', sender_name: visitorName }),
-      });
-      return;
-    }
-
-    // Default: ask FAQ bot
-    fetch('/chatbot/ask', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ message: text, session_id: sessionId }),
-})
-  .then(res => res.json())
-  .then(data => {
-    addBotMessage(data.text);
-
-    if (data.type === 'confirm_close') {
-      addQuickButton('Yes, close chat', () => {
-        addMessage('Yes, close chat', 'user');
-        addBotMessage('Thanks for chatting with AgroServices! Have a great day.');
-        setTimeout(() => {
-          chatbotWindow.style.display = 'none';
-          // Reset for next time the widget is opened
-          chatState = 'awaiting_name';
-          visitorName = '';
-          sessionId = null;
-          chatbotMessages.innerHTML = '';
-          addBotMessage("Hi there! Before we get started, what's your name?");
-        }, 1200);
-      });
-
-      addQuickButton('No, I have another question', () => {
-        addMessage('No, I have another question', 'user');
-        addBotMessage("Sure, go ahead and ask!");
-      });
-      return;
-    }
-
-    if (data.type === 'no_match') {
-      addQuickButton('Connect me to a live agent', () => {
-        addMessage('Connect me to a live agent', 'user');
-        fetch('/chatbot/connect-agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
+        },
+        body: JSON.stringify({
+          message: text,
+          sender_type: 'visitor',
+          sender_name: visitorName
         })
-          .then(res => res.json())
-          .then(connectData => {
-            addBotMessage(connectData.text);
-            if (connectData.connected) {
-              chatState = 'live_chat';
-              startPollingLiveChat();
-            }
-          });
       });
+      return;
     }
 
-    // ✅ After any normal FAQ answer, gently offer to close too
-    if (data.offer_close) {
-      addQuickButton('That answered my question — close chat', () => {
-        addMessage('That answered my question — close chat', 'user');
-        addBotMessage('Great! Thanks for chatting with AgroServices. Have a good day!');
-        setTimeout(() => {
-          chatbotWindow.style.display = 'none';
-          chatState = 'awaiting_name';
-          visitorName = '';
-          sessionId = null;
-          chatbotMessages.innerHTML = '';
-          addBotMessage("Hi there! Before we get started, what's your name?");
-        }, 1200);
-      });
-    }
-  })
-  .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
+    // ----- Default FAQ bot -----
+    fetch('/chatbot/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, session_id: sessionId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        addBotMessage(data.text);
+
+        // Start password / email change flow
+        if (data.type === 'start_identity_flow') {
+          pendingFlow = { type: data.flow, fullName: null };
+          pendingStep = 'awaiting_name';
+          return;
+        }
+
+        if (data.type === 'confirm_close') {
+          addQuickButton('Yes, close chat', () => {
+            addMessage('Yes, close chat', 'user');
+            addBotMessage('Thanks for chatting with AgroServices! Have a great day.');
+            setTimeout(() => {
+              chatbotWindow.style.display = 'none';
+              chatState = 'awaiting_name';
+              visitorName = '';
+              sessionId = null;
+              pendingStep = null;
+              pendingFlow = null;
+            }, 1200);
+          });
+
+          addQuickButton('No, I have another question', () => {
+            addMessage('No, I have another question', 'user');
+            addBotMessage('Sure, go ahead and ask!');
+          });
+          return;
+        }
+
+        if (data.type === 'no_match') {
+          addQuickButton('Connect me to a live agent', () => {
+            addMessage('Connect me to a live agent', 'user');
+            fetch('/chatbot/connect-agent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: sessionId })
+            })
+              .then(res => res.json())
+              .then(connectData => {
+                addBotMessage(connectData.text);
+                if (connectData.connected) {
+                  chatState = 'live_chat';
+                  startPollingLiveChat();
+                }
+              });
+          });
+        }
+
+        if (data.offer_close) {
+          addQuickButton('That answered my question — close chat', () => {
+            addMessage('That answered my question — close chat', 'user');
+            addBotMessage('Great! Thanks for chatting with AgroServices. Have a good day!');
+            setTimeout(() => {
+              chatbotWindow.style.display = 'none';
+              chatState = 'awaiting_name';
+              visitorName = '';
+              sessionId = null;
+            }, 1200);
+          });
+        }
+      })
+      .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
   });
 }
 // end here
@@ -2400,97 +2524,241 @@ if (testimonialUploadArea && testimonialUploadInput) {
 // end here.
 
 // chatbots
-const liveChatsLink = document.getElementById('liveChatsLink');
-const liveChatsPanel = document.getElementById('liveChatsPanel');
-const cancelLiveChats = document.getElementById('cancelLiveChats');
-const waitingChatsList = document.getElementById('waitingChatsList');
-const activeChatThread = document.getElementById('activeChatThread');
-const activeChatMessages = document.getElementById('activeChatMessages');
-const ictChatReplyForm = document.getElementById('ictChatReplyForm');
-const ictChatReplyInput = document.getElementById('ictChatReplyInput');
-let activeSessionId = null;
-let ictPollTimer = null;
+// const liveChatsLink = document.getElementById('liveChatsLink');
+// const liveChatsPanel = document.getElementById('liveChatsPanel');
+// const cancelLiveChats = document.getElementById('cancelLiveChats');
+// const waitingChatsList = document.getElementById('waitingChatsList');
+// const activeChatThread = document.getElementById('activeChatThread');
+// const activeChatMessages = document.getElementById('activeChatMessages');
+// const ictChatReplyForm = document.getElementById('ictChatReplyForm');
+// const ictChatReplyInput = document.getElementById('ictChatReplyInput');
+// let activeSessionId = null;
+// let ictPollTimer = null;
 
-if (liveChatsLink && liveChatsPanel && dbMainContent) {
-  liveChatsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    liveChatsPanel.style.display = 'block';
-    loadWaitingChats();
-  });
-}
-if (cancelLiveChats) cancelLiveChats.addEventListener('click', (e) => {
-  e.preventDefault();
-  liveChatsPanel.style.display = 'none';
-  dbMainContent.style.display = 'block';
-  clearInterval(ictPollTimer);
-});
+// if (liveChatsLink && liveChatsPanel && dbMainContent) {
+//   liveChatsLink.addEventListener('click', (e) => {
+//     e.preventDefault();
+//     dbMainContent.style.display = 'none';
+//     liveChatsPanel.style.display = 'block';
+//     loadWaitingChats();
+//   });
+// }
+// if (cancelLiveChats) cancelLiveChats.addEventListener('click', (e) => {
+//   e.preventDefault();
+//   liveChatsPanel.style.display = 'none';
+//   dbMainContent.style.display = 'block';
+//   clearInterval(ictPollTimer);
+// });
 
-function loadWaitingChats() {
-  fetch('/account/chat/waiting')
-    .then(res => res.json())
-    .then(sessions => {
-      if (sessions.length === 0) {
-        waitingChatsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No visitors waiting right now.</p>';
-        return;
-      }
-      waitingChatsList.innerHTML = sessions.map(s => `
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f5f5f5;">
-          <span>${s.visitor_name}</span>
-          <button type="button" class="btn-outline-sm accept-chat-btn" data-session-id="${s.id}">Accept</button>
-        </div>
-      `).join('');
+// function loadWaitingChats() {
+//   fetch('/account/chat/waiting')
+//     .then(res => res.json())
+//     .then(sessions => {
+//       if (sessions.length === 0) {
+//         waitingChatsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No visitors waiting right now.</p>';
+//         return;
+//       }
+//       waitingChatsList.innerHTML = sessions.map(s => `
+//         <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f5f5f5;">
+//           <span>${s.visitor_name}</span>
+//           <button type="button" class="btn-outline-sm accept-chat-btn" data-session-id="${s.id}">Accept</button>
+//         </div>
+//       `).join('');
 
-      document.querySelectorAll('.accept-chat-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const sid = btn.dataset.sessionId;
-          fetch(`/account/chat/${sid}/accept`, { method: 'POST',
-            headers: { 'x-csrf-token': csrfToken },
-           })
-            .then(() => openChatThread(sid));
-        });
+//       document.querySelectorAll('.accept-chat-btn').forEach(btn => {
+//         btn.addEventListener('click', () => {
+//           const sid = btn.dataset.sessionId;
+//           fetch(`/account/chat/${sid}/accept`, { method: 'POST',
+//             headers: { 'x-csrf-token': csrfToken },
+//            })
+//             .then(() => openChatThread(sid));
+//         });
+//       });
+//     });
+// }
+
+// function openChatThread(sid) {
+//   activeSessionId = sid;
+//   activeChatThread.style.display = 'block';
+//   pollActiveChat();
+//   clearInterval(ictPollTimer);
+//   ictPollTimer = setInterval(pollActiveChat, 3000);
+// }
+
+// function pollActiveChat() {
+//   fetch(`/chat/${activeSessionId}/messages`)
+//     .then(res => res.json())
+//     .then(messages => {
+//       activeChatMessages.innerHTML = messages.map(m => `
+//         <div style="align-self:${m.sender_type === 'ict' ? 'flex-end' : 'flex-start'}; background:${m.sender_type === 'ict' ? 'var(--primary-green)' : '#f1f8e9'}; color:${m.sender_type === 'ict' ? '#fff' : '#000'}; padding:8px 12px; border-radius:12px; max-width:75%; font-size:0.85rem;">
+//           ${m.message}
+//         </div>
+//       `).join('');
+//       activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+//     });
+// }
+
+// if (ictChatReplyForm) {
+//   ictChatReplyForm.addEventListener('submit', (e) => {
+//     e.preventDefault();
+//     const text = ictChatReplyInput.value.trim();
+//     if (!text || !activeSessionId) return;
+//     fetch(`/chat/${activeSessionId}/send`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+//       body: JSON.stringify({ message: text, sender_type: 'ict', sender_name: '<%= account.full_name %>' }),
+//     }).then(() => {
+//       ictChatReplyInput.value = '';
+//       pollActiveChat();
+//     });
+//   });
+// }
+// end here.
+  // =====================================================
+  // PUBLIC CHATBOT (Visitor side) - Popular questions + Password/Email change
+  // =====================================================
+    // =====================================================
+  // PUBLIC CHATBOT - Toggle + Popular Questions + Flow
+  // =====================================================
+  const chatbotToggle = document.getElementById('chatbotToggle');
+  const chatbotWindow = document.getElementById('chatbotWindow');
+  const chatbotClose = document.getElementById('chatbotClose');
+  const chatbotForm = document.getElementById('chatbotForm');
+  const chatbotInput = document.getElementById('chatbotInput');
+  const chatbotMessages = document.getElementById('chatbotMessages');
+
+  // 1. Open / Close the chatbot window
+  if (chatbotToggle && chatbotWindow) {
+    chatbotToggle.addEventListener('click', () => {
+      chatbotWindow.style.display = 'flex'; // or 'block'
+    });
+  }
+
+  if (chatbotClose && chatbotWindow) {
+    chatbotClose.addEventListener('click', () => {
+      chatbotWindow.style.display = 'none';
+    });
+  }
+
+  // 2. Chatbot logic (only if form exists)
+  if (chatbotForm && chatbotInput && chatbotMessages) {
+    let sessionId = null;
+    let pendingFlow = null;
+    let pendingAccountId = null;
+    let pendingStep = null;
+
+    function addMessage(text, type) {
+      const div = document.createElement('div');
+      div.className = `chatbot-msg chatbot-msg-${type}`;
+      div.textContent = text;
+      chatbotMessages.appendChild(div);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+      addMessage(text, 'bot');
+    }
+
+    // 3. Popular questions pills
+    document.querySelectorAll('.chatbot-quick-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const question = pill.getAttribute('data-question');
+        const popular = document.getElementById('chatbotPopularQuestions');
+        if (popular) popular.style.display = 'none';
+
+        chatbotInput.value = question;
+        chatbotForm.dispatchEvent(new Event('submit'));
       });
     });
-}
 
-function openChatThread(sid) {
-  activeSessionId = sid;
-  activeChatThread.style.display = 'block';
-  pollActiveChat();
-  clearInterval(ictPollTimer);
-  ictPollTimer = setInterval(pollActiveChat, 3000);
-}
+    // 4. Form submit + multi-step flow
+    chatbotForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = chatbotInput.value.trim();
+      if (!text) return;
 
-function pollActiveChat() {
-  fetch(`/chat/${activeSessionId}/messages`)
-    .then(res => res.json())
-    .then(messages => {
-      activeChatMessages.innerHTML = messages.map(m => `
-        <div style="align-self:${m.sender_type === 'ict' ? 'flex-end' : 'flex-start'}; background:${m.sender_type === 'ict' ? 'var(--primary-green)' : '#f1f8e9'}; color:${m.sender_type === 'ict' ? '#fff' : '#000'}; padding:8px 12px; border-radius:12px; max-width:75%; font-size:0.85rem;">
-          ${m.message}
-        </div>
-      `).join('');
-      activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+      addMessage(text, 'user');
+      chatbotInput.value = '';
+
+      // Step: waiting for full name
+      if (pendingStep === 'awaiting_name') {
+        pendingFlow.fullName = text;
+        pendingStep = 'awaiting_email';
+        addBotMessage('Thanks. Now please confirm the email address on your account.');
+        return;
+      }
+
+      // Step: waiting for email
+      if (pendingStep === 'awaiting_email') {
+        fetch('/chatbot/verify-identity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: pendingFlow.fullName,
+            email: text
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            addBotMessage(data.text);
+            if (data.verified) {
+              pendingAccountId = data.account_id;
+              pendingStep = 'awaiting_new_value';
+            } else {
+              pendingStep = null;
+              pendingFlow = null;
+            }
+          })
+          .catch(() => {
+            addBotMessage('Something went wrong. Please try again.');
+            pendingStep = null;
+            pendingFlow = null;
+          });
+        return;
+      }
+
+      // Step: waiting for new password / email
+      if (pendingStep === 'awaiting_new_value') {
+        fetch('/chatbot/apply-change', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_id: pendingAccountId,
+            flow: pendingFlow.type,
+            new_value: text
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            addBotMessage(data.text);
+            if (data.success) {
+              pendingStep = null;
+              pendingFlow = null;
+              pendingAccountId = null;
+            }
+          })
+          .catch(() => addBotMessage('Something went wrong applying the change.'));
+        return;
+      }
+
+      // Normal question
+      fetch('/chatbot/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: sessionId })
+      })
+        .then(res => res.json())
+        .then(data => {
+          addBotMessage(data.text);
+
+          if (data.type === 'start_identity_flow') {
+            pendingFlow = { type: data.flow, fullName: null };
+            pendingStep = 'awaiting_name';
+          }
+        })
+        .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
     });
-}
-
-if (ictChatReplyForm) {
-  ictChatReplyForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = ictChatReplyInput.value.trim();
-    if (!text || !activeSessionId) return;
-    fetch(`/chat/${activeSessionId}/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-      body: JSON.stringify({ message: text, sender_type: 'ict', sender_name: '<%= account.full_name %>' }),
-    }).then(() => {
-      ictChatReplyInput.value = '';
-      pollActiveChat();
-    });
-  });
-}
-// end here.
-
+  }
 // delivery FAQ
           const siteFaqsLink = document.getElementById('siteFaqsLink');
           const siteFaqsPanel = document.getElementById('siteFaqsPanel');
@@ -2837,6 +3105,32 @@ if (enableFaceIdBtn) {
   });
 }
 // END HERE
+
+// trust review for Admin dashboard
+/* ---------- Trust & Bot Review panel ---------- */
+const trustReviewLink = document.getElementById('trustReviewLink');
+const trustReviewPanel = document.getElementById('trustReviewPanel');
+const cancelTrustReview = document.getElementById('cancelTrustReview');
+
+if (trustReviewLink && trustReviewPanel && dbMainContent) {
+  trustReviewLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    dbMainContent.style.display = 'none';
+    trustReviewPanel.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (cancelTrustReview && trustReviewPanel && dbMainContent) {
+  cancelTrustReview.addEventListener('click', (e) => {
+    e.preventDefault();
+    trustReviewPanel.style.display = 'none';
+    dbMainContent.style.display = 'block';
+  });
+}
+// end here
+
+
 
 
     /* ---------- Approve / Reject button feedback ---------- */

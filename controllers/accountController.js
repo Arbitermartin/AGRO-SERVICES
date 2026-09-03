@@ -67,6 +67,7 @@ async function buildLogin(req,res) {
 /* ****************************************
  * Process registration
  * *************************************** */
+
 async function registerAccount(req, res) {
   try {
     const {
@@ -80,39 +81,100 @@ async function registerAccount(req, res) {
       bank_name,
       bank_account_number,
       referrer_id,
-      latitude, 
+      latitude,
       longitude,
       referred_by_account_id,
       website,
-      form_rendered_at,  
+      form_rendered_at,
+      behavior_data,
     } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newAccount = await accountModel.registerAccount(fullName, email, Phone_number, hashedPassword,referrer_id,latitude, longitude );
-        // DELIVERY latitude and longitude
-    if (latitude && longitude) {
-      await accountModel.updateAccountLocation(newAccount.id, parseFloat(latitude), parseFloat(longitude));
-         } 
+    // ============================================
+    // 1. ANTI-BOT CHECKS (must be first)
+    // ============================================
 
-      // ✅ Award referral tier if this registration completes a referral
+    // Honeypot
+    if (website && website.trim() !== "") {
+      console.log("Honeypot triggered on registration — bot blocked");
+      return res.redirect("/account/register");
+    }
+
+    // Timing check
+    const elapsedMs = Date.now() - parseInt(form_rendered_at, 10);
+    if (isNaN(elapsedMs) || elapsedMs < 2000) {
+      console.log("Registration submitted too quickly — likely bot");
+      return res.redirect("/account/register");
+    }
+
+    // ============================================
+    // 2. BEHAVIOR + DEVICE TRUST SCORE
+    // ============================================
+    let behaviorMetrics = {};
+    try {
+      behaviorMetrics = JSON.parse(behavior_data || "{}");
+    } catch (e) {
+      behaviorMetrics = {};
+    }
+
+    const behaviorScore = accountModel.calculateBehaviorScore(behaviorMetrics);
+
+    const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const deviceHash = accountModel.hashDevice(
+      behaviorMetrics.userAgent || req.headers["user-agent"] || "",
+      behaviorMetrics.screenSize || "",
+      behaviorMetrics.timezone || ""
+    );
+
+    const deviceTrust = await accountModel.getOrCreateDeviceTrust(deviceHash, ipAddress);
+    const combinedScore = Math.round(behaviorScore * 0.6 + deviceTrust.trust_score * 0.4);
+
+    // Hard block only very low scores
+    if (combinedScore < 20) {
+      await accountModel.adjustDeviceTrust(deviceHash, -15, true);
+      req.flash("error", "We couldn't verify this submission. Please try again or contact support.");
+      return res.redirect("/account/register");
+    }
+
+    // ============================================
+    // 3. CREATE ACCOUNT (correct argument order)
+    // ============================================
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newAccount = await accountModel.registerAccount(
+      fullName,
+      email,
+      Phone_number,
+      hashedPassword,
+      referrer_id || null,
+      referred_by_account_id ? parseInt(referred_by_account_id, 10) : null
+    );
+
+    // Save location
+    if (latitude && longitude) {
+      await accountModel.updateAccountLocation(
+        newAccount.id,
+        parseFloat(latitude),
+        parseFloat(longitude)
+      );
+    }
+
+    // Save trust score on the account
+    await db("accounts").where({ id: newAccount.id }).update({
+      registration_trust_score: combinedScore,
+      behavior_metrics: JSON.stringify(behaviorMetrics),
+    });
+
+    // Adjust device trust
+    await accountModel.adjustDeviceTrust(deviceHash, combinedScore >= 60 ? 5 : 0, false);
+
+    // Award referral tier
     if (referred_by_account_id) {
       await accountModel.awardReferralTierIfEligible(referred_by_account_id);
     }
 
-    // Honeypot check
-    if(website && website.trim() !== ""){
-      console.log("Honeypot trigger on registration-bot blocked");
-      return res.redirect("/account/register")
-    }
-    // end here.
-    
-    // Timing check
-    const elapsedMs= date.now() - parseInt(form_rendered_at,10);
-    if (isNaN(elapsedMs) || elapsedMs <2000){
-      console.log("Registration submitted too quickly- likely bot");
-       return res.redirect("/account/register");
-    }
-
+    // ============================================
+    // 4. PAYMENT (your existing logic)
+    // ============================================
     if (req.file) {
       const planPrices = { Basic: 10000, Standard: 25000, Premium: 50000 };
       const amount = planPrices[membership_plan] || 25000;
@@ -314,6 +376,9 @@ const membersByReferrer = await accountModel.getMembersByReferrer();
 // delivery member view map
 const memberLocations = await accountModel.getAllMemberLocations();
 
+// Delivery trust devices
+ const flaggedRegistrations = await accountModel.getAllFlaggedRegistrations();
+
 
   res.render("dashboards/index", {
     title: "Admin Dashboard",
@@ -359,6 +424,7 @@ const memberLocations = await accountModel.getAllMemberLocations();
     allReferrers,
     membersByReferrer,
     memberLocations,
+    flaggedRegistrations,
       // Add these two lines 👇
     showNav: false,
     showFooter: false,
@@ -2403,39 +2469,6 @@ async function buildRegisterGate(req, res) {
  * Delivery chatbot
  * 
  */
-// async function chatbotAsk(req, res) {
-//   try {
-//     const { message } = req.body;
-
-//     if (!message || message.trim().length === 0) {
-//       return res.json({ type: "bot", text: "Please type a question and I'll try to help." });
-//     }
-
-//     const match = await accountModel.findFaqMatch(message);
-
-//     if (match) {
-//       return res.json({ type: "bot", text: match.answer });
-//     }
-
-//     // No FAQ match — check for a live agent
-//     const agent = await accountModel.getAvailableIctStaff();
-
-//     if (agent) {
-//       return res.json({
-//         type: "agent_available",
-//         text: `I'm not sure about that one — but ${agent.name || agent.full_name} from our ICT team is online. Would you like me to connect you?`,
-//       });
-//     }
-
-//     return res.json({
-//       type: "no_agent",
-//       text: "I'm not sure about that, and no ICT staff are online right now. Would you like to leave a message and we'll get back to you?",
-//     });
-//   } catch (error) {
-//     console.error("CHATBOT ASK ERROR:", error);
-//     res.status(500).json({ type: "bot", text: "Something went wrong. Please try again." });
-//   }
-// }
 
 async function chatbotCreateTicket(req, res) {
   try {
@@ -2487,8 +2520,32 @@ async function chatbotAsk(req, res) {
         text: "Glad I could help! Would you like to close this chat?",
       });
     }
+    //  start here 
+
+    const lower = message.toLowerCase();
+
+    // ✅ Intent: change password or email
+    if (/change.*password|reset.*password|forgot.*password/.test(lower)) {
+      return res.json({
+        type: "start_identity_flow",
+        flow: "password",
+        text: "I can help you reset your password. First, please tell me your full name as registered in our system.",
+      });
+    }
+
+    if (/change.*email|update.*email|forgot.*email/.test(lower)) {
+      return res.json({
+        type: "start_identity_flow",
+        flow: "email",
+        text: "I can help you update your email. First, please tell me your full name as registered in our system.",
+      });
+    }
+
 
     const match = await accountModel.findFaqMatch(message);
+
+     
+
 
     if (match) {
       if (session_id) await accountModel.addChatMessage(session_id, "bot", "Assistant", match.answer);
@@ -2504,6 +2561,64 @@ async function chatbotAsk(req, res) {
     res.status(500).json({ type: "bot", text: "Something went wrong. Please try again." });
   }
 }
+
+// here is chatbot verify
+async function chatbotVerifyIdentity(req, res) {
+  try {
+    const { full_name, email } = req.body;
+    const account = await accountModel.verifyIdentityForChange(full_name, email);
+
+    if (!account) {
+      return res.json({
+        verified: false,
+        text: "I couldn't find an account matching that name and email. Please check the details and try again, or ask me to connect you with a live agent.",
+      });
+    }
+
+    res.json({
+      verified: true,
+      account_id: account.id,
+      text: `Thanks, ${account.full_name}! I found your account. What would you like your new value to be?`,
+    });
+  } catch (error) {
+    console.error("CHATBOT VERIFY IDENTITY ERROR:", error);
+    res.status(500).json({ verified: false, text: "Something went wrong verifying your identity." });
+  }
+}
+
+async function chatbotApplyChange(req, res) {
+  try {
+    const { account_id, flow, new_value } = req.body;
+
+    if (flow === "password") {
+      if (!new_value || new_value.length < 8) {
+        return res.json({ success: false, text: "Your new password must be at least 8 characters. Please try again." });
+      }
+      const hashed = await bcrypt.hash(new_value, 10);
+      await accountModel.changePasswordViaChatbot(account_id, hashed);
+      return res.json({ success: true, text: "Your password has been changed successfully! You can now log in with your new password." });
+    }
+
+    if (flow === "email") {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(new_value)) {
+        return res.json({ success: false, text: "That doesn't look like a valid email address. Please try again." });
+      }
+      const existing = await accountModel.getAccountByEmail(new_value);
+      if (existing) {
+        return res.json({ success: false, text: "That email is already in use by another account. Please try a different one." });
+      }
+      await accountModel.changeEmailViaChatbot(account_id, new_value);
+      return res.json({ success: true, text: "Your email has been updated successfully!" });
+    }
+
+    res.json({ success: false, text: "Something went wrong processing your request." });
+  } catch (error) {
+    console.error("CHATBOT APPLY CHANGE ERROR:", error);
+    res.status(500).json({ success: false, text: "Something went wrong applying your change." });
+  }
+}
+// end here
 
 async function chatbotConnectAgent(req, res) {
   try {
@@ -3204,5 +3319,5 @@ function accountLogout(req, res) {
 
 
 module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,webauthnRegisterOptions,webauthnRegisterVerify,webauthnLoginOptions,webauthnLoginVerify,deleteWebauthnCredentialPost,accountLogout
+  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,webauthnRegisterOptions,webauthnRegisterVerify,webauthnLoginOptions,webauthnLoginVerify,deleteWebauthnCredentialPost, chatbotVerifyIdentity,chatbotApplyChange,accountLogout
 }

@@ -44,12 +44,25 @@
       </div>
       <button type="button" id="chatbotClose" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
     </div>
-
     <div class="chatbot-messages" id="chatbotMessages">
       <div class="chatbot-msg chatbot-msg-bot">
         Hi! I'm the AgroServices assistant. Ask me about registration, jobs, training, payments, or anything else.
+
       </div>
+      <div class="chatbot-popular-questions" id="chatbotPopularQuestions">
+         <p class="chatbot-popular-label">Popular questions</p>
+         <div class="chatbot-quick-grid">
+           <button type="button" class="chatbot-quick-pill" data-question="I forgot my email and password">Forgot email &amp; password?</button>
+           <button type="button" class="chatbot-quick-pill" data-question="I want to change my email address">Change my email address</button>
+           <button type="button" class="chatbot-quick-pill" data-question="I want to reset my password">Reset my password</button>
+           <button type="button" class="chatbot-quick-pill" data-question="How do I register?">How do I register?</button>
+         </div>
+
+      </div>
+
     </div>
+
+   
 
     <form class="chatbot-input-row" id="chatbotForm">
       <input type="text" id="chatbotInput" placeholder="Type your question..." autocomplete="off" required>

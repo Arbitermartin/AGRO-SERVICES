@@ -1,0 +1,22 @@
+<div id="trustReviewPanel" class="db-card" style="display:none;">
+  <div class="step-header" style="text-align:center; margin-bottom:24px;">
+    <h2>Trust &amp; Bot Review</h2>
+    <p>Registrations flagged with a low trust score for manual review</p>
+  </div>
+
+  <table class="db-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Trust Score</th><th>Registered</th></tr></thead>
+    <tbody>
+      <% flaggedRegistrations.forEach(a => { %>
+        <tr>
+          <td><%= a.full_name %></td>
+          <td><%= a.email %></td>
+          <td><span class="db-badge-status db-badge-priority db-badge-high"><%= a.registration_trust_score %>%</span></td>
+          <td><%= new Date(a.created_at).toLocaleDateString('en-GB') %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <div class="auth-switch" style="margin-top:20px;text-align:center;"><a href="#" id="cancelTrustReview">Back to Dashboard</a></div>
+</div>

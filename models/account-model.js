@@ -1,4 +1,5 @@
 const db = require("../database/config/knex");
+const crypto = require("crypto");
 
 // ====================== SECURITY HELPER ======================
 function sanitizeInput(input) {
@@ -1649,6 +1650,86 @@ async function deleteWebauthnCredential(id) {
 }
 // END HERE
 
+// trust devices and user start here
+function hashDevice(userAgent, screenSize, timezone) {
+  return crypto.createHash("sha256").update(`${userAgent}|${screenSize}|${timezone}`).digest("hex");
+}
+
+async function getOrCreateDeviceTrust(deviceHash, ipAddress) {
+  let record = await db("device_trust_scores").where({ device_hash: deviceHash }).first();
+
+  if (!record) {
+    const inserted = await db("device_trust_scores").insert({
+      device_hash: deviceHash, ip_address: ipAddress, trust_score: 50,
+    }).returning("*");
+    record = inserted[0];
+  } else {
+    await db("device_trust_scores").where({ device_hash: deviceHash }).update({ last_seen_at: db.fn.now() });
+  }
+
+  return record;
+}
+
+async function adjustDeviceTrust(deviceHash, delta, flagged = false) {
+  const record = await db("device_trust_scores").where({ device_hash: deviceHash }).first();
+  if (!record) return;
+
+  const newScore = Math.max(0, Math.min(100, record.trust_score + delta));
+  const updateData = { trust_score: newScore };
+
+  if (flagged) updateData.flagged_attempts = record.flagged_attempts + 1;
+  else updateData.successful_registrations = record.successful_registrations + 1;
+
+  await db("device_trust_scores").where({ device_hash: deviceHash }).update(updateData);
+  return newScore;
+}
+
+function calculateBehaviorScore(behaviorMetrics) {
+  let score = 50;
+  const { mouseMoves, keystrokes, timeOnFormMs, pasteEvents, tabBlurCount } = behaviorMetrics;
+
+  if (mouseMoves > 10) score += 15;
+  else if (mouseMoves === 0) score -= 25;
+
+  if (keystrokes > 15) score += 15;
+  else if (keystrokes === 0) score -= 25;
+
+  if (timeOnFormMs > 8000) score += 15;
+  else if (timeOnFormMs < 2000) score -= 30;
+
+  if (pasteEvents > 3) score -= 10;
+
+  if (tabBlurCount > 0) score += 5;
+
+  return Math.max(0, Math.min(100, score));
+}
+
+async function getAllFlaggedRegistrations() {
+  return await db("accounts")
+    .where("registration_trust_score", "<", 40)
+    .orderBy("created_at", "desc");
+}
+// end here.
+
+// chatbot auto change password and imge
+
+async function verifyIdentityForChange(fullName, email) {
+  const account = await db("accounts")
+    .whereRaw("LOWER(full_name) = ?", [fullName.trim().toLowerCase()])
+    .andWhere("email", email.trim().toLowerCase())
+    .first();
+  return account || null;
+}
+
+async function changeEmailViaChatbot(accountId, newEmail) {
+  return await db("accounts").where({ id: accountId }).update({ email: newEmail });
+}
+
+async function changePasswordViaChatbot(accountId, hashedPassword) {
+  return await db("accounts").where({ id: accountId }).update({ password: hashedPassword });
+}
+// end here
+
 
 module.exports = {
   registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
@@ -1657,6 +1738,6 @@ module.exports = {
   getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
   createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
   countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer,updateAccountLocation,getAllMemberLocations,calculateProfileCompletion,getDistinctRegionsForCalculator,getDistrictsByRegion,getCropsByRegionDistrict,getCropBenchmark,saveCostCalculation,detectClosingIntent,deleteContactMessage,convertMessageToTicket,getDirectReferrals,countTotalReferrals,getReferralTree,getNextTier, calculateReferralHealth,awardReferralTierIfEligible,getReferralRewards,saveWebauthnCredential,getWebauthnCredentialsByAccount,getWebauthnCredentialById,updateWebauthnCounter,deleteWebauthnCredential
+  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer,updateAccountLocation,getAllMemberLocations,calculateProfileCompletion,getDistinctRegionsForCalculator,getDistrictsByRegion,getCropsByRegionDistrict,getCropBenchmark,saveCostCalculation,detectClosingIntent,deleteContactMessage,convertMessageToTicket,getDirectReferrals,countTotalReferrals,getReferralTree,getNextTier, calculateReferralHealth,awardReferralTierIfEligible,getReferralRewards,saveWebauthnCredential,getWebauthnCredentialsByAccount,getWebauthnCredentialById,updateWebauthnCounter,deleteWebauthnCredential,hashDevice,getOrCreateDeviceTrust,adjustDeviceTrust,calculateBehaviorScore,getAllFlaggedRegistrations,verifyIdentityForChange,changeEmailViaChatbot,changePasswordViaChatbot
 
 };

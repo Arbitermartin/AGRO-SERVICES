@@ -90,15 +90,20 @@ validate.registrationRules = () => [
  * ***************************** */
 validate.checkRegData = async (req, res, next) => {
   const errors = validationResult(req);
+  const referrers = await accountModel.getAllReferrers(); // or whatever your function is called
+const referredByAccountId = req.body.referred_by_account_id || req.query.ref || null;
   if (!errors.isEmpty()) {
     let nav = await utilities.getNav();
     return res.render("account/register", {
       title: "Registration",
       nav,
+      referrers,
+      referredByAccountId,
       errors: errors.array(),
       fullName: req.body.fullName,
       email: req.body.email,
       Phone_number: req.body.Phone_number,
+      
     });
   };
   next();
