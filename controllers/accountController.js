@@ -28,10 +28,10 @@ async function buildRegister(req, res) {
     req.flash("error", "Registration is not currently open.");
     return res.redirect("/account/register");
   }
-  
 
-  const today = new Date(); today.setHours(0,0,0,0);
-  const closeDate = new Date(intake.close_date); closeDate.setHours(0,0,0,0);
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const closeDate = new Date(intake.close_date); closeDate.setHours(0, 0, 0, 0);
 
   if (today > closeDate) {
     req.flash("error", "Registration for this intake has closed.");
@@ -39,7 +39,7 @@ async function buildRegister(req, res) {
   }
 
   const referrers = await accountModel.getAllReferrers();
-  const referredByAccountId = req.query.ref || null; 
+  const referredByAccountId = req.query.ref || null;
 
   let nav = await utilities.getNav();
   res.render("account/register", {
@@ -53,9 +53,9 @@ async function buildRegister(req, res) {
 /***************************
  * Deliver build login
  *******************/
-async function buildLogin(req,res) {
+async function buildLogin(req, res) {
   let nav = await utilities.getNav();
-   res.render("account/login", {
+  res.render("account/login", {
     title: "Login",
     nav,
     errors: null,
@@ -228,32 +228,32 @@ async function accountLogin(req, res) {
     // }
 
     if (!passwordMatch) {
-    const attempts = (account.failed_login_attempts || 0) + 1;
-     const updateData = { failed_login_attempts: attempts };
-       if (attempts >= 5) {
+      const attempts = (account.failed_login_attempts || 0) + 1;
+      const updateData = { failed_login_attempts: attempts };
+      if (attempts >= 5) {
         updateData.locked_until = new Date(Date.now() + 15 * 60 * 1000);
-       }
-        await accountModel.updateFailedAttempts(account.id, updateData);
-        req.flash("error", "Invalid email or password.");
-        return res.redirect("/account/login");
-       }
+      }
+      await accountModel.updateFailedAttempts(account.id, updateData);
+      req.flash("error", "Invalid email or password.");
+      return res.redirect("/account/login");
+    }
 
-          if (account.locked_until && new Date(account.locked_until) > new Date()) {
-         req.flash("error", "Account temporarily locked. Try again in a few minutes.");
-         return res.redirect("/account/login");
-         }
+    if (account.locked_until && new Date(account.locked_until) > new Date()) {
+      req.flash("error", "Account temporarily locked. Try again in a few minutes.");
+      return res.redirect("/account/login");
+    }
 
-         // on success, reset:
-        await accountModel.updateFailedAttempts(account.id, { failed_login_attempts: 0, locked_until: null });
+    // on success, reset:
+    await accountModel.updateFailedAttempts(account.id, { failed_login_attempts: 0, locked_until: null });
 
     if (account.status !== "active") {
       req.flash("error", "Your account is not active yet. Please contact support.");
       return res.redirect("/account/login");
     }
-     // ✅ Create a login log entry
-     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-     const loginLog = await accountModel.createLoginLog(account.id, account.full_name, account.account_type, ip);
- 
+    // ✅ Create a login log entry
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const loginLog = await accountModel.createLoginLog(account.id, account.full_name, account.account_type, ip);
+
 
     // Store minimal account info in session (never store the password hash)
     req.session.account = {
@@ -261,7 +261,7 @@ async function accountLogin(req, res) {
       full_name: account.full_name,
       email: account.email,
       account_type: account.account_type,
-       admin_level: account.admin_level || null,
+      admin_level: account.admin_level || null,
       loginLogId: loginLog.id,
       profile_photo: profilePhoto || null,
     };
@@ -300,7 +300,7 @@ function getInitials(fullName) {
  * *************************************** */
 async function buildAdminDashboard(req, res) {
   let nav = await utilities.getNav();
-   const account = req.session.account;
+  const account = req.session.account;
 
   const freshAccount = await accountModel.getAccountById(account.id);
   account.is_online = freshAccount.is_online;
@@ -322,14 +322,14 @@ async function buildAdminDashboard(req, res) {
   const allNews = await accountModel.getAllNews();
   const allEvents = await accountModel.getAllEventsAdmin();
   const allTrainingRegistrations = await accountModel.getAllTrainingRegistrations();
-   const allEventRegistrations = await accountModel.getAllEventRegistrations();
+  const allEventRegistrations = await accountModel.getAllEventRegistrations();
   const allAccounts = await accountModel.getAllAccounts();
   const totalMembers = await accountModel.countMembersOnly();
   const newMembersThisMonth = await accountModel.countNewMembersThisMonth();
   const totalAdmins = await accountModel.countAdminsOnly();
   const allTeamMembers = await accountModel.getAllTeamMembers();
 
-    // ✅ Payments
+  // ✅ Payments
   const pendingPayments = await accountModel.getAllPendingPayments();
   const recentPendingPayments = await accountModel.getRecentPendingPayments(3);
   const pendingPaymentCount = await accountModel.countPendingPayments();
@@ -346,9 +346,9 @@ async function buildAdminDashboard(req, res) {
   const assignablePeople = [...(await accountModel.getAllAdminAccounts()), ...(await accountModel.getAllIctStaffOnly())];
   const allTasks = await accountModel.getAllTasksForSuperAdmin();
   const taskAssigneesMap = {};
-              for (const t of allTasks) {
-      taskAssigneesMap[t.id] = await accountModel.getAssigneesForTask(t.id);
-    }
+  for (const t of allTasks) {
+    taskAssigneesMap[t.id] = await accountModel.getAssigneesForTask(t.id);
+  }
   const myTasks = await accountModel.getTasksForAccount(account.id);
 
   //delivery testmonials
@@ -359,25 +359,25 @@ async function buildAdminDashboard(req, res) {
 
   // get upcoming event
   const upcomingEventsForDashboard = await accountModel.getUpcomingEventsWithRegistrationCount();
-  const recentActivity = await accountModel.getRecentActivityForDashboard(4); 
+  const recentActivity = await accountModel.getRecentActivityForDashboard(4);
 
   // member status
   const memberStats = await accountModel.getMemberRegistrationStats();
-  
+
   // dashboard view for member in graph
   const monthlyRegistrations = await accountModel.getMonthlyMemberRegistrations();
   const canDownloadChart = monthlyRegistrations.length >= 3;
 
 
   // member referres
-const allReferrers = await accountModel.getAllReferrers();
-const membersByReferrer = await accountModel.getMembersByReferrer();
+  const allReferrers = await accountModel.getAllReferrers();
+  const membersByReferrer = await accountModel.getMembersByReferrer();
 
-// delivery member view map
-const memberLocations = await accountModel.getAllMemberLocations();
+  // delivery member view map
+  const memberLocations = await accountModel.getAllMemberLocations();
 
-// Delivery trust devices
- const flaggedRegistrations = await accountModel.getAllFlaggedRegistrations();
+  // Delivery trust devices
+  const flaggedRegistrations = await accountModel.getAllFlaggedRegistrations();
 
 
   res.render("dashboards/index", {
@@ -403,7 +403,7 @@ const memberLocations = await accountModel.getAllMemberLocations();
     totalAdmins,
     allTeamMembers,
     allEventRegistrations,
-     pendingPayments,
+    pendingPayments,
     recentPendingPayments,
     pendingPaymentCount,
     allPaymentHistory,
@@ -425,11 +425,11 @@ const memberLocations = await accountModel.getAllMemberLocations();
     membersByReferrer,
     memberLocations,
     flaggedRegistrations,
-      // Add these two lines 👇
+    // Add these two lines 👇
     showNav: false,
     showFooter: false,
-    success: req.flash("success"),   
-    error: req.flash("error"),       
+    success: req.flash("success"),
+    error: req.flash("error"),
   });
 }
 
@@ -497,11 +497,11 @@ async function createJob(req, res) {
 
     // inside createJob, after insert:
     await accountModel.notifyRoles(
-     ["member", "ict_staff"],
+      ["member", "ict_staff"],
       "New Job Posting",
-       `A new job "${title}" was posted.`,
+      `A new job "${title}" was posted.`,
       "/jobs"
-     );
+    );
 
     req.flash("success", "Job posting published successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");
@@ -697,11 +697,11 @@ async function buildIctStaffDashboard(req, res) {
     myTasks,
     allSiteFaqs,
     allHeroSlides,
-     // Add these two lines 👇
-     showNav: false,
-     showFooter: false,
-     success: req.flash("success"),   
-     error: req.flash("error"),
+    // Add these two lines 👇
+    showNav: false,
+    showFooter: false,
+    success: req.flash("success"),
+    error: req.flash("error"),
   });
 }
 
@@ -709,22 +709,22 @@ async function buildMemberDashboard(req, res) {
   let nav = await utilities.getNav();
   const account = req.session.account;   // ← This line MUST exist
 
-    if (!account || !account.id) {
-      req.flash("error", "Please log in to access the dashboard.");
-      return res.redirect("/account/login");
-    }
+  if (!account || !account.id) {
+    req.flash("error", "Please log in to access the dashboard.");
+    return res.redirect("/account/login");
+  }
   const jobs = await accountModel.getAllOpenJobs();
   const myApplications = await accountModel.getApplicationsByAccountId(account.id);
   const profile = await accountModel.getProfileByAccountId(account.id) || {};
-  const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id) || {})  : {};
-  const member = profile.id? (await accountModel.getMemberByProfileId(profile.id)) || {}: {};
-  const educations = profile.id? await accountModel.getEducationsByProfileId(profile.id): [];experiences = profile.id? await accountModel.getExperiencesByProfileId(profile.id): [];
-    const myApplicationsCount = await accountModel.countApplicationsByAccountId(account.id);
-    const activeTrainings = await accountModel.getActiveTrainings();
-    const myTrainings = await accountModel.getMyTrainingRegistrations(account.id);
-    const myTrainingIds = myTrainings.map(t => t.training_id);
-    const myLearningProgress = await accountModel.getTrainingProgressSummary(account.id);   
-    const myTickets = await accountModel.getTicketsByAccountId(account.id);
+  const birthPlace = profile.id ? (await accountModel.getBirthPlaceByProfileId(profile.id) || {}) : {};
+  const member = profile.id ? (await accountModel.getMemberByProfileId(profile.id)) || {} : {};
+  const educations = profile.id ? await accountModel.getEducationsByProfileId(profile.id) : []; experiences = profile.id ? await accountModel.getExperiencesByProfileId(profile.id) : [];
+  const myApplicationsCount = await accountModel.countApplicationsByAccountId(account.id);
+  const activeTrainings = await accountModel.getActiveTrainings();
+  const myTrainings = await accountModel.getMyTrainingRegistrations(account.id);
+  const myTrainingIds = myTrainings.map(t => t.training_id);
+  const myLearningProgress = await accountModel.getTrainingProgressSummary(account.id);
+  const myTickets = await accountModel.getTicketsByAccountId(account.id);
 
   // For each training, figure out which lesson to jump to (first incomplete, or first lesson if none started)
   for (const item of myLearningProgress) {
@@ -782,11 +782,11 @@ async function buildMemberDashboard(req, res) {
     currentTier,
     referralRewards,
     referralLink,
-     // Add these two lines 👇
-     showNav: false,
-     showFooter: false,
-     success: req.flash("success"),   // ← ADD THIS
-     error: req.flash("error"),
+    // Add these two lines 👇
+    showNav: false,
+    showFooter: false,
+    success: req.flash("success"),   // ← ADD THIS
+    error: req.flash("error"),
   });
 }
 /***************************************
@@ -817,7 +817,7 @@ async function submitMemberJobApplication(req, res) {
       cv_file_path: cvFilePath,
     });
 
-     // ✅ ADD THIS — right after the insert succeeds
+    // ✅ ADD THIS — right after the insert succeeds
     await accountModel.notifyRoles(
       ["admin", "ict_staff"],
       "New Job Application",
@@ -943,11 +943,11 @@ async function createNewsPost(req, res) {
     await accountModel.createNews({ title, description, news_date, profile_image });
     // inside createNewsPost, after insert:
     await accountModel.notifyRoles(
-     ["member", "ict_staff"],
+      ["member", "ict_staff"],
       "News Update",
       `New news posted: "${title}".`,
-       "/"
-      );
+      "/"
+    );
 
     req.flash("success", "News posted successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
@@ -969,7 +969,7 @@ async function createEventPost(req, res) {
       "New Event Posted",
       `A new event "${title}" was posted.`,
       "/"
-      );
+    );
 
     req.flash("success", "Event created successfully.");
     res.redirect("/account/dashboard/admin?jobPosted=true");   // ✅ goes to home page after add
@@ -1066,12 +1066,12 @@ async function createTrainingPost(req, res) {
       start_date, end_date,
     });
     // inside createTrainingPost, after insert:
-   await accountModel.notifyRoles(
-    ["member", "ict_staff"],
-     "New Training Program",
-     `A new training "${title}" was posted.`,
-     "/training"
-     );
+    await accountModel.notifyRoles(
+      ["member", "ict_staff"],
+      "New Training Program",
+      `A new training "${title}" was posted.`,
+      "/training"
+    );
 
     req.flash("success", "Training program added successfully.");
     res.redirect("/account/dashboard/admin?trainingPosted=true");
@@ -1091,12 +1091,12 @@ async function registerTraining(req, res) {
 
     // inside registerTraining, after successful insert:
     const trainingInfo = await accountModel.getTrainingById(trainingId);
-     await accountModel.notifyRoles(
+    await accountModel.notifyRoles(
       ["admin", "ict_staff"],
       "New Training Registration",
       `${req.session.account.full_name} registered for "${trainingInfo.title}".`,
       "/account/dashboard/admin"
-     );
+    );
 
     req.flash("success", "You have successfully registered for this training!");
     res.redirect("/account/dashboard/member?trainingRegistered=true");
@@ -1159,10 +1159,10 @@ async function createLessonPost(req, res) {
     await accountModel.createLesson({ training_id, title, description, lesson_order: parseInt(lesson_order, 10) || 1 });
     // inside createLessonPost, after insert:
     await accountModel.notifyRoles(
-     ["member"],
-     "New Lesson Added",
-     `A new lesson "${title}" was added to your training program.`,
-     "/account/dashboard/member"
+      ["member"],
+      "New Lesson Added",
+      `A new lesson "${title}" was added to your training program.`,
+      "/account/dashboard/member"
     );
 
     req.flash("success", "Lesson added successfully.");
@@ -1197,11 +1197,11 @@ async function uploadLessonMaterial(req, res) {
     });
     // inside uploadLessonMaterial, after insert:
     await accountModel.notifyRoles(
-    ["member"],
-     "New Training Material",
-     `New material "${title}" was uploaded for your training.`,
-     "/account/dashboard/member"
-     );
+      ["member"],
+      "New Training Material",
+      `New material "${title}" was uploaded for your training.`,
+      "/account/dashboard/member"
+    );
 
     req.flash("success", "Material uploaded successfully.");
     res.redirect("/account/dashboard/ict-staff");
@@ -1297,12 +1297,12 @@ async function createSupportTicket(req, res) {
     const ticket = await accountModel.createTicket(req.session.account.id, subject, description);
 
     // inside createSupportTicket, after ticket creation:
-   await accountModel.notifyRoles(
+    await accountModel.notifyRoles(
       ["ict_staff"],
-     "New Support Ticket",
+      "New Support Ticket",
       `${req.session.account.full_name} opened ticket #${ticket.ticket_number}: ${subject}.`,
-     "/account/dashboard/ict-staff"
-     );
+      "/account/dashboard/ict-staff"
+    );
 
     req.flash("success", `Ticket ${ticket.ticket_number} created successfully.`);
     res.redirect("/account/dashboard/member?ticketCreated=true");
@@ -1411,7 +1411,7 @@ async function reactivateAccountPost(req, res) {
  */
 async function createTeamMemberPost(req, res) {
   try {
-    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const { full_name, title, category, bio, linkedin_url, twitter_url, instagram_url, email, display_order } = req.body;
     const photo_path = req.file ? `/images/team/${req.file.filename}` : null;
 
     await accountModel.createTeamMember({
@@ -1427,10 +1427,10 @@ async function createTeamMemberPost(req, res) {
     // inside createTeamMemberPost, after insert:
     await accountModel.notifyRoles(
       ["admin"],
-     "New Team Member Added",
+      "New Team Member Added",
       `${full_name} was added to the team by ICT staff.`,
       "/account/dashboard/admin"
-     );
+    );
 
     req.flash("success", "Team member posted successfully.");
     res.redirect("/account/dashboard/ict-staff?teamPosted=true");
@@ -1457,7 +1457,7 @@ async function deleteTeamMemberPost(req, res) {
 async function updateTeamMemberPost(req, res) {
   try {
     const { id } = req.params;
-    const { full_name, title, category, bio, linkedin_url, twitter_url,instagram_url, email, display_order } = req.body;
+    const { full_name, title, category, bio, linkedin_url, twitter_url, instagram_url, email, display_order } = req.body;
     const updateData = {
       full_name, title, category, bio,
       linkedin_url: linkedin_url || null,
@@ -1609,11 +1609,11 @@ async function downloadMemberProfilePdf(req, res) {
  */
 async function submitContactForm(req, res) {
   try {
-    const { name, email, subject, message,website,form_rendered_at } = req.body;
+    const { name, email, subject, message, website, form_rendered_at } = req.body;
 
-  
+
     // 1: Honeypot check-real users never fill this field
-    if (website && website.trim() !== ""){
+    if (website && website.trim() !== "") {
 
       return res.redirect("/contact");
     }
@@ -1623,25 +1623,25 @@ async function submitContactForm(req, res) {
     const elapsedMs = Date.now() - renderedAt;
 
     if (!form_rendered_at || isNaN(renderedAt) || elapsedMs < 2000) {
-      
+
       return res.redirect("/contact");
     }
-     
 
-     if (!name || !email || !subject || !message) {
+
+    if (!name || !email || !subject || !message) {
       req.flash("error", "Please fill in all fields.");
       return res.redirect("/contact");
     }
-     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       req.flash("error", "Please enter a valid email address.");
       return res.redirect("/contact");
     }
     if (message.length > 500) {
-       req.flash("error", "Your message must be 500 characters or fewer.");
-       return res.redirect("/contact");
+      req.flash("error", "Your message must be 500 characters or fewer.");
+      return res.redirect("/contact");
     }
-    
+
 
     await accountModel.createContactMessage({
       full_name: name,
@@ -2544,7 +2544,7 @@ async function chatbotAsk(req, res) {
 
     const match = await accountModel.findFaqMatch(message);
 
-     
+
 
 
     if (match) {
@@ -3318,6 +3318,6 @@ function accountLogout(req, res) {
 
 
 
-module.exports={
-  buildLogin,buildRegister,registerAccount,accountLogin,buildAdminDashboard,updateProfile,changePassword, buildIctStaffDashboard,buildMemberDashboard,createJob,buildApplyJob,submitJobApplication,updateApplicationStatus,submitMemberJobApplication,toggleJobStatus,createNewsPost, createEventPost,updateNewsPost,deleteNewsPost,updateEventPost,deleteEventPost,createTrainingPost,registerTraining,updateTrainingRegistrationStatus,createLessonPost,uploadTrainingGuide,deleteTrainingGuide,uploadLessonMaterial,deleteLessonMaterialPost,viewLesson,completeLesson,createSupportTicket,updateTicketStatusPost,replyToTicket,getTicketMessagesJson,deactivateAccountPost,reactivateAccountPost,createTeamMemberPost,updateTeamMemberPost,deleteTeamMemberAdminPost,deleteTeamMemberPost,viewMemberProfile,downloadMemberProfilePdf,submitContactForm,markMessageReadPost,viewEvent,buildEventRegister,submitEventRegistration,deleteEventRegistrationPost,downloadEventRegistrationsPdf,searchAdmin,searchIct,searchMember,approvePaymentPost,rejectPaymentPost,ictResetMemberPassword,ictDeleteMember,viewNewsDetails,createAdminPost,updateAdminLevelPost,deleteAdminPost,getNotificationsJson,markNotificationReadPost,markAllNotificationsReadPost,deleteNotificationPost,createIctStaffPost,updateIctStaffPost,adminResetIctPasswordPost,deleteIctStaffPost,createTaskPost,deleteTaskPost,submitTaskReportPost,updateIndividualTaskStatusPost,createTestimonialPost,deleteTestimonialPost,updateTestimonialPost,createIntakePost,closeIntakePost, buildRegisterGate,chatbotStartSession,chatbotAsk,chatbotConnectAgent,chatbotCreateTicket,chatSendMessage,chatGetMessages,chatGetWaitingSessions,chatIctAcceptSession,chatCloseSession,createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost,createHeroSlidePost, deleteHeroSlidePost,createReferrerPost,deleteReferrerPost,downloadMembersByReferrerPdf,getCalculatorRegions,getCalculatorDistricts,getCalculatorCrops,calculateFarmCost,deleteContactMessagePost,convertMessageToTicketPost,webauthnRegisterOptions,webauthnRegisterVerify,webauthnLoginOptions,webauthnLoginVerify,deleteWebauthnCredentialPost, chatbotVerifyIdentity,chatbotApplyChange,accountLogout
+module.exports = {
+  buildLogin, buildRegister, registerAccount, accountLogin, buildAdminDashboard, updateProfile, changePassword, buildIctStaffDashboard, buildMemberDashboard, createJob, buildApplyJob, submitJobApplication, updateApplicationStatus, submitMemberJobApplication, toggleJobStatus, createNewsPost, createEventPost, updateNewsPost, deleteNewsPost, updateEventPost, deleteEventPost, createTrainingPost, registerTraining, updateTrainingRegistrationStatus, createLessonPost, uploadTrainingGuide, deleteTrainingGuide, uploadLessonMaterial, deleteLessonMaterialPost, viewLesson, completeLesson, createSupportTicket, updateTicketStatusPost, replyToTicket, getTicketMessagesJson, deactivateAccountPost, reactivateAccountPost, createTeamMemberPost, updateTeamMemberPost, deleteTeamMemberAdminPost, deleteTeamMemberPost, viewMemberProfile, downloadMemberProfilePdf, submitContactForm, markMessageReadPost, viewEvent, buildEventRegister, submitEventRegistration, deleteEventRegistrationPost, downloadEventRegistrationsPdf, searchAdmin, searchIct, searchMember, approvePaymentPost, rejectPaymentPost, ictResetMemberPassword, ictDeleteMember, viewNewsDetails, createAdminPost, updateAdminLevelPost, deleteAdminPost, getNotificationsJson, markNotificationReadPost, markAllNotificationsReadPost, deleteNotificationPost, createIctStaffPost, updateIctStaffPost, adminResetIctPasswordPost, deleteIctStaffPost, createTaskPost, deleteTaskPost, submitTaskReportPost, updateIndividualTaskStatusPost, createTestimonialPost, deleteTestimonialPost, updateTestimonialPost, createIntakePost, closeIntakePost, buildRegisterGate, chatbotStartSession, chatbotAsk, chatbotConnectAgent, chatbotCreateTicket, chatSendMessage, chatGetMessages, chatGetWaitingSessions, chatIctAcceptSession, chatCloseSession, createSiteFaqPost, updateSiteFaqPost, deleteSiteFaqPost, createHeroSlidePost, deleteHeroSlidePost, createReferrerPost, deleteReferrerPost, downloadMembersByReferrerPdf, getCalculatorRegions, getCalculatorDistricts, getCalculatorCrops, calculateFarmCost, deleteContactMessagePost, convertMessageToTicketPost, webauthnRegisterOptions, webauthnRegisterVerify, webauthnLoginOptions, webauthnLoginVerify, deleteWebauthnCredentialPost, chatbotVerifyIdentity, chatbotApplyChange, accountLogout
 }

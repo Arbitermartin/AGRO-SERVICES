@@ -160,34 +160,35 @@
               <input type="date" id="dob" name="date_of_birth" required>
             </div>
           </div>
-
-          <div class="form-field">
-            <label>Location</label>
-            <div class="input-wrap">
-              <select id="location" name="region" required>
-                <option value="">Select your region</option>
-                <option value="Arusha">Arusha</option>
-                <option value="Dodoma">Dodoma</option>
-                <option value="Mwanza">Mwanza</option>
-                <option value="Mbeya">Mbeya</option>
-              </select>
+          <div class="form-row">
+            <div class="form-field">
+              <label >Region</label>
+              <div class="input-wrap">
+                <select name="region" id="location" required>
+                  <option value="">Select your region</option>
+                </select>
+              </div>
             </div>
-          </div>
-
-          <div class="form-field">
-            <label>Farm Size (acres)</label>
-            <div class="input-wrap">
-              <input
-                type="number"
-                id="farmSize"
-                name="farm_size"
-                step="0.1"
-                placeholder="e.g. 2.5"
-                required
-              >
+            <div class="form-field">
+              <label>District</label>
+              <div class="input-wrap">
+                <select name="district" id="districtSelect" required>
+                  <option value="">Select region first</option>
+                </select>
+              </div>
             </div>
-          </div>
+            <div class="form-field">
+              <label >Ward</label>
+              <div class="input-wrap">
+                <select name="ward" id="wardSelect" required>
+                  <option value="">Select district first</option>
 
+                </select>
+              </div>
+            </div>
+
+
+          </div>
           <div style="display:flex;gap:12px;">
             <button type="button" onclick="prevStep(2)" class="btn btn-outline btn-block">
               Back

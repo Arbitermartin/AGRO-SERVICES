@@ -1,48 +1,8 @@
 
   <!-- ===================== HERO ===================== -->
-  <!-- <section class="hero">
-    <div class="hero-overlay"></div>
-    <div class="container hero-content">
-      <h1 class="hero-title">
-        Empowering Farmers.<br>
-        <span class="text-accent">Growing</span> Together.
-      </h1>
-      <p class="hero-text">
-        AgroServices connects farmers, experts, and opportunities to build a
-        stronger agricultural community and sustainable future.
-      </p>
-      <div class="hero-actions">
-        <a href="/account/register" class="btn btn-filled btn-lg">Join Our Network</a>
-        <a href="/about" class="btn btn-outline-light btn-lg">Read More</a>
-      </div>
-    </div> -->
 
-    <!-- Feature cards overlapping hero bottom edge -->
-    <!-- <div class="container">
-      <div class="feature-cards">
-        <div class="feature-card">
-          <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
-          <h3>Expert Support</h3>
-          <p>Get guidance from agricultural experts</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="bi bi-mortarboard"></i></div>
-          <h3>Training &amp; Capacity</h3>
-          <p>Improve your skills with our training programs</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="bi bi-graph-up-arrow"></i></div>
-          <h3>Market Access</h3>
-          <p>Access better markets and opportunities</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon"><i class="bi bi-people"></i></div>
-          <h3>Community Network</h3>
-          <p>Connect and grow with fellow farmers</p>
-        </div>
-      </div>
-    </div>
-  </section> -->
+  
+
   <section class="hero">
   <div class="hero-slider" id="heroSlider">
     <% if (heroSlides && heroSlides.length > 0) { %>
@@ -79,6 +39,86 @@
   
 </section>
 
+<!-- ===================== REGIONS MARQUEE ===================== -->
+<section class="regions-marquee-section">
+  <div class="regions-marquee-title">
+    <i class="bi bi-geo-alt-fill"></i> Serving Farmers Across All Regions of Tanzania
+  </div>
+  <div class="regions-marquee-wrap">
+    <div class="regions-marquee-track">
+      <span>Arusha</span>
+      <span>Dar es Salaam</span>
+      <span>Dodoma</span>
+      <span>Geita</span>
+      <span>Iringa</span>
+      <span>Kagera</span>
+      <span>Katavi</span>
+      <span>Kigoma</span>
+      <span>Kilimanjaro</span>
+      <span>Lindi</span>
+      <span>Manyara</span>
+      <span>Mara</span>
+      <span>Mbeya</span>
+      <span>Morogoro</span>
+      <span>Mtwara</span>
+      <span>Mwanza</span>
+      <span>Njombe</span>
+      <span>Pemba North</span>
+      <span>Pemba South</span>
+      <span>Pwani</span>
+      <span>Rukwa</span>
+      <span>Ruvuma</span>
+      <span>Shinyanga</span>
+      <span>Simiyu</span>
+      <span>Singida</span>
+      <span>Songwe</span>
+      <span>Tabora</span>
+      <span>Tanga</span>
+      <span>Zanzibar North</span>
+      <span>Zanzibar South</span>
+      <span>Zanzibar Urban/West</span>
+      
+    </div>
+  </div>
+</section>
+<!-- ===================== ANIMATED STATS COUNTER ===================== -->
+<section class="stats-counter-section">
+  <div class="container">
+    <div class="section-heading" style="text-align:center; margin-bottom: 32px;">
+      <p style="color:var(--text-muted); margin-top:8px;">Real numbers from farmers, events and updates across Tanzania</p>
+    </div>
+    <div class="stats-counter-grid">
+
+      <!-- Members -->
+      <div class="stat-counter-card">
+        <div class="stat-counter-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-counter-number">
+          <span class="count-up" data-target="<%= totalMembers || 0 %>">0</span>+
+        </div>
+        <div class="stat-counter-label">Members Growing With Us</div>
+      </div>
+
+      <!-- Events -->
+      <div class="stat-counter-card">
+        <div class="stat-counter-icon"><i class="bi bi-calendar-event"></i></div>
+        <div class="stat-counter-number">
+          <span class="count-up" data-target="<%= totalEvents || 0 %>">0</span>
+        </div>
+        <div class="stat-counter-label">Upcoming Events</div>
+      </div>
+
+      <!-- News -->
+      <div class="stat-counter-card">
+        <div class="stat-counter-icon"><i class="bi bi-newspaper"></i></div>
+        <div class="stat-counter-number">
+          <span class="count-up" data-target="<%= totalNews || 0 %>">0</span>
+        </div>
+        <div class="stat-counter-label">Latest News & Updates</div>
+      </div>
+
+    </div>
+  </div>
+</section>
   <!-- ===================== SERVICES ===================== -->
   <section class="services">
     <div class="container">
@@ -182,6 +222,30 @@
     <!-- End of News & Events -->
 
   </div>
+
+  <!-- ===================== PARTNERS SLIDER ===================== -->
+<section class="partners-section">
+  <div class="container">
+    <div class="section-heading" style="text-align:center; margin-bottom: 28px;">
+      <h2>Our Partners</h2>
+      <i class="bi bi-flower2 heading-divider"></i>
+      <p style="color:#666;">Trusted organizations we work with</p>
+    </div>
+
+    <div class="partners-slider-wrap">
+      <div class="partners-track" id="partnersTrack">
+        <!-- Partner logos (repeat the list twice for seamless loop) -->
+        <div class="partner-logo"><img src="../images/site/crdb.webp" alt="Partner 1"></div>
+        <div class="partner-logo"><img src="../images/site/nbc.webp" alt="Partner 2"></div>
+        <div class="partner-logo"><img src="../images/site/vijana.webp" alt="Partner 3"></div>
+        <div class="partner-logo"><img src="../images/site/tadb.webp" alt="Partner 4"></div>
+        <div class="partner-logo"><img src="../images/site/nmb.webp" alt="Partner 5"></div>
+        <div class="partner-logo"><img src="../images/site/equity.webp" alt="Partner 6"></div>
+
+        
+    </div>
+  </div>
+</section>
 </section>
     <!-- Delivery frequent asked question -->
       <section class="faq-home-section">
@@ -253,3 +317,28 @@
     </div>
   </div>
 </section>
+
+<!-- ICT Support Status Popup -->
+<div id="ictSupportPopup" class="ict-support-popup" style="display:none;">
+  <div class="ict-support-popup-content">
+    <button type="button" class="ict-support-close" id="ictSupportClose">&times;</button>
+    
+    <% if (ictOnline) { %>
+      <div class="ict-support-icon online">
+        <i class="bi bi-headset"></i>
+      </div>
+      <h4>ICT Support is Online</h4>
+      <p>Our support team is available right now. Chat with us if you need help.</p>
+      <button type="button" class="btn btn-filled btn-sm" id="openChatFromPopup">
+        Start Chat
+      </button>
+    <% } else { %>
+      <div class="ict-support-icon offline">
+        <i class="bi bi-headset"></i>
+      </div>
+      <h4>ICT Support is Offline</h4>
+      <p>Our team is currently offline. You can still leave a message or try again later.</p>
+      <a href="/contact" class="btn btn-outline btn-sm">Contact Us</a>
+    <% } %>
+  </div>
+</div>

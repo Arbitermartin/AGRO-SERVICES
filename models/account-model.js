@@ -5,20 +5,20 @@ const crypto = require("crypto");
 function sanitizeInput(input) {
   if (typeof input === 'string') {
     return input.trim().replace(/<script.*?>.*?<\/script>/gi, '')
-                     .replace(/javascript:/gi, '');
+      .replace(/javascript:/gi, '');
   }
   return input;
 }
 
-async function registerAccount(fullName, email, Phone_number, hashedPassword,referrerId,referredByAccountId) {
+async function registerAccount(fullName, email, Phone_number, hashedPassword, referrerId, referredByAccountId) {
   try {
     const safeFullName = sanitizeInput(fullName);
     const safeEmail = sanitizeInput(email).toLowerCase();
     const safePhone = sanitizeInput(Phone_number);
     const account = await db("accounts")
       .insert({
-        full_name:safeFullName,
-        email:safeEmail,
+        full_name: safeFullName,
+        email: safeEmail,
         phone_number: safePhone,
         password: hashedPassword,
         account_type: "member",
@@ -53,7 +53,7 @@ async function upsertProfile(accountId, data) {
   const existing = await getProfileByAccountId(accountId);
   if (existing) {
     await db("profiles").where({ id: existing.id }).update(data);
-    return { profile_photo: photoPath};
+    return { profile_photo: photoPath };
   }
   const inserted = await db("profiles").insert({ account_id: accountId, ...data }).returning("*");
   return inserted[0];
@@ -141,16 +141,16 @@ async function upsertAdminDetails(profileId, data) {
 /****************
  * Delivery create job 
  */
-async function createJob(data){
+async function createJob(data) {
   const inserted = await db("jobs").insert(data).returning("*");
   return inserted[0];
 }
 async function getAllOpenJobs() {
   return await db("jobs")
-  .where("status","open")
-  .andWhere("end_date",">=",db.fn.now())
-  .orderBy("created_at","desc");
-  
+    .where("status", "open")
+    .andWhere("end_date", ">=", db.fn.now())
+    .orderBy("created_at", "desc");
+
 }
 async function getAllJobs() {
   return await db("jobs").orderBy("created_at", "desc");
@@ -167,10 +167,10 @@ async function toggleJobStatus(jobId) {
 /************************************
  * Delivery job application
  */
-async function getJobById(jobId){
-  return await db("jobs").where({id:jobId}).first();
+async function getJobById(jobId) {
+  return await db("jobs").where({ id: jobId }).first();
 }
-async function createJobApplication(data){
+async function createJobApplication(data) {
   const inserted = await db("job_applications").insert(data).returning("*");
   return inserted[0];
 }
@@ -1406,17 +1406,17 @@ async function getMembersByReferrer() {
  * Delivery track location for the users who registered in our portal
  * 
  */
-async function updateAccountLocation(accountId,latitude,longitude){
-  return await db("accounts").where({id: accountId}).update({
-    latitude,longitude,location_captured_at: db.fn.now(),
+async function updateAccountLocation(accountId, latitude, longitude) {
+  return await db("accounts").where({ id: accountId }).update({
+    latitude, longitude, location_captured_at: db.fn.now(),
   })
 }
-async function getAllMemberLocations(){
+async function getAllMemberLocations() {
   return await db("accounts")
-  .where ("account_type","member")
-  .whereNotNull("latitude")
-  .whereNotNull("longitude")
-  .select("id","full_name","email","phone_number","latitude","longitude","location_captured_at");
+    .where("account_type", "member")
+    .whereNotNull("latitude")
+    .whereNotNull("longitude")
+    .select("id", "full_name", "email", "phone_number", "latitude", "longitude", "location_captured_at");
 }
 // end here
 
@@ -1730,14 +1730,45 @@ async function changePasswordViaChatbot(accountId, hashedPassword) {
 }
 // end here
 
+// Total Members
+async function countMembersOnly() {
+  const result = await db("accounts")
+    .where("account_type", "member")
+    .count("id as count")
+    .first();
+  return parseInt(result.count, 10) || 0;
+}
+
+// Upcoming Events (you already have this – keep using it)
+async function countUpcomingEvents() {
+  const result = await db("events")
+    .where("end_date", ">=", db.fn.now())
+    .count("event_id as count")
+    .first();
+  return parseInt(result.count, 10) || 0;
+}
+
+// Total News
+async function getTotalNews() {
+  const result = await db("news")
+    .count("news_id as count")
+    .first();
+  return parseInt(result.count, 10) || 0;
+}
+
+async function isIctSupportOnline() {
+  const staff = await getAvailableIctStaff(); // you already have this function
+  return !!staff;
+}
+
 
 module.exports = {
-  registerAccount,checkExistingEmail,getAccountByEmail,getAccountById,updatePassword,updateFullName,getProfileByAccountId,upsertProfile,
-  getBirthPlaceByProfileId,upsertBirthPlace,getAdminDetailsByProfileId,
-  upsertAdminDetails,createJob,getAllOpenJobs,getAllJobs,toggleJobStatus,
-  getJobById,createJobApplication,getAllApplications,getApplicationsByJobId,updateApplicationStatus,getApplicationsByAccountId,countAllJobs,countOpenJobs,countApplicationsByAccountId,createNews,getLatestNews,createEvent,getUpcomingEvents,countAllEvents,countUpcomingEvents,getNewsById,updateNews,deleteNews,getEventById,updateEvent,deleteEvent,getAllNews,getAllEventsAdmin,createLoginLog,recordLogout,getAllLoginLogs,createActivityLog,getAllActivityLogs,createTraining,getAllTrainings,getActiveTrainings,getTrainingById,updateTraining,deleteTraining,registerForTraining,getMyTrainingRegistrations,isRegisteredForTraining,getAllTrainingRegistrations,updateTrainingRegistrationStatus,createTrainingGuide,getAllTrainingGuides,deleteTrainingGuide,createLesson,getAllLessons,getLessonsByTrainingId,getLessonById,createLessonMaterial,getMaterialsByLessonId,deleteLessonMaterial,markLessonComplete,getProgressForTraining,getTrainingProgressSummary,
-  createTicket,generateTicketNumber,getAllTickets,getTicketsByAccountId,getTicketById,updateTicketStatus,countTicketsByStatus,createTicketMessage,getMessagesByTicketId,getAllAccounts,deactivateAccount,reactivateAccount,
-  countMembersOnly,countNewMembersThisMonth,countAdminsOnly,createTeamMember,
-  getAllTeamMembers,getTeamMemberById,updateTeamMember,getTeamMembersByCategory,deleteTeamMember,upsertProfile,getProfilePhotoByAccountId,getMemberByProfileId,upsertMember,getEducationsByProfileId,replaceEducations,getExperiencesByProfileId,replaceExperiences,updatePhone,getFullMemberProfile,createContactMessage,getAllContactMessages,countUnreadContactMessages,markContactMessageAsRead,getEventById,createEventRegistration,getEventRegistrationsByEventId,getAllEventRegistrations,deleteEventRegistration,updateLastActive,markOffline,getAvailableIctStaff,getAllOnlineIctStaff,searchAdminDashboard,searchMemberDashboard,searchIctDashboard,createPayment,getAllPendingPayments,getRecentPendingPayments,countPendingPayments,approvePayment,rejectPayment,getAllPaymentHistory,getAllMembersOnly,getFullMemberDetailsForIct,permanentlyDeleteAccount,adminResetPassword,getNewsById,createAdminAccount,updateAdminLevel,getAllAdminAccounts,createNotification,notifyRoles,getNotificationsForAccount,countUnreadNotifications,markNotificationRead,markAllNotificationsRead,deleteNotification,createIctStaffAccount,getAllIctStaffOnly,updateIctStaffDetails,createTask,getAllTasksForSuperAdmin,getAssigneesForTask,getTasksForAccount,submitTaskReport,updateIndividualTaskStatus,deleteTask,createTestimonial,getActiveTestimonials,getAllTestimonials,deleteTestimonial,updateTestimonial,createIntake,getActiveIntake,closeIntake,getAllIntakes,getUpcomingEventsWithRegistrationCount,getRecentActivityForDashboard,findFaqMatch,createChatSession,assignChatToAgent,addChatMessage,getChatMessages,getChatSession,getWaitingChatSessions,getActiveChatSessionsForIct,closeChatSession,getAvailableIctStaff,updateFailedAttempts,createSiteFaq,getAllSiteFaqs,getSiteFaqById,updateSiteFaq,deleteSiteFaq,createHeroSlide,getActiveHeroSlides,getAllHeroSlides,updateHeroSlide,deleteHeroSlide,getMemberRegistrationStats,getMonthlyMemberRegistrations,createReferrer,getAllReferrers,deleteReferrer,getMembersByReferrer,updateAccountLocation,getAllMemberLocations,calculateProfileCompletion,getDistinctRegionsForCalculator,getDistrictsByRegion,getCropsByRegionDistrict,getCropBenchmark,saveCostCalculation,detectClosingIntent,deleteContactMessage,convertMessageToTicket,getDirectReferrals,countTotalReferrals,getReferralTree,getNextTier, calculateReferralHealth,awardReferralTierIfEligible,getReferralRewards,saveWebauthnCredential,getWebauthnCredentialsByAccount,getWebauthnCredentialById,updateWebauthnCounter,deleteWebauthnCredential,hashDevice,getOrCreateDeviceTrust,adjustDeviceTrust,calculateBehaviorScore,getAllFlaggedRegistrations,verifyIdentityForChange,changeEmailViaChatbot,changePasswordViaChatbot
+  registerAccount, checkExistingEmail, getAccountByEmail, getAccountById, updatePassword, updateFullName, getProfileByAccountId, upsertProfile,
+  getBirthPlaceByProfileId, upsertBirthPlace, getAdminDetailsByProfileId,
+  upsertAdminDetails, createJob, getAllOpenJobs, getAllJobs, toggleJobStatus,
+  getJobById, createJobApplication, getAllApplications, getApplicationsByJobId, updateApplicationStatus, getApplicationsByAccountId, countAllJobs, countOpenJobs, countApplicationsByAccountId, createNews, getLatestNews, createEvent, getUpcomingEvents, countAllEvents, countUpcomingEvents, getNewsById, updateNews, deleteNews, getEventById, updateEvent, deleteEvent, getAllNews, getAllEventsAdmin, createLoginLog, recordLogout, getAllLoginLogs, createActivityLog, getAllActivityLogs, createTraining, getAllTrainings, getActiveTrainings, getTrainingById, updateTraining, deleteTraining, registerForTraining, getMyTrainingRegistrations, isRegisteredForTraining, getAllTrainingRegistrations, updateTrainingRegistrationStatus, createTrainingGuide, getAllTrainingGuides, deleteTrainingGuide, createLesson, getAllLessons, getLessonsByTrainingId, getLessonById, createLessonMaterial, getMaterialsByLessonId, deleteLessonMaterial, markLessonComplete, getProgressForTraining, getTrainingProgressSummary,
+  createTicket, generateTicketNumber, getAllTickets, getTicketsByAccountId, getTicketById, updateTicketStatus, countTicketsByStatus, createTicketMessage, getMessagesByTicketId, getAllAccounts, deactivateAccount, reactivateAccount,
+  countMembersOnly, countNewMembersThisMonth, countAdminsOnly, createTeamMember,
+  getAllTeamMembers, getTeamMemberById, updateTeamMember, getTeamMembersByCategory, deleteTeamMember, upsertProfile, getProfilePhotoByAccountId, getMemberByProfileId, upsertMember, getEducationsByProfileId, replaceEducations, getExperiencesByProfileId, replaceExperiences, updatePhone, getFullMemberProfile, createContactMessage, getAllContactMessages, countUnreadContactMessages, markContactMessageAsRead, getEventById, createEventRegistration, getEventRegistrationsByEventId, getAllEventRegistrations, deleteEventRegistration, updateLastActive, markOffline, getAvailableIctStaff, getAllOnlineIctStaff, searchAdminDashboard, searchMemberDashboard, searchIctDashboard, createPayment, getAllPendingPayments, getRecentPendingPayments, countPendingPayments, approvePayment, rejectPayment, getAllPaymentHistory, getAllMembersOnly, getFullMemberDetailsForIct, permanentlyDeleteAccount, adminResetPassword, getNewsById, createAdminAccount, updateAdminLevel, getAllAdminAccounts, createNotification, notifyRoles, getNotificationsForAccount, countUnreadNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification, createIctStaffAccount, getAllIctStaffOnly, updateIctStaffDetails, createTask, getAllTasksForSuperAdmin, getAssigneesForTask, getTasksForAccount, submitTaskReport, updateIndividualTaskStatus, deleteTask, createTestimonial, getActiveTestimonials, getAllTestimonials, deleteTestimonial, updateTestimonial, createIntake, getActiveIntake, closeIntake, getAllIntakes, getUpcomingEventsWithRegistrationCount, getRecentActivityForDashboard, findFaqMatch, createChatSession, assignChatToAgent, addChatMessage, getChatMessages, getChatSession, getWaitingChatSessions, getActiveChatSessionsForIct, closeChatSession, getAvailableIctStaff, updateFailedAttempts, createSiteFaq, getAllSiteFaqs, getSiteFaqById, updateSiteFaq, deleteSiteFaq, createHeroSlide, getActiveHeroSlides, getAllHeroSlides, updateHeroSlide, deleteHeroSlide, getMemberRegistrationStats, getMonthlyMemberRegistrations, createReferrer, getAllReferrers, deleteReferrer, getMembersByReferrer, updateAccountLocation, getAllMemberLocations, calculateProfileCompletion, getDistinctRegionsForCalculator, getDistrictsByRegion, getCropsByRegionDistrict, getCropBenchmark, saveCostCalculation, detectClosingIntent, deleteContactMessage, convertMessageToTicket, getDirectReferrals, countTotalReferrals, getReferralTree, getNextTier, calculateReferralHealth, awardReferralTierIfEligible, getReferralRewards, saveWebauthnCredential, getWebauthnCredentialsByAccount, getWebauthnCredentialById, updateWebauthnCounter, deleteWebauthnCredential, hashDevice, getOrCreateDeviceTrust, adjustDeviceTrust, calculateBehaviorScore, getAllFlaggedRegistrations, verifyIdentityForChange, changeEmailViaChatbot, changePasswordViaChatbot, countMembersOnly, countUpcomingEvents, getTotalNews, isIctSupportOnline
 
 };

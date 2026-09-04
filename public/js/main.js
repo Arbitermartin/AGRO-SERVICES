@@ -30,186 +30,336 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-    // ✅ ADD THIS ONCE, near the top csrf
+  // ✅ ADD THIS ONCE, near the top csrf
   const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : '';
   // team page
 
-// /* =====================================================
-//    EVENT REGISTRATION — Country / Region cascade
-// ===================================================== */
-const countrySelect = document.getElementById('countrySelect');
-const regionSelect = document.getElementById('regionSelect');
+  // live count for member event and news
+  function animateCountUp() {
+    document.querySelectorAll('.count-up').forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'), 10) || 0;
 
-if (countrySelect && regionSelect) {
-  const regionsByCountry = {
-    Tanzania: ["Arusha","Dar es Salaam", "Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma","Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza","Njombe","Pwani(Coast)","Rukwa","Ruvuma","Shinyanga","Simiyu","Singida","Songwe","Tabora","Tanga","Kaskazini Pemba","Kusini Pemba","Kaskazini Unguja","Kusini Unguja","Mjini Magharibi"],
-    Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
-    Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
-    Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
-    Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
-    "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
-    Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
-    Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
-    Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
-    Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
-  };
-
-  countrySelect.addEventListener('change', () => {
-    const selectedCountry = countrySelect.value;
-    const regions = regionsByCountry[selectedCountry] || [];
-
-    regionSelect.innerHTML = '';
-
-    if (regions.length === 0) {
-      regionSelect.innerHTML = '<option value="">Select country first</option>';
-      return;
-    }
-
-    regionSelect.innerHTML = '<option value="">Select region</option>' +
-      regions.map(r => `<option value="${r}">${r}</option>`).join('');
-  });
-}
-// // end here for form for events
-
-
-// end here
-
-// location track
-
-const locationConsent = document.getElementById('locationConsent');
-const latitudeInput = document.getElementById('latitudeInput');
-const longitudeInput = document.getElementById('longitudeInput');
-const locationStatus = document.getElementById('locationStatus');
-
-if (locationConsent) {
-  locationConsent.addEventListener('change', () => {
-    if (!locationConsent.checked) {
-      latitudeInput.value = '';
-      longitudeInput.value = '';
-      locationStatus.textContent = '';
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      locationStatus.textContent = 'Location is not supported on this device.';
-      locationConsent.checked = false;
-      return;
-    }
-
-    locationStatus.textContent = 'Requesting location access...';
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        latitudeInput.value = position.coords.latitude;
-        longitudeInput.value = position.coords.longitude;
-        locationStatus.textContent = 'Location captured successfully.';
-        locationStatus.style.color = '#2e7d32';
-      },
-      (error) => {
-        locationStatus.textContent = 'Could not access your location. You can still register without it.';
-        locationStatus.style.color = '#c0392b';
-        locationConsent.checked = false;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  });
-}
-// end here
-
-function showToast(message, type = 'success') {
-  let toastContainer = document.getElementById('toastContainer');
-
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.id = 'toastContainer';
-    toastContainer.className = 'toast-container';
-    document.body.appendChild(toastContainer);
-  }
-
-  const toast = document.createElement('div');
-  toast.className = `toast-msg ${type}`;
-  toast.innerHTML = `
-    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}"></i>
-    <span>${message}</span>
-  `;
-  toastContainer.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('toast-hide');
-    setTimeout(() => toast.remove(), 300);
-  }, 5000);
-}
-
-
-// FACE ID RECOGNION
-const faceIdLoginBtn = document.getElementById('faceIdLoginBtn');
-if (faceIdLoginBtn) {
-  faceIdLoginBtn.addEventListener('click', async () => {
-    const emailInput = document.getElementById('email');
-    const email = emailInput ? emailInput.value.trim() : '';
-
-    if (!email) {
-      showToast('Please enter your email first, then tap Face ID login.', 'error');
-      return;
-    }
-
-    try {
-      showToast('Preparing biometric verification...', 'success');
-
-      const optionsRes = await fetch('/account/webauthn/login-options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!optionsRes.ok) {
-        const err = await optionsRes.json();
-        showToast(err.error || 'Biometric login not set up for this account.', 'error');
+      if (target === 0) {
+        counter.textContent = '0';
         return;
       }
 
-      const options = await optionsRes.json();
+      let current = 0;
+      const duration = 1600;
+      const stepTime = 25;
+      const steps = Math.ceil(duration / stepTime);
+      const increment = target / steps;
 
-      const credential = await SimpleWebAuthnBrowser.startAuthentication(options);
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          counter.textContent = target.toLocaleString();
+          clearInterval(timer);
+        } else {
+          counter.textContent = Math.floor(current).toLocaleString();
+        }
+      }, stepTime);
+    });
+  }
 
-      const verifyRes = await fetch('/account/webauthn/login-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential }),
+  if (document.querySelector('.stats-counter-section')) {
+    setTimeout(animateCountUp, 400);
+  }
+  // end here
+
+  // ICT Support Popup
+  const ictSupportPopup = document.getElementById('ictSupportPopup');
+  const ictSupportClose = document.getElementById('ictSupportClose');
+  const openChatFromPopup = document.getElementById('openChatFromPopup');
+
+  if (ictSupportPopup) {
+    // Show popup 1.5 seconds after page loads
+    setTimeout(() => {
+      ictSupportPopup.style.display = 'block';
+    }, 1500);
+
+    // Close button
+    if (ictSupportClose) {
+      ictSupportClose.addEventListener('click', () => {
+        ictSupportPopup.style.display = 'none';
       });
-
-      const result = await verifyRes.json();
-
-      if (result.success) {
-        showToast('Verified! Redirecting...', 'success');
-        setTimeout(() => {
-          window.location.href = result.redirect;
-        }, 800);
-      } else {
-        showToast(result.message || 'Verification failed.', 'error');
-      }
-    } catch (error) {
-      showToast('Biometric login was cancelled or failed.', 'error');
     }
+
+    // Optional: open the chatbot when clicking "Start Chat"
+    if (openChatFromPopup) {
+      openChatFromPopup.addEventListener('click', () => {
+        ictSupportPopup.style.display = 'none';
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        if (chatbotToggle) chatbotToggle.click();
+      });
+    }
+  }
+  // end here
+
+
+
+  // /* =====================================================
+  //    EVENT REGISTRATION — Country / Region cascade
+  // ===================================================== */
+
+  const regionSelectReg = document.getElementById('location');
+  const districtSelectReg = document.getElementById('districtSelect');
+  const wardSelectReg = document.getElementById('wardSelect');
+
+  const tanzaniaLocations = {
+    "Arusha": {
+      "Arusha City": ["Kaloleni", "Sekei", "Themi"],
+      "Arumeru": ["Usa River", "Ngaramtoni", "Poli"],
+    },
+    "Dar es Salaam": {
+      "Ilala": ["Bonyokwa", "Buguruni", "Buyuni", "Chanika", "Gerezani", "Gongolamboto", "Ilala", "Jangwani", "Kariakoo", "Kimanga", "Kinyerezi", "Kipawa", "Kipunguni", "Kisukuru", "Kisutu", "Kitunda", "Kivukoni", "Kivule", "Kiwalani", "Majohe", "Mchafukoge", "Mchikichini", "Minazi Mirefu", "Mnyamani", "Msongola", "Mzinga", "Pugu", "Pugu Station", "Segerea", "Tabata", "Ukonga", "Upanga Mashariki", "Upanga Magharibi", "Vingunguti", "Zingiziwa"
+      ],
+
+      "Kigamboni": ["Kibada", "Kigamboni", "Kimbiji", "Kisarawe II", "Mjimwema", "Pembamnazi", "Somangila", "Tungi", "Vijibweni"
+      ],
+
+      "Kinondoni": ["Bunju", "Goba", "Kawe", "Kigogo", "Kijitonyama", "Kunduchi", "Mabwepande", "Magomeni", "Makumbusho", "Manzese", "Mbezi", "Mikocheni", "Msasani", "Mwananyamala", "Mzimuni", "Ndugumbi", "Sinza", "Tandale", "Wazo", "Kibamba"
+      ],
+
+      "Temeke": ["Azimio", "Chamazi", "Chang'ombe", "Charambe", "Keko", "Kigamboni", "Kurasini", "Mbagala", "Mbagala Kuu", "Mianzini", "Miburani", "Sandali", "Somangira", "Tandika", "Temeke", "Toangoma", "Vijibweni"
+      ],
+
+      "Ubungo": [
+        "Gongo la Mboto", "Kimara", "Kwembe", "Kibamba", "Kibogwa", "Kibamba", "Kinyerezi", "Mabibo", "Makuburi", "Makurumla", "Manzese", "Mbezi Juu", "Mburahati", "Msigani", "Sinza", "Ubungo"
+      ]
+    },
+    "Dodoma": {
+      "Dodoma Urban": ["Makole", "Nzuguni", "Chamwino"],
+      "Chamwino": ["Membe", "Mvumi"],
+    },
+    "Mbeya": {
+      "Mbeya Urban": ["Iyunga", "Ilomba"],
+      "Mbarali": ["Rujewa", "Igava"],
+    },
+    "Mwanza": {
+      "Nyamagana": ["Igogo", "Mirongo"],
+      "Ilemela": ["Buzuruga", "Kirumba"],
+    },
+    "Morogoro": {
+      "Morogoro Urban": ["Kihonda", "Mji Mkuu"],
+      "Kilombero": ["Ifakara", "Mang'ula"],
+    },
+    "Tanga": {
+      "Tanga City": ["Ngamiani", "Chumbageni"],
+      "Muheza": ["Muheza Mjini", "Amani"],
+    },
+    "Kilimanjaro": {
+      "Moshi Urban": ["Kiboroloni", "Njoro"],
+      "Moshi Rural": ["Old Moshi", "Kibosho"],
+    },
+    "Kagera": {
+      "Bukoba Urban": ["Miembeni", "Kashai"],
+      "Bukoba Rural": ["Katoro", "Kanyangereko"],
+    },
+    "Iringa": {
+      "Iringa MC": ["Gangilonga", "Igumbilo", "Ilala", "Isakalilo", "Kihesa", "Kitanzini", "Kitwiru", "Kwakilosa", "Makorongoni", "Mivinjeni", "Mkwawa", "Mlandege", "Mshindo", "Mtwivila", "Mwangata", "Nduli", "Ruaha", "Ipogolo"],
+      "Iringa DC": ["Ifunda", "Idodi", "Ilolompya", "izazi", "Kalenga", "Kihanga", "Kihorogota", "Kising'a", "Kiwere", "Lumuli", "Maboga", "Mahuninga", "Magulilwa", "Malengamakali", "Mboliboli", "Mgama", "mlenge", "Mlowa", "Mseke", "Nyang'oro", "Nzihi", "Ulanda", "Wasa"],
+      "Kilolo DC": ["Bomalang'ombe", "Dabaga", "Ibumu", "Idete", "Ihimbo", "Ilula", "Image", "Irole", "Kimala", "Kising'a", "Lugalo", "Mahenge", "Masisiwe", "Mlafu", "Mtitu", "Ng'ang'ange", "Ng'uruhe", "Nyalumbu", "Nyanzwa", "Ruaha Mbuyuni", "Udekwa", "Uhambingeto", "Ukumbi", "Ukwega"],
+      "Mufindi DC": ["Builayinga", "Idete", "Idunda", "Ifwagi", "Igombavanu", "Igowole", "Ihalimba", "Ihanu", "Ihowanza", "Ikongosi", "Ikweha", "Isalavanu", "Itandula", "Kasanga", "Kibengu", "Kiyowela", "Luhunga", "Makungu", "Malangali", "Mapanda", "Mbalamaziwa", "Mdabulo", "Mninga", "Mpanga Tazara", "Mtambula", "Mtwango", "Nyololo", "Sadani"],
+      "Mafinga TC": ["Boma", "Bumilayinga", "Changarawe", "Isalavanu", "Kinyanambo", "Rungemba", "Sao Hill", "Upendo", "Wambi"]
+
+    },
+    // Add remaining regions: Singida, Tabora, Rukwa, Katavi, Kigoma, Shinyanga,
+    // Simiyu, Geita, Manyara, Njombe, Ruvuma, Lindi, Mtwara, Pwani, Zanzibar Urban/West, Pemba North/South
+  };
+
+  if (regionSelectReg) {
+    regionSelectReg.innerHTML = '<option value="">Select your region</option>' +
+      Object.keys(tanzaniaLocations).map(r => `<option value="${r}">${r}</option>`).join('');
+
+    regionSelectReg.addEventListener('change', () => {
+      const districts = tanzaniaLocations[regionSelectReg.value] || {};
+      districtSelectReg.innerHTML = '<option value="">Select district</option>' +
+        Object.keys(districts).map(d => `<option value="${d}">${d}</option>`).join('');
+      wardSelectReg.innerHTML = '<option value="">Select district first</option>';
+    });
+
+    districtSelectReg.addEventListener('change', () => {
+      const districts = tanzaniaLocations[regionSelectReg.value] || {};
+      const wards = districts[districtSelectReg.value] || [];
+      wardSelectReg.innerHTML = '<option value="">Select ward</option>' +
+        wards.map(w => `<option value="${w}">${w}</option>`).join('');
+    });
+  }
+  // END HERE
+  const countrySelect = document.getElementById('countrySelect');
+  const regionSelect = document.getElementById('regionSelect');
+
+  if (countrySelect && regionSelect) {
+    const regionsByCountry = {
+      Tanzania: ["Arusha", "Dar es Salaam", "Dodoma", "Geita", "Iringa", "Kagera", "Katavi", "Kigoma", "Kilimanjaro", "Lindi", "Manyara", "Mara", "Mbeya", "Morogoro", "Mtwara", "Mwanza", "Njombe", "Pwani(Coast)", "Rukwa", "Ruvuma", "Shinyanga", "Simiyu", "Singida", "Songwe", "Tabora", "Tanga", "Kaskazini Pemba", "Kusini Pemba", "Kaskazini Unguja", "Kusini Unguja", "Mjini Magharibi"],
+      Kenya: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Machakos", "Kiambu"],
+      Uganda: ["Kampala", "Wakiso", "Mbarara", "Gulu", "Jinja", "Mbale"],
+      Rwanda: ["Kigali", "Northern Province", "Southern Province", "Eastern Province", "Western Province"],
+      Burundi: ["Bujumbura", "Gitega", "Ngozi", "Rumonge"],
+      "South Sudan": ["Juba", "Wau", "Malakal", "Yei"],
+      Ethiopia: ["Addis Ababa", "Oromia", "Amhara", "Tigray", "Sidama"],
+      Somalia: ["Mogadishu", "Puntland", "Somaliland", "Hirshabelle"],
+      Djibouti: ["Djibouti City", "Ali Sabieh", "Dikhil", "Tadjourah"],
+      Eritrea: ["Asmara", "Anseba", "Debub", "Gash-Barka"],
+    };
+
+    countrySelect.addEventListener('change', () => {
+      const selectedCountry = countrySelect.value;
+      const regions = regionsByCountry[selectedCountry] || [];
+
+      regionSelect.innerHTML = '';
+
+      if (regions.length === 0) {
+        regionSelect.innerHTML = '<option value="">Select country first</option>';
+        return;
+      }
+
+      regionSelect.innerHTML = '<option value="">Select region</option>' +
+        regions.map(r => `<option value="${r}">${r}</option>`).join('');
+    });
+  }
+  // // end here for form for events
+
+
+  // end here
+
+  // location track
+
+  const locationConsent = document.getElementById('locationConsent');
+  const latitudeInput = document.getElementById('latitudeInput');
+  const longitudeInput = document.getElementById('longitudeInput');
+  const locationStatus = document.getElementById('locationStatus');
+
+  if (locationConsent) {
+    locationConsent.addEventListener('change', () => {
+      if (!locationConsent.checked) {
+        latitudeInput.value = '';
+        longitudeInput.value = '';
+        locationStatus.textContent = '';
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        locationStatus.textContent = 'Location is not supported on this device.';
+        locationConsent.checked = false;
+        return;
+      }
+
+      locationStatus.textContent = 'Requesting location access...';
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          latitudeInput.value = position.coords.latitude;
+          longitudeInput.value = position.coords.longitude;
+          locationStatus.textContent = 'Location captured successfully.';
+          locationStatus.style.color = '#2e7d32';
+        },
+        (error) => {
+          locationStatus.textContent = 'Could not access your location. You can still register without it.';
+          locationStatus.style.color = '#c0392b';
+          locationConsent.checked = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  }
+  // end here
+
+  function showToast(message, type = 'success') {
+    let toastContainer = document.getElementById('toastContainer');
+
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toastContainer';
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast-msg ${type}`;
+    toast.innerHTML = `
+    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}"></i>
+    <span>${message}</span>
+  `;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('toast-hide');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
+  }
+
+
+  // FACE ID RECOGNION
+  const faceIdLoginBtn = document.getElementById('faceIdLoginBtn');
+  if (faceIdLoginBtn) {
+    faceIdLoginBtn.addEventListener('click', async () => {
+      const emailInput = document.getElementById('email');
+      const email = emailInput ? emailInput.value.trim() : '';
+
+      if (!email) {
+        showToast('Please enter your email first, then tap Face ID login.', 'error');
+        return;
+      }
+
+      try {
+        showToast('Preparing biometric verification...', 'success');
+
+        const optionsRes = await fetch('/account/webauthn/login-options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        if (!optionsRes.ok) {
+          const err = await optionsRes.json();
+          showToast(err.error || 'Biometric login not set up for this account.', 'error');
+          return;
+        }
+
+        const options = await optionsRes.json();
+
+        const credential = await SimpleWebAuthnBrowser.startAuthentication(options);
+
+        const verifyRes = await fetch('/account/webauthn/login-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential }),
+        });
+
+        const result = await verifyRes.json();
+
+        if (result.success) {
+          showToast('Verified! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = result.redirect;
+          }, 800);
+        } else {
+          showToast(result.message || 'Verification failed.', 'error');
+        }
+      } catch (error) {
+        showToast('Biometric login was cancelled or failed.', 'error');
+      }
+    });
+  }
+  // END HERE.
+
+
+
+  /* =====================================================
+     TEAM PAGE — bio toggle
+  ===================================================== */
+  document.querySelectorAll('.team-bio-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.team-card');
+      card.classList.toggle('is-open');
+      const label = btn.querySelector('span');
+      label.textContent = card.classList.contains('is-open') ? 'Hide Bio' : 'Read Bio';
+    });
   });
-}
-// END HERE.
-
-
-
-/* =====================================================
-   TEAM PAGE — bio toggle
-===================================================== */
-document.querySelectorAll('.team-bio-toggle').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const card = btn.closest('.team-card');
-    card.classList.toggle('is-open');
-    const label = btn.querySelector('span');
-    label.textContent = card.classList.contains('is-open') ? 'Hide Bio' : 'Read Bio';
-  });
-});
-// end here
+  // end here
 
   /* ---------- Generic dropdown handling (About Us, Resources) ---------- */
   const allDropdownToggles = Array.from(document.querySelectorAll('.dropdown-toggle'));
@@ -266,17 +416,17 @@ document.querySelectorAll('.team-bio-toggle').forEach((btn) => {
   /* =====================================================
    TOAST NOTIFICATIONS — auto-dismiss flash messages
 ===================================================== */
-const toastContainer = document.getElementById('toastContainer');
-if (toastContainer) {
-  const toastItems = toastContainer.querySelectorAll('.toast-msg');
+  const toastContainer = document.getElementById('toastContainer');
+  if (toastContainer) {
+    const toastItems = toastContainer.querySelectorAll('.toast-msg');
 
-  toastItems.forEach((toast) => {
-    setTimeout(() => {
-      toast.classList.add('toast-hide');
-      setTimeout(() => toast.remove(), 300);
-    }, 5000);
-  });
-}
+    toastItems.forEach((toast) => {
+      setTimeout(() => {
+        toast.classList.add('toast-hide');
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    });
+  }
 
   /* =====================================================
      LOGIN PAGE INTERACTIVITY
@@ -475,15 +625,15 @@ if (toastContainer) {
     };
 
     window.selectPayment = (index) => {
-  document.querySelectorAll('.payment-method').forEach((el, i) => {
-    el.classList.toggle('selected', i === index);
-  });
+      document.querySelectorAll('.payment-method').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
 
-  const bankDetailsFields = document.getElementById('bankDetailsFields');
-  if (bankDetailsFields) {
-    bankDetailsFields.style.display = index === 1 ? 'block' : 'none';
-  }
-};
+      const bankDetailsFields = document.getElementById('bankDetailsFields');
+      if (bankDetailsFields) {
+        bankDetailsFields.style.display = index === 1 ? 'block' : 'none';
+      }
+    };
 
     const uploadArea = document.getElementById('uploadArea');
     const proofInput = document.getElementById('proofUpload');
@@ -513,54 +663,54 @@ if (toastContainer) {
 
   // calculator for farm
   const calcRegion = document.getElementById('calcRegion');
-const calcDistrict = document.getElementById('calcDistrict');
-const calcCrop = document.getElementById('calcCrop');
-const calculatorForm = document.getElementById('calculatorForm');
-const calculatorResults = document.getElementById('calculatorResults');
+  const calcDistrict = document.getElementById('calcDistrict');
+  const calcCrop = document.getElementById('calcCrop');
+  const calculatorForm = document.getElementById('calculatorForm');
+  const calculatorResults = document.getElementById('calculatorResults');
 
-if (calcRegion) {
-  fetch('/calculator/regions').then(r => r.json()).then(regions => {
-    calcRegion.innerHTML = '<option value="">Select region</option>' + regions.map(r => `<option value="${r}">${r}</option>`).join('');
-  });
+  if (calcRegion) {
+    fetch('/calculator/regions').then(r => r.json()).then(regions => {
+      calcRegion.innerHTML = '<option value="">Select region</option>' + regions.map(r => `<option value="${r}">${r}</option>`).join('');
+    });
 
-  calcRegion.addEventListener('change', () => {
-    fetch(`/calculator/districts?region=${encodeURIComponent(calcRegion.value)}`)
-      .then(r => r.json())
-      .then(districts => {
-        calcDistrict.innerHTML = '<option value="">Select district</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
-        calcCrop.innerHTML = '<option value="">Select district first</option>';
-      });
-  });
+    calcRegion.addEventListener('change', () => {
+      fetch(`/calculator/districts?region=${encodeURIComponent(calcRegion.value)}`)
+        .then(r => r.json())
+        .then(districts => {
+          calcDistrict.innerHTML = '<option value="">Select district</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+          calcCrop.innerHTML = '<option value="">Select district first</option>';
+        });
+    });
 
-  calcDistrict.addEventListener('change', () => {
-    fetch(`/calculator/crops?region=${encodeURIComponent(calcRegion.value)}&district=${encodeURIComponent(calcDistrict.value)}`)
-      .then(r => r.json())
-      .then(crops => {
-        calcCrop.innerHTML = '<option value="">Select crop</option>' + crops.map(c => `<option value="${c}">${c}</option>`).join('');
-      });
-  });
+    calcDistrict.addEventListener('change', () => {
+      fetch(`/calculator/crops?region=${encodeURIComponent(calcRegion.value)}&district=${encodeURIComponent(calcDistrict.value)}`)
+        .then(r => r.json())
+        .then(crops => {
+          calcCrop.innerHTML = '<option value="">Select crop</option>' + crops.map(c => `<option value="${c}">${c}</option>`).join('');
+        });
+    });
 
-  calculatorForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(calculatorForm);
-    const payload = Object.fromEntries(formData.entries());
+    calculatorForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(calculatorForm);
+      const payload = Object.fromEntries(formData.entries());
 
-    fetch('/calculator/calculate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (!data.success) {
-          calculatorResults.innerHTML = `<p style="text-align:center;color:#c0392b;">${data.message}</p>`;
-          calculatorResults.style.display = 'block';
-          return;
-        }
+      fetch('/calculator/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) {
+            calculatorResults.innerHTML = `<p style="text-align:center;color:#c0392b;">${data.message}</p>`;
+            calculatorResults.style.display = 'block';
+            return;
+          }
 
-        const fmt = (n) => 'TZS ' + Math.round(n).toLocaleString();
+          const fmt = (n) => 'TZS ' + Math.round(n).toLocaleString();
 
-        calculatorResults.innerHTML = `
+          calculatorResults.innerHTML = `
           <h3 class="profile-section-title">Cost Breakdown</h3>
           <div class="calc-breakdown-row"><span>Seed/Seedlings</span><b>${fmt(data.breakdown.seedCost)}</b></div>
           <div class="calc-breakdown-row"><span>Fertilizer</span><b>${fmt(data.breakdown.fertilizerCost)}</b></div>
@@ -582,42 +732,42 @@ if (calcRegion) {
             <div class="calc-result-card"><div class="value">${data.roi.toFixed(1)}%</div><div class="label">ROI</div></div>
           </div>
         `;
-        calculatorResults.style.display = 'block';
-        calculatorResults.scrollIntoView({ behavior: 'smooth' });
-      });
-  });
-}
-// end here calculator.
+          calculatorResults.style.display = 'block';
+          calculatorResults.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+  }
+  // end here calculator.
 
-// trust devices track
-const registrationBehaviorForm = document.querySelector('.registration-page form');
-if (registrationBehaviorForm) {
-  let mouseMoves = 0;
-  let keystrokes = 0;
-  let pasteEvents = 0;
-  let tabBlurCount = 0;
-  const formStartTime = Date.now();
+  // trust devices track
+  const registrationBehaviorForm = document.querySelector('.registration-page form');
+  if (registrationBehaviorForm) {
+    let mouseMoves = 0;
+    let keystrokes = 0;
+    let pasteEvents = 0;
+    let tabBlurCount = 0;
+    const formStartTime = Date.now();
 
-  document.addEventListener('mousemove', () => { mouseMoves++; }, { passive: true });
-  document.addEventListener('keydown', () => { keystrokes++; }, { passive: true });
-  document.addEventListener('paste', () => { pasteEvents++; }, { passive: true });
-  window.addEventListener('blur', () => { tabBlurCount++; }, { passive: true });
+    document.addEventListener('mousemove', () => { mouseMoves++; }, { passive: true });
+    document.addEventListener('keydown', () => { keystrokes++; }, { passive: true });
+    document.addEventListener('paste', () => { pasteEvents++; }, { passive: true });
+    window.addEventListener('blur', () => { tabBlurCount++; }, { passive: true });
 
-  registrationBehaviorForm.addEventListener('submit', () => {
-    const behaviorData = {
-      mouseMoves,
-      keystrokes,
-      pasteEvents,
-      tabBlurCount,
-      timeOnFormMs: Date.now() - formStartTime,
-      screenSize: `${screen.width}x${screen.height}`,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      userAgent: navigator.userAgent,
-    };
-    document.getElementById('behaviorData').value = JSON.stringify(behaviorData);
-  });
-}
-// end here
+    registrationBehaviorForm.addEventListener('submit', () => {
+      const behaviorData = {
+        mouseMoves,
+        keystrokes,
+        pasteEvents,
+        tabBlurCount,
+        timeOnFormMs: Date.now() - formStartTime,
+        screenSize: `${screen.width}x${screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        userAgent: navigator.userAgent,
+      };
+      document.getElementById('behaviorData').value = JSON.stringify(behaviorData);
+    });
+  }
+  // end here
 
   /* =====================================================
      JOB OPPORTUNITIES PAGE — LIVE SEARCH & FILTER
@@ -674,18 +824,18 @@ if (registrationBehaviorForm) {
   /* =====================================================
    JOB APPLICATION FORM — CV upload preview
 ===================================================== */
-const cvUploadArea = document.getElementById('cvUploadArea');
-const cvUploadInput = document.getElementById('cvUpload');
+  const cvUploadArea = document.getElementById('cvUploadArea');
+  const cvUploadInput = document.getElementById('cvUpload');
 
-if (cvUploadArea && cvUploadInput) {
-  cvUploadArea.addEventListener('click', () => cvUploadInput.click());
-  cvUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('cvUploadedFile').style.display = 'block';
-      document.getElementById('cvFileName').textContent = e.target.files[0].name;
-    }
-  });
-}
+  if (cvUploadArea && cvUploadInput) {
+    cvUploadArea.addEventListener('click', () => cvUploadInput.click());
+    cvUploadInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        document.getElementById('cvUploadedFile').style.display = 'block';
+        document.getElementById('cvFileName').textContent = e.target.files[0].name;
+      }
+    });
+  }
 
   /* =====================================================
      GUIDANCE & TRAINING PAGE — CATEGORY FILTER
@@ -751,443 +901,443 @@ if (cvUploadArea && cvUploadInput) {
 
   // testmonials
   const testimonialSlider = document.getElementById('testimonialSlider');
-if (testimonialSlider) {
-  const slides = Array.from(testimonialSlider.querySelectorAll('.testimonial-slide'));
-  const dotsContainer = document.getElementById('testimonialDots');
-  const prevBtn = document.getElementById('testimonialPrev');
-  const nextBtn = document.getElementById('testimonialNext');
-  let currentIndex = 0;
-  let autoTimer;
+  if (testimonialSlider) {
+    const slides = Array.from(testimonialSlider.querySelectorAll('.testimonial-slide'));
+    const dotsContainer = document.getElementById('testimonialDots');
+    const prevBtn = document.getElementById('testimonialPrev');
+    const nextBtn = document.getElementById('testimonialNext');
+    let currentIndex = 0;
+    let autoTimer;
 
-  slides.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.className = 'testimonial-dot' + (i === 0 ? ' active' : '');
-    dot.addEventListener('click', () => goToSlide(i));
-    dotsContainer.appendChild(dot);
-  });
-  const dots = Array.from(dotsContainer.querySelectorAll('.testimonial-dot'));
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'testimonial-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = Array.from(dotsContainer.querySelectorAll('.testimonial-dot'));
 
-  function goToSlide(index) {
-    slides[currentIndex].classList.remove('active');
-    dots[currentIndex].classList.remove('active');
-    currentIndex = (index + slides.length) % slides.length;
-    slides[currentIndex].classList.add('active');
-    dots[currentIndex].classList.add('active');
+    function goToSlide(index) {
+      slides[currentIndex].classList.remove('active');
+      dots[currentIndex].classList.remove('active');
+      currentIndex = (index + slides.length) % slides.length;
+      slides[currentIndex].classList.add('active');
+      dots[currentIndex].classList.add('active');
+      resetAutoplay();
+    }
+    function resetAutoplay() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => goToSlide(currentIndex + 1), 6000);
+    }
+    if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
     resetAutoplay();
   }
-  function resetAutoplay() {
-    clearInterval(autoTimer);
-    autoTimer = setInterval(() => goToSlide(currentIndex + 1), 6000);
-  }
-  if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
-  if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
-  resetAutoplay();
-}
-// end here testmonials
-// =====================================================
-// PUBLIC CHATBOT (with Popular Questions + Password/Email change)
-// =====================================================
-const chatbotToggle = document.getElementById('chatbotToggle');
-const chatbotWindow = document.getElementById('chatbotWindow');
-const chatbotClose = document.getElementById('chatbotClose');
-const chatbotForm = document.getElementById('chatbotForm');
-const chatbotInput = document.getElementById('chatbotInput');
-const chatbotMessages = document.getElementById('chatbotMessages');
+  // end here testmonials
+  // =====================================================
+  // PUBLIC CHATBOT (with Popular Questions + Password/Email change)
+  // =====================================================
+  const chatbotToggle = document.getElementById('chatbotToggle');
+  const chatbotWindow = document.getElementById('chatbotWindow');
+  const chatbotClose = document.getElementById('chatbotClose');
+  const chatbotForm = document.getElementById('chatbotForm');
+  const chatbotInput = document.getElementById('chatbotInput');
+  const chatbotMessages = document.getElementById('chatbotMessages');
 
-if (chatbotToggle && chatbotWindow && chatbotForm) {
+  if (chatbotToggle && chatbotWindow && chatbotForm) {
 
-  let chatState = 'awaiting_name';
-  let visitorName = '';
-  let sessionId = null;
-  let pollTimer = null;
+    let chatState = 'awaiting_name';
+    let visitorName = '';
+    let sessionId = null;
+    let pollTimer = null;
 
-  // ✅ These MUST be declared here (outside the submit handler)
-  let pendingFlow = null;
-  let pendingAccountId = null;
-  let pendingStep = null;
+    // ✅ These MUST be declared here (outside the submit handler)
+    let pendingFlow = null;
+    let pendingAccountId = null;
+    let pendingStep = null;
 
-  // Open / Close
-  chatbotToggle.addEventListener('click', () => {
-    const isOpen = chatbotWindow.style.display === 'flex';
-    chatbotWindow.style.display = isOpen ? 'none' : 'flex';
-  });
-
-  if (chatbotClose) {
-    chatbotClose.addEventListener('click', () => {
-      chatbotWindow.style.display = 'none';
+    // Open / Close
+    chatbotToggle.addEventListener('click', () => {
+      const isOpen = chatbotWindow.style.display === 'flex';
+      chatbotWindow.style.display = isOpen ? 'none' : 'flex';
     });
-  }
 
-  function addMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = `chatbot-msg chatbot-msg-${sender}`;
-    msg.textContent = text;
-    chatbotMessages.appendChild(msg);
-    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-  }
-
-  function addBotMessage(text) {
-    addMessage(text, 'bot');
-  }
-
-  function addQuickButton(label, onClick) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chatbot-quick-btn';
-    btn.textContent = label;
-    btn.addEventListener('click', () => {
-      btn.remove();
-      onClick();
-    });
-    chatbotMessages.appendChild(btn);
-    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-  }
-
-  function startPollingLiveChat() {
-    clearInterval(pollTimer);
-    let lastCount = 0;
-    pollTimer = setInterval(() => {
-      if (!sessionId) return;
-      fetch(`/chat/${sessionId}/messages`)
-        .then(res => res.json())
-        .then(messages => {
-          if (messages.length > lastCount) {
-            messages.slice(lastCount).forEach(m => {
-              if (m.sender_type === 'ict' || m.sender_type === 'bot') {
-                addMessage(m.message, 'bot');
-              }
-            });
-            lastCount = messages.length;
-          }
-        });
-    }, 3000);
-  }
-
-  // Popular questions
-  document.querySelectorAll('.chatbot-quick-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      const question = pill.getAttribute('data-question');
-      const popular = document.getElementById('chatbotPopularQuestions');
-      if (popular) popular.style.display = 'none';
-
-      chatbotInput.value = question;
-      chatbotForm.dispatchEvent(new Event('submit'));
-    });
-  });
-
-  // ========== ONLY ONE submit handler ==========
-  chatbotForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = chatbotInput.value.trim();
-    if (!text) return;
-
-    addMessage(text, 'user');
-    chatbotInput.value = '';
-
-    // ----- Identity flow steps (must be first) -----
-    if (pendingStep === 'awaiting_name') {
-      pendingFlow.fullName = text;
-      pendingStep = 'awaiting_email';
-      addBotMessage('Thanks. Now please confirm the email address on your account.');
-      return;
-    }
-
-    if (pendingStep === 'awaiting_email') {
-      fetch('/chatbot/verify-identity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          full_name: pendingFlow.fullName,
-          email: text
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          addBotMessage(data.text);
-          if (data.verified) {
-            pendingAccountId = data.account_id;
-            pendingStep = 'awaiting_new_value';
-          } else {
-            pendingStep = null;
-            pendingFlow = null;
-          }
-        })
-        .catch(() => {
-          addBotMessage('Something went wrong. Please try again.');
-          pendingStep = null;
-          pendingFlow = null;
-        });
-      return;
-    }
-
-    if (pendingStep === 'awaiting_new_value') {
-      fetch('/chatbot/apply-change', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          account_id: pendingAccountId,
-          flow: pendingFlow.type,
-          new_value: text
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          addBotMessage(data.text);
-          if (data.success) {
-            pendingStep = null;
-            pendingFlow = null;
-            pendingAccountId = null;
-          }
-        })
-        .catch(() => addBotMessage('Something went wrong applying the change.'));
-      return;
-    }
-
-    // ----- Normal chat states -----
-    if (chatState === 'awaiting_name') {
-      visitorName = text;
-      fetch('/chatbot/start-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken
-        },
-        body: JSON.stringify({ visitor_name: visitorName })
-      })
-        .then(res => res.json())
-        .then(data => {
-          sessionId = data.session_id;
-          chatState = 'chatting';
-          addBotMessage(data.text);
-        });
-      return;
-    }
-
-    if (chatState === 'live_chat') {
-      fetch(`/chat/${sessionId}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-csrf-token': csrfToken
-        },
-        body: JSON.stringify({
-          message: text,
-          sender_type: 'visitor',
-          sender_name: visitorName
-        })
+    if (chatbotClose) {
+      chatbotClose.addEventListener('click', () => {
+        chatbotWindow.style.display = 'none';
       });
-      return;
     }
 
-    // ----- Default FAQ bot -----
-    fetch('/chatbot/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, session_id: sessionId })
-    })
-      .then(res => res.json())
-      .then(data => {
-        addBotMessage(data.text);
+    function addMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.className = `chatbot-msg chatbot-msg-${sender}`;
+      msg.textContent = text;
+      chatbotMessages.appendChild(msg);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
 
-        // Start password / email change flow
-        if (data.type === 'start_identity_flow') {
-          pendingFlow = { type: data.flow, fullName: null };
-          pendingStep = 'awaiting_name';
-          return;
-        }
+    function addBotMessage(text) {
+      addMessage(text, 'bot');
+    }
 
-        if (data.type === 'confirm_close') {
-          addQuickButton('Yes, close chat', () => {
-            addMessage('Yes, close chat', 'user');
-            addBotMessage('Thanks for chatting with AgroServices! Have a great day.');
-            setTimeout(() => {
-              chatbotWindow.style.display = 'none';
-              chatState = 'awaiting_name';
-              visitorName = '';
-              sessionId = null;
-              pendingStep = null;
-              pendingFlow = null;
-            }, 1200);
-          });
+    function addQuickButton(label, onClick) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chatbot-quick-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        btn.remove();
+        onClick();
+      });
+      chatbotMessages.appendChild(btn);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
 
-          addQuickButton('No, I have another question', () => {
-            addMessage('No, I have another question', 'user');
-            addBotMessage('Sure, go ahead and ask!');
-          });
-          return;
-        }
-
-        if (data.type === 'no_match') {
-          addQuickButton('Connect me to a live agent', () => {
-            addMessage('Connect me to a live agent', 'user');
-            fetch('/chatbot/connect-agent', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ session_id: sessionId })
-            })
-              .then(res => res.json())
-              .then(connectData => {
-                addBotMessage(connectData.text);
-                if (connectData.connected) {
-                  chatState = 'live_chat';
-                  startPollingLiveChat();
+    function startPollingLiveChat() {
+      clearInterval(pollTimer);
+      let lastCount = 0;
+      pollTimer = setInterval(() => {
+        if (!sessionId) return;
+        fetch(`/chat/${sessionId}/messages`)
+          .then(res => res.json())
+          .then(messages => {
+            if (messages.length > lastCount) {
+              messages.slice(lastCount).forEach(m => {
+                if (m.sender_type === 'ict' || m.sender_type === 'bot') {
+                  addMessage(m.message, 'bot');
                 }
               });
+              lastCount = messages.length;
+            }
           });
-        }
-
-        if (data.offer_close) {
-          addQuickButton('That answered my question — close chat', () => {
-            addMessage('That answered my question — close chat', 'user');
-            addBotMessage('Great! Thanks for chatting with AgroServices. Have a good day!');
-            setTimeout(() => {
-              chatbotWindow.style.display = 'none';
-              chatState = 'awaiting_name';
-              visitorName = '';
-              sessionId = null;
-            }, 1200);
-          });
-        }
-      })
-      .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
-  });
-}
-// end here
-
-/* =====================================================
-   CONTACT FORM VALIDATION
-===================================================== */
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-  const nameInput = document.getElementById('name');
-  const emailInput = document.getElementById('cEmail');
-  const subjectInput = document.getElementById('subject');
-  const messageInput = document.getElementById('message');
-  const contactBtn = document.getElementById('contactBtn');
-  const charCount = document.getElementById('charCount');
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  function validateField(input, isValid) {
-    const field = input.closest('.form-field');
-    if (field) field.classList.toggle('has-error', !isValid);
-    return isValid;
-  }
-
-  function validateContactForm() {
-    let isValid = true;
-
-    if (!nameInput.value.trim()) {
-      validateField(nameInput, false);
-      isValid = false;
-    } else {
-      validateField(nameInput, true);
+      }, 3000);
     }
 
-    if (!emailInput.value.trim() || !emailPattern.test(emailInput.value.trim())) {
-      validateField(emailInput, false);
-      isValid = false;
-    } else {
-      validateField(emailInput, true);
-    }
+    // Popular questions
+    document.querySelectorAll('.chatbot-quick-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const question = pill.getAttribute('data-question');
+        const popular = document.getElementById('chatbotPopularQuestions');
+        if (popular) popular.style.display = 'none';
 
-    if (!subjectInput.value.trim()) {
-      validateField(subjectInput, false);
-      isValid = false;
-    } else {
-      validateField(subjectInput, true);
-    }
-
-    if (!messageInput.value.trim()) {
-      validateField(messageInput, false);
-      isValid = false;
-    } else {
-      validateField(messageInput, true);
-    }
-
-    return isValid;
-  }
-
-  [nameInput, emailInput, subjectInput, messageInput].forEach((input) => {
-    input.addEventListener('blur', validateContactForm);
-    input.addEventListener('input', () => {
-      const field = input.closest('.form-field');
-      if (field) field.classList.remove('has-error');
+        chatbotInput.value = question;
+        chatbotForm.dispatchEvent(new Event('submit'));
+      });
     });
-  });
 
- if (messageInput && charCount) {
-  const MAX_CHARS = 500;
-
-  // Enforce a maxlength attribute too, as a browser-level backstop
-  messageInput.setAttribute('maxlength', MAX_CHARS);
-
-  messageInput.addEventListener('input', () => {
-    const currentLength = messageInput.value.length;
-
-    // Hard stop — trim any excess characters (covers paste events too)
-    if (currentLength > MAX_CHARS) {
-      messageInput.value = messageInput.value.substring(0, MAX_CHARS);
-    }
-
-    const updatedLength = messageInput.value.length;
-    charCount.textContent = updatedLength;
-
-    // Visual warning when approaching the limit
-    if (updatedLength >= MAX_CHARS) {
-      charCount.style.color = '#c0392b';
-    } else if (updatedLength >= MAX_CHARS * 0.9) {
-      charCount.style.color = '#f57f17';
-    } else {
-      charCount.style.color = '';
-    }
-  });
-}
-
-  contactForm.addEventListener('submit', (e) => {
-    if (!validateContactForm()) {
+    // ========== ONLY ONE submit handler ==========
+    chatbotForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      return;
+      const text = chatbotInput.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      chatbotInput.value = '';
+
+      // ----- Identity flow steps (must be first) -----
+      if (pendingStep === 'awaiting_name') {
+        pendingFlow.fullName = text;
+        pendingStep = 'awaiting_email';
+        addBotMessage('Thanks. Now please confirm the email address on your account.');
+        return;
+      }
+
+      if (pendingStep === 'awaiting_email') {
+        fetch('/chatbot/verify-identity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: pendingFlow.fullName,
+            email: text
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            addBotMessage(data.text);
+            if (data.verified) {
+              pendingAccountId = data.account_id;
+              pendingStep = 'awaiting_new_value';
+            } else {
+              pendingStep = null;
+              pendingFlow = null;
+            }
+          })
+          .catch(() => {
+            addBotMessage('Something went wrong. Please try again.');
+            pendingStep = null;
+            pendingFlow = null;
+          });
+        return;
+      }
+
+      if (pendingStep === 'awaiting_new_value') {
+        fetch('/chatbot/apply-change', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            account_id: pendingAccountId,
+            flow: pendingFlow.type,
+            new_value: text
+          })
+        })
+          .then(res => res.json())
+          .then(data => {
+            addBotMessage(data.text);
+            if (data.success) {
+              pendingStep = null;
+              pendingFlow = null;
+              pendingAccountId = null;
+            }
+          })
+          .catch(() => addBotMessage('Something went wrong applying the change.'));
+        return;
+      }
+
+      // ----- Normal chat states -----
+      if (chatState === 'awaiting_name') {
+        visitorName = text;
+        fetch('/chatbot/start-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': csrfToken
+          },
+          body: JSON.stringify({ visitor_name: visitorName })
+        })
+          .then(res => res.json())
+          .then(data => {
+            sessionId = data.session_id;
+            chatState = 'chatting';
+            addBotMessage(data.text);
+          });
+        return;
+      }
+
+      if (chatState === 'live_chat') {
+        fetch(`/chat/${sessionId}/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': csrfToken
+          },
+          body: JSON.stringify({
+            message: text,
+            sender_type: 'visitor',
+            sender_name: visitorName
+          })
+        });
+        return;
+      }
+
+      // ----- Default FAQ bot -----
+      fetch('/chatbot/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: sessionId })
+      })
+        .then(res => res.json())
+        .then(data => {
+          addBotMessage(data.text);
+
+          // Start password / email change flow
+          if (data.type === 'start_identity_flow') {
+            pendingFlow = { type: data.flow, fullName: null };
+            pendingStep = 'awaiting_name';
+            return;
+          }
+
+          if (data.type === 'confirm_close') {
+            addQuickButton('Yes, close chat', () => {
+              addMessage('Yes, close chat', 'user');
+              addBotMessage('Thanks for chatting with AgroServices! Have a great day.');
+              setTimeout(() => {
+                chatbotWindow.style.display = 'none';
+                chatState = 'awaiting_name';
+                visitorName = '';
+                sessionId = null;
+                pendingStep = null;
+                pendingFlow = null;
+              }, 1200);
+            });
+
+            addQuickButton('No, I have another question', () => {
+              addMessage('No, I have another question', 'user');
+              addBotMessage('Sure, go ahead and ask!');
+            });
+            return;
+          }
+
+          if (data.type === 'no_match') {
+            addQuickButton('Connect me to a live agent', () => {
+              addMessage('Connect me to a live agent', 'user');
+              fetch('/chatbot/connect-agent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+              })
+                .then(res => res.json())
+                .then(connectData => {
+                  addBotMessage(connectData.text);
+                  if (connectData.connected) {
+                    chatState = 'live_chat';
+                    startPollingLiveChat();
+                  }
+                });
+            });
+          }
+
+          if (data.offer_close) {
+            addQuickButton('That answered my question — close chat', () => {
+              addMessage('That answered my question — close chat', 'user');
+              addBotMessage('Great! Thanks for chatting with AgroServices. Have a good day!');
+              setTimeout(() => {
+                chatbotWindow.style.display = 'none';
+                chatState = 'awaiting_name';
+                visitorName = '';
+                sessionId = null;
+              }, 1200);
+            });
+          }
+        })
+        .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
+    });
+  }
+  // end here
+
+  /* =====================================================
+     CONTACT FORM VALIDATION
+  ===================================================== */
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('cEmail');
+    const subjectInput = document.getElementById('subject');
+    const messageInput = document.getElementById('message');
+    const contactBtn = document.getElementById('contactBtn');
+    const charCount = document.getElementById('charCount');
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function validateField(input, isValid) {
+      const field = input.closest('.form-field');
+      if (field) field.classList.toggle('has-error', !isValid);
+      return isValid;
     }
 
-    contactBtn.classList.add('is-loading');
-    contactBtn.disabled = true;
-  });
-}
-// end here
+    function validateContactForm() {
+      let isValid = true;
 
-// hero page for home
-const heroSlider = document.getElementById('heroSlider');
-if (heroSlider) {
-  const slides = Array.from(heroSlider.querySelectorAll('.hero-slide'));
-  const dotsContainer = document.getElementById('heroDots');
-  let idx = 0;
-  slides.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
-    dot.addEventListener('click', () => showSlide(i));
-    dotsContainer.appendChild(dot);
-  });
-  const dots = Array.from(dotsContainer.querySelectorAll('.hero-dot'));
-  function showSlide(i) {
-    slides[idx].classList.remove('active');
-    dots[idx].classList.remove('active');
-    idx = (i + slides.length) % slides.length;
-    slides[idx].classList.add('active');
-    dots[idx].classList.add('active');
+      if (!nameInput.value.trim()) {
+        validateField(nameInput, false);
+        isValid = false;
+      } else {
+        validateField(nameInput, true);
+      }
+
+      if (!emailInput.value.trim() || !emailPattern.test(emailInput.value.trim())) {
+        validateField(emailInput, false);
+        isValid = false;
+      } else {
+        validateField(emailInput, true);
+      }
+
+      if (!subjectInput.value.trim()) {
+        validateField(subjectInput, false);
+        isValid = false;
+      } else {
+        validateField(subjectInput, true);
+      }
+
+      if (!messageInput.value.trim()) {
+        validateField(messageInput, false);
+        isValid = false;
+      } else {
+        validateField(messageInput, true);
+      }
+
+      return isValid;
+    }
+
+    [nameInput, emailInput, subjectInput, messageInput].forEach((input) => {
+      input.addEventListener('blur', validateContactForm);
+      input.addEventListener('input', () => {
+        const field = input.closest('.form-field');
+        if (field) field.classList.remove('has-error');
+      });
+    });
+
+    if (messageInput && charCount) {
+      const MAX_CHARS = 500;
+
+      // Enforce a maxlength attribute too, as a browser-level backstop
+      messageInput.setAttribute('maxlength', MAX_CHARS);
+
+      messageInput.addEventListener('input', () => {
+        const currentLength = messageInput.value.length;
+
+        // Hard stop — trim any excess characters (covers paste events too)
+        if (currentLength > MAX_CHARS) {
+          messageInput.value = messageInput.value.substring(0, MAX_CHARS);
+        }
+
+        const updatedLength = messageInput.value.length;
+        charCount.textContent = updatedLength;
+
+        // Visual warning when approaching the limit
+        if (updatedLength >= MAX_CHARS) {
+          charCount.style.color = '#c0392b';
+        } else if (updatedLength >= MAX_CHARS * 0.9) {
+          charCount.style.color = '#f57f17';
+        } else {
+          charCount.style.color = '';
+        }
+      });
+    }
+
+    contactForm.addEventListener('submit', (e) => {
+      if (!validateContactForm()) {
+        e.preventDefault();
+        return;
+      }
+
+      contactBtn.classList.add('is-loading');
+      contactBtn.disabled = true;
+    });
   }
-  if (slides.length > 1) setInterval(() => showSlide(idx + 1), 6000);
-}
-// end here
+  // end here
 
-// registration intake
-const registrationIntakeLink = document.getElementById('registrationIntakeLink');
-const registrationIntakePanel = document.getElementById('registrationIntakePanel');
-const cancelRegistrationIntake = document.getElementById('cancelRegistrationIntake');
-if (registrationIntakeLink && registrationIntakePanel && dbMainContent) {
-  registrationIntakeLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; registrationIntakePanel.style.display='block'; });
-}
-if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click', (e) => { e.preventDefault(); registrationIntakePanel.style.display='none'; dbMainContent.style.display='block'; });
+  // hero page for home
+  const heroSlider = document.getElementById('heroSlider');
+  if (heroSlider) {
+    const slides = Array.from(heroSlider.querySelectorAll('.hero-slide'));
+    const dotsContainer = document.getElementById('heroDots');
+    let idx = 0;
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => showSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = Array.from(dotsContainer.querySelectorAll('.hero-dot'));
+    function showSlide(i) {
+      slides[idx].classList.remove('active');
+      dots[idx].classList.remove('active');
+      idx = (i + slides.length) % slides.length;
+      slides[idx].classList.add('active');
+      dots[idx].classList.add('active');
+    }
+    if (slides.length > 1) setInterval(() => showSlide(idx + 1), 6000);
+  }
+  // end here
+
+  // registration intake
+  const registrationIntakeLink = document.getElementById('registrationIntakeLink');
+  const registrationIntakePanel = document.getElementById('registrationIntakePanel');
+  const cancelRegistrationIntake = document.getElementById('cancelRegistrationIntake');
+  if (registrationIntakeLink && registrationIntakePanel && dbMainContent) {
+    registrationIntakeLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; registrationIntakePanel.style.display = 'block'; });
+  }
+  if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click', (e) => { e.preventDefault(); registrationIntakePanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
 
 
 
@@ -1246,7 +1396,7 @@ if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click',
         }
       });
     }
-  
+
 
     /* ---------- Shared reference to the main dashboard content ---------- */
     const dbMainContent = document.getElementById('dbMainContent');
@@ -1464,26 +1614,26 @@ if (cancelRegistrationIntake) cancelRegistrationIntake.addEventListener('click',
 
     // edit profile
     /* ---------- Profile section tabs (Personal / Education / Profession / Experience) ---------- */
-const profileNavItems = document.querySelectorAll('.profile-nav-item');
-const profileSections = document.querySelectorAll('.profile-section');
+    const profileNavItems = document.querySelectorAll('.profile-nav-item');
+    const profileSections = document.querySelectorAll('.profile-section');
 
-if (profileNavItems.length && profileSections.length) {
-  profileNavItems.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = btn.dataset.section;
+    if (profileNavItems.length && profileSections.length) {
+      profileNavItems.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.section;
 
-      profileNavItems.forEach((b) => b.classList.remove('is-active'));
-      btn.classList.add('is-active');
+          profileNavItems.forEach((b) => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
 
-      profileSections.forEach((sec) => {
-        const isMatch = sec.id === `profile-section-${target}`;
-        sec.classList.toggle('is-active', isMatch);
-        sec.style.display = isMatch ? 'block' : 'none';
+          profileSections.forEach((sec) => {
+            const isMatch = sec.id === `profile-section-${target}`;
+            sec.classList.toggle('is-active', isMatch);
+            sec.style.display = isMatch ? 'block' : 'none';
+          });
+        });
       });
-    });
-  });
-}
-// end here
+    }
+    // end here
 
 
     // Add Experience button
@@ -1507,865 +1657,865 @@ if (profileNavItems.length && profileSections.length) {
     // END of new Member Profile code
     // =====================================================
 
-      // job posting
-      const addJobLink = document.getElementById('addJobLink');
-      const addJobPanel = document.getElementById('addJobPanel');
-      const cancelAddJob = document.getElementById('cancelAddJob');
-      
-      if (addJobLink && addJobPanel && dbMainContent) {
-        addJobLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          dbMainContent.style.display = 'none';
-          if (changePasswordPanel) changePasswordPanel.style.display = 'none';
-          if (updateProfilePanel) updateProfilePanel.style.display = 'none';
-          if (allJobsPanel) allJobsPanel.style.display = 'none';
-          addJobPanel.style.display = 'block';
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-      }
-      
-      if (cancelAddJob && addJobPanel && dbMainContent) {
-        cancelAddJob.addEventListener('click', (e) => {
-          e.preventDefault();
-          addJobPanel.style.display = 'none';
-          dbMainContent.style.display = 'block';
-        });
-      }
-      
-      if (window.location.search.includes('jobPosted=true')) {
-        if (addJobPanel) addJobPanel.style.display = 'none';
-        if (dbMainContent) dbMainContent.style.display = 'block';
-      }
-      
-      // end here job posting
+    // job posting
+    const addJobLink = document.getElementById('addJobLink');
+    const addJobPanel = document.getElementById('addJobPanel');
+    const cancelAddJob = document.getElementById('cancelAddJob');
 
-      /* ---------- All Jobs panel toggle ---------- */
-const allJobsLink = document.getElementById('allJobsLink');
-const allJobsPanel = document.getElementById('allJobsPanel');
-const cancelAllJobs = document.getElementById('cancelAllJobs');
-
-if (allJobsLink && allJobsPanel && dbMainContent) {
-  allJobsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (changePasswordPanel) changePasswordPanel.style.display = 'none';
-    if (updateProfilePanel) updateProfilePanel.style.display = 'none';
-    if (addJobPanel) addJobPanel.style.display = 'none';
-    allJobsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-if (cancelAllJobs && allJobsPanel && dbMainContent) {
-  cancelAllJobs.addEventListener('click', (e) => {
-    e.preventDefault();
-    allJobsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-/* ---------- Applications panel toggle ---------- */
-const applicationsLink = document.getElementById('applicationsLink');
-const applicationsPanel = document.getElementById('applicationsPanel');
-const cancelApplications = document.getElementById('cancelApplications');
-
-if (applicationsLink && applicationsPanel && dbMainContent) {
-  applicationsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (changePasswordPanel) changePasswordPanel.style.display = 'none';
-    if (updateProfilePanel) updateProfilePanel.style.display = 'none';
-    if (addJobPanel) addJobPanel.style.display = 'none';
-    if (allJobsPanel) allJobsPanel.style.display = 'none';
-    applicationsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-if (cancelApplications && applicationsPanel && dbMainContent) {
-  cancelApplications.addEventListener('click', (e) => {
-    e.preventDefault();
-    applicationsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- Expand/collapse individual application details ---------- */
-document.querySelectorAll('.application-toggle').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.application-item');
-    item.classList.toggle('is-open');
-  });
-});
-/* =====================================================
-   MEMBER DASHBOARD — Job Opportunities & My Applications
-===================================================== */
-
-
-// Job Opportunities Panel
-const jobOpportunitiesLink = document.getElementById('jobOpportunitiesLink');
-const jobOpportunitiesPanel = document.getElementById('jobOpportunitiesPanel');
-const cancelJobOpportunities = document.getElementById('cancelJobOpportunities');
-
-if (jobOpportunitiesLink && jobOpportunitiesPanel && dbMainContent) {
-  jobOpportunitiesLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (myApplicationsPanel) myApplicationsPanel.style.display = 'none';
-    jobOpportunitiesPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-if (cancelJobOpportunities && jobOpportunitiesPanel && dbMainContent) {
-  cancelJobOpportunities.addEventListener('click', (e) => {
-    e.preventDefault();
-    jobOpportunitiesPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-// My Applications Panel
-const myApplicationsLink = document.getElementById('myApplicationsLink');
-const myApplicationsPanel = document.getElementById('myApplicationsPanel');
-const cancelMyApplications = document.getElementById('cancelMyApplications');
-
-if (myApplicationsLink && myApplicationsPanel && dbMainContent) {
-  myApplicationsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
-    myApplicationsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-if (cancelMyApplications && myApplicationsPanel && dbMainContent) {
-  cancelMyApplications.addEventListener('click', (e) => {
-    e.preventDefault();
-    myApplicationsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-// Job listing interactivity (works on both pages)
-document.querySelectorAll('.job-toggle-details').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const card = btn.closest('.job-listing-card');
-    if (card) card.classList.toggle('is-open');
-  });
-});
-
-document.querySelectorAll('.job-open-apply-form').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const card = btn.closest('.job-listing-card');
-    const formWrap = card ? card.querySelector('.job-apply-form-wrap') : null;
-    if (formWrap) {
-      const isVisible = formWrap.style.display === 'block';
-      formWrap.style.display = isVisible ? 'none' : 'block';
-      if (!isVisible) formWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (addJobLink && addJobPanel && dbMainContent) {
+      addJobLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+        if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+        if (allJobsPanel) allJobsPanel.style.display = 'none';
+        addJobPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
-  });
-});
 
-document.querySelectorAll('.job-cancel-apply').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const formWrap = btn.closest('.job-apply-form-wrap');
-    if (formWrap) formWrap.style.display = 'none';
-  });
-});
+    if (cancelAddJob && addJobPanel && dbMainContent) {
+      cancelAddJob.addEventListener('click', (e) => {
+        e.preventDefault();
+        addJobPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
 
-// CV upload preview per job
-document.querySelectorAll('.job-cv-upload-area').forEach((area) => {
-  const input = area.querySelector('.job-cv-upload-input');
-  const uploadedDiv = area.parentElement.querySelector('.job-cv-uploaded-file');
-  const fileNameSpan = area.parentElement.querySelector('.job-cv-file-name');
+    if (window.location.search.includes('jobPosted=true')) {
+      if (addJobPanel) addJobPanel.style.display = 'none';
+      if (dbMainContent) dbMainContent.style.display = 'block';
+    }
 
-  if (input && uploadedDiv && fileNameSpan) {
-    area.addEventListener('click', () => input.click());
-    input.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        uploadedDiv.style.display = 'block';
-        fileNameSpan.textContent = e.target.files[0].name;
+    // end here job posting
+
+    /* ---------- All Jobs panel toggle ---------- */
+    const allJobsLink = document.getElementById('allJobsLink');
+    const allJobsPanel = document.getElementById('allJobsPanel');
+    const cancelAllJobs = document.getElementById('cancelAllJobs');
+
+    if (allJobsLink && allJobsPanel && dbMainContent) {
+      allJobsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+        if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+        if (addJobPanel) addJobPanel.style.display = 'none';
+        allJobsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelAllJobs && allJobsPanel && dbMainContent) {
+      cancelAllJobs.addEventListener('click', (e) => {
+        e.preventDefault();
+        allJobsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    /* ---------- Applications panel toggle ---------- */
+    const applicationsLink = document.getElementById('applicationsLink');
+    const applicationsPanel = document.getElementById('applicationsPanel');
+    const cancelApplications = document.getElementById('cancelApplications');
+
+    if (applicationsLink && applicationsPanel && dbMainContent) {
+      applicationsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (changePasswordPanel) changePasswordPanel.style.display = 'none';
+        if (updateProfilePanel) updateProfilePanel.style.display = 'none';
+        if (addJobPanel) addJobPanel.style.display = 'none';
+        if (allJobsPanel) allJobsPanel.style.display = 'none';
+        applicationsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelApplications && applicationsPanel && dbMainContent) {
+      cancelApplications.addEventListener('click', (e) => {
+        e.preventDefault();
+        applicationsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    /* ---------- Expand/collapse individual application details ---------- */
+    document.querySelectorAll('.application-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.application-item');
+        item.classList.toggle('is-open');
+      });
+    });
+    /* =====================================================
+       MEMBER DASHBOARD — Job Opportunities & My Applications
+    ===================================================== */
+
+
+    // Job Opportunities Panel
+    const jobOpportunitiesLink = document.getElementById('jobOpportunitiesLink');
+    const jobOpportunitiesPanel = document.getElementById('jobOpportunitiesPanel');
+    const cancelJobOpportunities = document.getElementById('cancelJobOpportunities');
+
+    if (jobOpportunitiesLink && jobOpportunitiesPanel && dbMainContent) {
+      jobOpportunitiesLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (myApplicationsPanel) myApplicationsPanel.style.display = 'none';
+        jobOpportunitiesPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelJobOpportunities && jobOpportunitiesPanel && dbMainContent) {
+      cancelJobOpportunities.addEventListener('click', (e) => {
+        e.preventDefault();
+        jobOpportunitiesPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // My Applications Panel
+    const myApplicationsLink = document.getElementById('myApplicationsLink');
+    const myApplicationsPanel = document.getElementById('myApplicationsPanel');
+    const cancelMyApplications = document.getElementById('cancelMyApplications');
+
+    if (myApplicationsLink && myApplicationsPanel && dbMainContent) {
+      myApplicationsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
+        myApplicationsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelMyApplications && myApplicationsPanel && dbMainContent) {
+      cancelMyApplications.addEventListener('click', (e) => {
+        e.preventDefault();
+        myApplicationsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // Job listing interactivity (works on both pages)
+    document.querySelectorAll('.job-toggle-details').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.job-listing-card');
+        if (card) card.classList.toggle('is-open');
+      });
+    });
+
+    document.querySelectorAll('.job-open-apply-form').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.job-listing-card');
+        const formWrap = card ? card.querySelector('.job-apply-form-wrap') : null;
+        if (formWrap) {
+          const isVisible = formWrap.style.display === 'block';
+          formWrap.style.display = isVisible ? 'none' : 'block';
+          if (!isVisible) formWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.job-cancel-apply').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const formWrap = btn.closest('.job-apply-form-wrap');
+        if (formWrap) formWrap.style.display = 'none';
+      });
+    });
+
+    // CV upload preview per job
+    document.querySelectorAll('.job-cv-upload-area').forEach((area) => {
+      const input = area.querySelector('.job-cv-upload-input');
+      const uploadedDiv = area.parentElement.querySelector('.job-cv-uploaded-file');
+      const fileNameSpan = area.parentElement.querySelector('.job-cv-file-name');
+
+      if (input && uploadedDiv && fileNameSpan) {
+        area.addEventListener('click', () => input.click());
+        input.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            uploadedDiv.style.display = 'block';
+            fileNameSpan.textContent = e.target.files[0].name;
+          }
+        });
       }
     });
-  }
-});
 
-// Handle redirect after successful application
-if (window.location.search.includes('applicationSubmitted=true')) {
-  if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
-  if (dbMainContent) dbMainContent.style.display = 'block';
-}
-/* ---------- Add News panel toggle ---------- */
-const addNewsLink = document.getElementById('addNewsLink');
-const addNewsPanel = document.getElementById('addNewsPanel');
-const cancelAddNews = document.getElementById('cancelAddNews');
-
-if (addNewsLink && addNewsPanel && dbMainContent) {
-  addNewsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (addEventPanel) addEventPanel.style.display = 'none';
-    addNewsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAddNews && addNewsPanel && dbMainContent) {
-  cancelAddNews.addEventListener('click', (e) => {
-    e.preventDefault();
-    addNewsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- Add Event panel toggle ---------- */
-const addEventLink = document.getElementById('addEventLink');
-const addEventPanel = document.getElementById('addEventPanel');
-const cancelAddEvent = document.getElementById('cancelAddEvent');
-
-if (addEventLink && addEventPanel && dbMainContent) {
-  addEventLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    if (addNewsPanel) addNewsPanel.style.display = 'none';
-    addEventPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAddEvent && addEventPanel && dbMainContent) {
-  cancelAddEvent.addEventListener('click', (e) => {
-    e.preventDefault();
-    addEventPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- News image upload preview ---------- */
-const newsImageUploadArea = document.getElementById('newsImageUploadArea');
-const newsImageUploadInput = document.getElementById('newsImageUpload');
-if (newsImageUploadArea && newsImageUploadInput) {
-  newsImageUploadArea.addEventListener('click', () => newsImageUploadInput.click());
-  newsImageUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('newsImageUploadedFile').style.display = 'block';
-      document.getElementById('newsImageFileName').textContent = e.target.files[0].name;
+    // Handle redirect after successful application
+    if (window.location.search.includes('applicationSubmitted=true')) {
+      if (jobOpportunitiesPanel) jobOpportunitiesPanel.style.display = 'none';
+      if (dbMainContent) dbMainContent.style.display = 'block';
     }
-  });
-}
+    /* ---------- Add News panel toggle ---------- */
+    const addNewsLink = document.getElementById('addNewsLink');
+    const addNewsPanel = document.getElementById('addNewsPanel');
+    const cancelAddNews = document.getElementById('cancelAddNews');
 
-/* ---------- All News panel toggle ---------- */
-const allNewsLink = document.getElementById('allNewsLink');
-const allNewsPanel = document.getElementById('allNewsPanel');
-const cancelAllNews = document.getElementById('cancelAllNews');
-
-if (allNewsLink && allNewsPanel && dbMainContent) {
-  allNewsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    allNewsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAllNews && allNewsPanel && dbMainContent) {
-  cancelAllNews.addEventListener('click', (e) => {
-    e.preventDefault();
-    allNewsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- All Events panel toggle ---------- */
-const allEventsLink = document.getElementById('allEventsLink');
-const allEventsPanel = document.getElementById('allEventsPanel');
-const cancelAllEvents = document.getElementById('cancelAllEvents');
-
-if (allEventsLink && allEventsPanel && dbMainContent) {
-  allEventsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    allEventsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAllEvents && allEventsPanel && dbMainContent) {
-  cancelAllEvents.addEventListener('click', (e) => {
-    e.preventDefault();
-    allEventsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- Edit form toggle (news + events) ---------- */
-document.querySelectorAll('.manage-edit-toggle').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.manage-item');
-    const form = item.querySelector('.manage-edit-form');
-    form.style.display = form.style.display === 'block' ? 'none' : 'block';
-  });
-});
-
-const trackLoginsLink = document.getElementById('trackLoginsLink');
-const trackLoginsPanel = document.getElementById('trackLoginsPanel');
-const cancelTrackLogins = document.getElementById('cancelTrackLogins');
-
-if (trackLoginsLink && trackLoginsPanel && dbMainContent) {
-  trackLoginsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    trackLoginsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelTrackLogins && trackLoginsPanel && dbMainContent) {
-  cancelTrackLogins.addEventListener('click', (e) => {
-    e.preventDefault();
-    trackLoginsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-// my training
-const addTrainingLink = document.getElementById('addTrainingLink');
-const addTrainingPanel = document.getElementById('addTrainingPanel');
-const cancelAddTraining = document.getElementById('cancelAddTraining');
-if (addTrainingLink && addTrainingPanel && dbMainContent) {
-  addTrainingLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    addTrainingPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAddTraining && addTrainingPanel && dbMainContent) {
-  cancelAddTraining.addEventListener('click', (e) => {
-    e.preventDefault();
-    addTrainingPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-const trainingOpportunitiesLink = document.getElementById('trainingOpportunitiesLink');
-const trainingOpportunitiesPanel = document.getElementById('trainingOpportunitiesPanel');
-const cancelTrainingOpportunities = document.getElementById('cancelTrainingOpportunities');
-if (trainingOpportunitiesLink && trainingOpportunitiesPanel && dbMainContent) {
-  trainingOpportunitiesLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    trainingOpportunitiesPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelTrainingOpportunities && trainingOpportunitiesPanel && dbMainContent) {
-  cancelTrainingOpportunities.addEventListener('click', (e) => {
-    e.preventDefault();
-    trainingOpportunitiesPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-// training registrtation
-const trainingRegistrationsLink = document.getElementById('trainingRegistrationsLink');
-const trainingRegistrationsPanel = document.getElementById('trainingRegistrationsPanel');
-const cancelTrainingRegistrations = document.getElementById('cancelTrainingRegistrations');
-
-if (trainingRegistrationsLink && trainingRegistrationsPanel && dbMainContent) {
-  trainingRegistrationsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    trainingRegistrationsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelTrainingRegistrations && trainingRegistrationsPanel && dbMainContent) {
-  cancelTrainingRegistrations.addEventListener('click', (e) => {
-    e.preventDefault();
-    trainingRegistrationsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here
-
-// guides start here
-const uploadGuidesLink = document.getElementById('uploadGuidesLink');
-const uploadGuidesPanel = document.getElementById('uploadGuidesPanel');
-const cancelUploadGuide = document.getElementById('cancelUploadGuide');
-
-if (uploadGuidesLink && uploadGuidesPanel && dbMainContent) {
-  uploadGuidesLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    uploadGuidesPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelUploadGuide && uploadGuidesPanel && dbMainContent) {
-  cancelUploadGuide.addEventListener('click', (e) => {
-    e.preventDefault();
-    uploadGuidesPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-const guideUploadArea = document.getElementById('guideUploadArea');
-const guideUploadInput = document.getElementById('guideUploadInput');
-if (guideUploadArea && guideUploadInput) {
-  guideUploadArea.addEventListener('click', () => guideUploadInput.click());
-  guideUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('guideUploadedFile').style.display = 'block';
-      document.getElementById('guideFileName').textContent = e.target.files[0].name;
-    }
-  });
-}
-// end here
-
-// Add Lesson
-const addLessonLink = document.getElementById('addLessonLink');
-const addLessonPanel = document.getElementById('addLessonPanel');
-const cancelAddLesson = document.getElementById('cancelAddLesson');
-if (addLessonLink && addLessonPanel && dbMainContent) {
-  addLessonLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; addLessonPanel.style.display='block'; });
-}
-if (cancelAddLesson) cancelAddLesson.addEventListener('click', (e) => { e.preventDefault(); addLessonPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-// Upload Material
-const uploadMaterialLink = document.getElementById('uploadMaterialLink');
-const uploadMaterialPanel = document.getElementById('uploadMaterialPanel');
-const cancelUploadMaterial = document.getElementById('cancelUploadMaterial');
-if (uploadMaterialLink && uploadMaterialPanel && dbMainContent) {
-  uploadMaterialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; uploadMaterialPanel.style.display='block'; });
-}
-if (cancelUploadMaterial) cancelUploadMaterial.addEventListener('click', (e) => { e.preventDefault(); uploadMaterialPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-const materialUploadArea = document.getElementById('materialUploadArea');
-const materialUploadInput = document.getElementById('materialUploadInput');
-if (materialUploadArea && materialUploadInput) {
-  materialUploadArea.addEventListener('click', () => materialUploadInput.click());
-  materialUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('materialUploadedFile').style.display = 'block';
-      document.getElementById('materialFileName').textContent = e.target.files[0].name;
-    }
-  });
-}
-// end here
-
-/* ---------- Create Ticket panel ---------- */
-const createTicketLink = document.getElementById('createTicketLink');
-const createTicketPanel = document.getElementById('createTicketPanel');
-const cancelCreateTicket = document.getElementById('cancelCreateTicket');
-if (createTicketLink && createTicketPanel && dbMainContent) {
-  createTicketLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; createTicketPanel.style.display='block'; });
-}
-if (cancelCreateTicket) cancelCreateTicket.addEventListener('click', (e) => { e.preventDefault(); createTicketPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-/* ---------- My Messages panel ---------- */
-const myMessagesLink = document.getElementById('myMessagesLink');
-const myMessagesPanel = document.getElementById('myMessagesPanel');
-const cancelMyMessages = document.getElementById('cancelMyMessages');
-if (myMessagesLink && myMessagesPanel && dbMainContent) {
-  myMessagesLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; myMessagesPanel.style.display='block'; });
-}
-if (cancelMyMessages) cancelMyMessages.addEventListener('click', (e) => { e.preventDefault(); myMessagesPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-/* ---------- Support Tickets panel (ICT) ---------- */
-const supportTicketsLink = document.getElementById('supportTicketsLink');
-const supportTicketsPanel = document.getElementById('supportTicketsPanel');
-const cancelSupportTickets = document.getElementById('cancelSupportTickets');
-if (supportTicketsLink && supportTicketsPanel && dbMainContent) {
-  supportTicketsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; supportTicketsPanel.style.display='block'; });
-}
-if (cancelSupportTickets) cancelSupportTickets.addEventListener('click', (e) => { e.preventDefault(); supportTicketsPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-const viewAllTicketsLink = document.getElementById('viewAllTicketsLink');
-if (viewAllTicketsLink && supportTicketsLink) {
-  viewAllTicketsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    supportTicketsLink.click();
-  });
-}
-
-
-/* ---------- Ticket expand/collapse + lazy-load messages ---------- */
-document.querySelectorAll('.ticket-toggle').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.ticket-item');
-    const ticketId = item.dataset.ticketId;
-    const wasOpen = item.classList.contains('is-open');
-    item.classList.toggle('is-open');
-
-    if (!wasOpen) {
-      fetch(`/account/tickets/${ticketId}/messages`)
-        .then(res => res.json())
-        .then(messages => {
-          const container = document.getElementById(`messages-${ticketId}`);
-          if (!container) return;
-          if (messages.length === 0) {
-            container.innerHTML = '<p style="font-size:0.8rem; color:#9ca3af;">No replies yet.</p>';
-            return;
-          }
-          container.innerHTML = messages.map(m => {
-            const isIct = m.account_type === 'ict_staff' || m.account_type === 'admin';
-            const cls = isIct ? 'ticket-msg-theirs' : 'ticket-msg-mine';
-            const time = new Date(m.created_at).toLocaleString('en-GB');
-            return `<div class="ticket-msg ${cls}">${m.message}<div class="ticket-msg-meta">${m.full_name} &middot; ${time}</div></div>`;
-          }).join('');
-        })
-        .catch(() => {
-          const container = document.getElementById(`messages-${ticketId}`);
-          if (container) container.innerHTML = '<p style="font-size:0.8rem; color:#c0392b;">Failed to load messages.</p>';
-        });
-    }
-  });
-});
-//end here
-
-/*****************
- * 
- * Delivery get all members
- * 
- */
-const allMembersLink = document.getElementById('allMembersLink');
-const allMembersPanel = document.getElementById('allMembersPanel');
-const cancelAllMembers = document.getElementById('cancelAllMembers');
-
-if (allMembersLink && allMembersPanel && dbMainContent) {
-  allMembersLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    allMembersPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAllMembers && allMembersPanel && dbMainContent) {
-  cancelAllMembers.addEventListener('click', (e) => {
-    e.preventDefault();
-    allMembersPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-// end here
-
-/********************
- * 
- * Delivery team member
- */
-const addTeamMemberLink = document.getElementById('addTeamMemberLink');
-const addTeamMemberPanel = document.getElementById('addTeamMemberPanel');
-const cancelAddTeamMember = document.getElementById('cancelAddTeamMember');
-
-if (addTeamMemberLink && addTeamMemberPanel && dbMainContent) {
-  addTeamMemberLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    addTeamMemberPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAddTeamMember && addTeamMemberPanel && dbMainContent) {
-  cancelAddTeamMember.addEventListener('click', (e) => {
-    e.preventDefault();
-    addTeamMemberPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-const teamPhotoUploadArea = document.getElementById('teamPhotoUploadArea');
-const teamPhotoUploadInput = document.getElementById('teamPhotoUploadInput');
-if (teamPhotoUploadArea && teamPhotoUploadInput) {
-  teamPhotoUploadArea.addEventListener('click', () => teamPhotoUploadInput.click());
-  teamPhotoUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('teamPhotoUploadedFile').style.display = 'block';
-      document.getElementById('teamPhotoFileName').textContent = e.target.files[0].name;
-    }
-  });
-}
-// end here team member.
-
-// Delivery admin to see all team member
-const allTeamMembersLink = document.getElementById('allTeamMembersLink');
-const allTeamMembersPanel = document.getElementById('allTeamMembersPanel');
-const cancelAllTeamMembers = document.getElementById('cancelAllTeamMembers');
-
-if (allTeamMembersLink && allTeamMembersPanel && dbMainContent) {
-  allTeamMembersLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    allTeamMembersPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAllTeamMembers && allTeamMembersPanel && dbMainContent) {
-  cancelAllTeamMembers.addEventListener('click', (e) => {
-    e.preventDefault();
-    allTeamMembersPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// admin see all team member end here
-
-//  edit profile photo (original code kept)
-const profilePhotoUpload = document.getElementById('profilePhotoUpload');
-const profilePhotoInput = document.getElementById('profilePhotoInput');
-
-if (profilePhotoUpload && profilePhotoInput) {
-  profilePhotoUpload.addEventListener('click', () => profilePhotoInput.click());
-
-  profilePhotoInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const oldPreview = document.getElementById('profilePhotoPreview');
-      if (oldPreview) {
-        const img = document.createElement('img');
-        img.src = event.target.result;
-        img.id = 'profilePhotoPreview';
-        img.className = 'profile-photo-preview';
-        oldPreview.replaceWith(img);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-// end here
-
-// message read
-const messagesLink = document.getElementById('messagesLink');
-const messagesPanel = document.getElementById('messagesPanel');
-const cancelMessages = document.getElementById('cancelMessages');
-
-if (messagesLink && messagesPanel && dbMainContent) {
-  messagesLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    messagesPanel.style.display = 'block';
-  });
-}
-if (cancelMessages && messagesPanel && dbMainContent) {
-  cancelMessages.addEventListener('click', (e) => {
-    e.preventDefault();
-    messagesPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-document.querySelectorAll('.message-toggle').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.ticket-item');
-    item.classList.toggle('is-open');
-  });
-});
-// end here messages
-
-/**************************
- * Delivery registered users for events.
- */
-const registeredUsersLink = document.getElementById('registeredUsersLink');
-const registeredUsersPanel = document.getElementById('registeredUsersPanel');
-const cancelRegisteredUsers = document.getElementById('cancelRegisteredUsers');
-
-if (registeredUsersLink && registeredUsersPanel && dbMainContent) {
-  registeredUsersLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    registeredUsersPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelRegisteredUsers && registeredUsersPanel && dbMainContent) {
-  cancelRegisteredUsers.addEventListener('click', (e) => {
-    e.preventDefault();
-    registeredUsersPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here
-
-/* ---------- Dashboard search ---------- */
-const dashboardSearchInput = document.getElementById('dashboardSearchInput');
-const dashboardSearchResults = document.getElementById('dashboardSearchResults');
-
-if (dashboardSearchInput && dashboardSearchResults) {
-  const roleAttr = document.body.getAttribute('data-role') || '';
-  let searchEndpoint = '/account/search/member';
-  if (roleAttr === 'admin') searchEndpoint = '/account/search/admin';
-  if (roleAttr === 'ict_staff') searchEndpoint = '/account/search/ict';
-
-  let debounceTimer;
-
-  dashboardSearchInput.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    const query = dashboardSearchInput.value.trim();
-
-    if (query.length < 2) {
-      dashboardSearchResults.style.display = 'none';
-      return;
-    }
-
-    debounceTimer = setTimeout(() => {
-      fetch(`${searchEndpoint}?q=${encodeURIComponent(query)}`)
-        .then(res => res.json())
-        .then(data => renderSearchResults(data))
-        .catch(() => {
-          dashboardSearchResults.innerHTML = '<div class="search-no-results">Search failed. Try again.</div>';
-          dashboardSearchResults.style.display = 'block';
-        });
-    }, 300);
-  });
-
-  function renderSearchResults(data) {
-    let html = '';
-    let hasResults = false;
-
-    if (data.accounts && data.accounts.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">Users</div>';
-      data.accounts.forEach(a => {
-        html += `<div class="search-result-item"><b>${a.full_name}</b><small>${a.email} &middot; ${a.account_type}</small></div>`;
+    if (addNewsLink && addNewsPanel && dbMainContent) {
+      addNewsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (addEventPanel) addEventPanel.style.display = 'none';
+        addNewsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
-      html += '</div>';
     }
-
-    if (data.jobs && data.jobs.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">Jobs</div>';
-      data.jobs.forEach(j => {
-        html += `<div class="search-result-item"><b>${j.title}</b><small>${j.region} &middot; ${j.job_type}</small></div>`;
+    if (cancelAddNews && addNewsPanel && dbMainContent) {
+      cancelAddNews.addEventListener('click', (e) => {
+        e.preventDefault();
+        addNewsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
       });
-      html += '</div>';
     }
 
-    if (data.news && data.news.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">News</div>';
-      data.news.forEach(n => {
-        html += `<div class="search-result-item"><b>${n.title}</b></div>`;
+    /* ---------- Add Event panel toggle ---------- */
+    const addEventLink = document.getElementById('addEventLink');
+    const addEventPanel = document.getElementById('addEventPanel');
+    const cancelAddEvent = document.getElementById('cancelAddEvent');
+
+    if (addEventLink && addEventPanel && dbMainContent) {
+      addEventLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        if (addNewsPanel) addNewsPanel.style.display = 'none';
+        addEventPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
-      html += '</div>';
     }
-
-    if (data.events && data.events.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">Events</div>';
-      data.events.forEach(e => {
-        html += `<div class="search-result-item"><b>${e.title}</b></div>`;
+    if (cancelAddEvent && addEventPanel && dbMainContent) {
+      cancelAddEvent.addEventListener('click', (e) => {
+        e.preventDefault();
+        addEventPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
       });
-      html += '</div>';
     }
 
-    if (data.tickets && data.tickets.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">Tickets</div>';
-      data.tickets.forEach(t => {
-        html += `<div class="search-result-item"><b>#${t.ticket_number} — ${t.subject}</b><small>${t.full_name}</small></div>`;
-      });
-      html += '</div>';
-    }
-
-    if (data.trainings && data.trainings.length > 0) {
-      hasResults = true;
-      html += '<div class="search-result-group"><div class="search-result-group-title">Trainings</div>';
-      data.trainings.forEach(t => {
-        html += `<div class="search-result-item"><b>${t.title}</b></div>`;
-      });
-      html += '</div>';
-    }
-
-    dashboardSearchResults.innerHTML = hasResults ? html : '<div class="search-no-results">No results found.</div>';
-    dashboardSearchResults.style.display = 'block';
-  }
-
-  document.addEventListener('click', (e) => {
-    if (!dashboardSearchInput.contains(e.target) && !dashboardSearchResults.contains(e.target)) {
-      dashboardSearchResults.style.display = 'none';
-    }
-  });
-}
-// end here search.
-
-// payments
-const allPaymentsLink = document.getElementById('allPaymentsLink');
-const allPaymentsLink2 = document.getElementById('allPaymentsLink2');
-const allPaymentsPanel = document.getElementById('allPaymentsPanel');
-const cancelAllPayments = document.getElementById('cancelAllPayments');
-
-function openAllPayments(e) {
-  e.preventDefault();
-  dbMainContent.style.display = 'none';
-  allPaymentsPanel.style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-if (allPaymentsLink && allPaymentsPanel && dbMainContent) allPaymentsLink.addEventListener('click', openAllPayments);
-if (allPaymentsLink2 && allPaymentsPanel && dbMainContent) allPaymentsLink2.addEventListener('click', openAllPayments);
-
-if (cancelAllPayments && allPaymentsPanel && dbMainContent) {
-  cancelAllPayments.addEventListener('click', (e) => {
-    e.preventDefault();
-    allPaymentsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here
-
-// show all members
-const ictAllMembersLink = document.getElementById('ictAllMembersLink');
-const ictAllMembersPanel = document.getElementById('ictAllMembersPanel');
-const cancelIctAllMembers = document.getElementById('cancelIctAllMembers');
-
-if (ictAllMembersLink && ictAllMembersPanel && dbMainContent) {
-  ictAllMembersLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    ictAllMembersPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelIctAllMembers && ictAllMembersPanel && dbMainContent) {
-  cancelIctAllMembers.addEventListener('click', (e) => {
-    e.preventDefault();
-    ictAllMembersPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here show all members
-
-// delivery admin
-const adminManagementLink = document.getElementById('adminManagementLink');
-const adminManagementPanel = document.getElementById('adminManagementPanel');
-const cancelAdminManagement = document.getElementById('cancelAdminManagement');
-if (adminManagementLink && adminManagementPanel && dbMainContent) {
-  adminManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; adminManagementPanel.style.display='block'; });
-}
-if (cancelAdminManagement) cancelAdminManagement.addEventListener('click', (e) => { e.preventDefault(); adminManagementPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-// notifications area
-const notifToggle = document.getElementById('notifToggle');
-const notifDropdown = document.getElementById('notifDropdown');
-const notifCount = document.getElementById('notifCount'); 
-const notifDot = document.getElementById('notifDot');
-const notifList = document.getElementById('notifList');
-const markAllReadBtn = document.getElementById('markAllReadBtn');
-
-function loadNotifications() {
-  fetch('/account/notifications')
-    .then(res => res.json())
-    .then(items => {
-      if (notifCount) {
-        if (items.length > 0) {
-          notifCount.textContent = items.length > 9 ? '9+' : items.length;
-          notifCount.style.display = 'flex';
-        } else {
-          notifCount.style.display = 'none';
+    /* ---------- News image upload preview ---------- */
+    const newsImageUploadArea = document.getElementById('newsImageUploadArea');
+    const newsImageUploadInput = document.getElementById('newsImageUpload');
+    if (newsImageUploadArea && newsImageUploadInput) {
+      newsImageUploadArea.addEventListener('click', () => newsImageUploadInput.click());
+      newsImageUploadInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('newsImageUploadedFile').style.display = 'block';
+          document.getElementById('newsImageFileName').textContent = e.target.files[0].name;
         }
-      }
-    
+      });
+    }
 
-      notifList.innerHTML = items.map(n => `
+    /* ---------- All News panel toggle ---------- */
+    const allNewsLink = document.getElementById('allNewsLink');
+    const allNewsPanel = document.getElementById('allNewsPanel');
+    const cancelAllNews = document.getElementById('cancelAllNews');
+
+    if (allNewsLink && allNewsPanel && dbMainContent) {
+      allNewsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        allNewsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAllNews && allNewsPanel && dbMainContent) {
+      cancelAllNews.addEventListener('click', (e) => {
+        e.preventDefault();
+        allNewsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    /* ---------- All Events panel toggle ---------- */
+    const allEventsLink = document.getElementById('allEventsLink');
+    const allEventsPanel = document.getElementById('allEventsPanel');
+    const cancelAllEvents = document.getElementById('cancelAllEvents');
+
+    if (allEventsLink && allEventsPanel && dbMainContent) {
+      allEventsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        allEventsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAllEvents && allEventsPanel && dbMainContent) {
+      cancelAllEvents.addEventListener('click', (e) => {
+        e.preventDefault();
+        allEventsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    /* ---------- Edit form toggle (news + events) ---------- */
+    document.querySelectorAll('.manage-edit-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.manage-item');
+        const form = item.querySelector('.manage-edit-form');
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+      });
+    });
+
+    const trackLoginsLink = document.getElementById('trackLoginsLink');
+    const trackLoginsPanel = document.getElementById('trackLoginsPanel');
+    const cancelTrackLogins = document.getElementById('cancelTrackLogins');
+
+    if (trackLoginsLink && trackLoginsPanel && dbMainContent) {
+      trackLoginsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        trackLoginsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelTrackLogins && trackLoginsPanel && dbMainContent) {
+      cancelTrackLogins.addEventListener('click', (e) => {
+        e.preventDefault();
+        trackLoginsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // my training
+    const addTrainingLink = document.getElementById('addTrainingLink');
+    const addTrainingPanel = document.getElementById('addTrainingPanel');
+    const cancelAddTraining = document.getElementById('cancelAddTraining');
+    if (addTrainingLink && addTrainingPanel && dbMainContent) {
+      addTrainingLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        addTrainingPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAddTraining && addTrainingPanel && dbMainContent) {
+      cancelAddTraining.addEventListener('click', (e) => {
+        e.preventDefault();
+        addTrainingPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    const trainingOpportunitiesLink = document.getElementById('trainingOpportunitiesLink');
+    const trainingOpportunitiesPanel = document.getElementById('trainingOpportunitiesPanel');
+    const cancelTrainingOpportunities = document.getElementById('cancelTrainingOpportunities');
+    if (trainingOpportunitiesLink && trainingOpportunitiesPanel && dbMainContent) {
+      trainingOpportunitiesLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        trainingOpportunitiesPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelTrainingOpportunities && trainingOpportunitiesPanel && dbMainContent) {
+      cancelTrainingOpportunities.addEventListener('click', (e) => {
+        e.preventDefault();
+        trainingOpportunitiesPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // training registrtation
+    const trainingRegistrationsLink = document.getElementById('trainingRegistrationsLink');
+    const trainingRegistrationsPanel = document.getElementById('trainingRegistrationsPanel');
+    const cancelTrainingRegistrations = document.getElementById('cancelTrainingRegistrations');
+
+    if (trainingRegistrationsLink && trainingRegistrationsPanel && dbMainContent) {
+      trainingRegistrationsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        trainingRegistrationsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelTrainingRegistrations && trainingRegistrationsPanel && dbMainContent) {
+      cancelTrainingRegistrations.addEventListener('click', (e) => {
+        e.preventDefault();
+        trainingRegistrationsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here
+
+    // guides start here
+    const uploadGuidesLink = document.getElementById('uploadGuidesLink');
+    const uploadGuidesPanel = document.getElementById('uploadGuidesPanel');
+    const cancelUploadGuide = document.getElementById('cancelUploadGuide');
+
+    if (uploadGuidesLink && uploadGuidesPanel && dbMainContent) {
+      uploadGuidesLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        uploadGuidesPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelUploadGuide && uploadGuidesPanel && dbMainContent) {
+      cancelUploadGuide.addEventListener('click', (e) => {
+        e.preventDefault();
+        uploadGuidesPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    const guideUploadArea = document.getElementById('guideUploadArea');
+    const guideUploadInput = document.getElementById('guideUploadInput');
+    if (guideUploadArea && guideUploadInput) {
+      guideUploadArea.addEventListener('click', () => guideUploadInput.click());
+      guideUploadInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('guideUploadedFile').style.display = 'block';
+          document.getElementById('guideFileName').textContent = e.target.files[0].name;
+        }
+      });
+    }
+    // end here
+
+    // Add Lesson
+    const addLessonLink = document.getElementById('addLessonLink');
+    const addLessonPanel = document.getElementById('addLessonPanel');
+    const cancelAddLesson = document.getElementById('cancelAddLesson');
+    if (addLessonLink && addLessonPanel && dbMainContent) {
+      addLessonLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; addLessonPanel.style.display = 'block'; });
+    }
+    if (cancelAddLesson) cancelAddLesson.addEventListener('click', (e) => { e.preventDefault(); addLessonPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    // Upload Material
+    const uploadMaterialLink = document.getElementById('uploadMaterialLink');
+    const uploadMaterialPanel = document.getElementById('uploadMaterialPanel');
+    const cancelUploadMaterial = document.getElementById('cancelUploadMaterial');
+    if (uploadMaterialLink && uploadMaterialPanel && dbMainContent) {
+      uploadMaterialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; uploadMaterialPanel.style.display = 'block'; });
+    }
+    if (cancelUploadMaterial) cancelUploadMaterial.addEventListener('click', (e) => { e.preventDefault(); uploadMaterialPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    const materialUploadArea = document.getElementById('materialUploadArea');
+    const materialUploadInput = document.getElementById('materialUploadInput');
+    if (materialUploadArea && materialUploadInput) {
+      materialUploadArea.addEventListener('click', () => materialUploadInput.click());
+      materialUploadInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('materialUploadedFile').style.display = 'block';
+          document.getElementById('materialFileName').textContent = e.target.files[0].name;
+        }
+      });
+    }
+    // end here
+
+    /* ---------- Create Ticket panel ---------- */
+    const createTicketLink = document.getElementById('createTicketLink');
+    const createTicketPanel = document.getElementById('createTicketPanel');
+    const cancelCreateTicket = document.getElementById('cancelCreateTicket');
+    if (createTicketLink && createTicketPanel && dbMainContent) {
+      createTicketLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; createTicketPanel.style.display = 'block'; });
+    }
+    if (cancelCreateTicket) cancelCreateTicket.addEventListener('click', (e) => { e.preventDefault(); createTicketPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    /* ---------- My Messages panel ---------- */
+    const myMessagesLink = document.getElementById('myMessagesLink');
+    const myMessagesPanel = document.getElementById('myMessagesPanel');
+    const cancelMyMessages = document.getElementById('cancelMyMessages');
+    if (myMessagesLink && myMessagesPanel && dbMainContent) {
+      myMessagesLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; myMessagesPanel.style.display = 'block'; });
+    }
+    if (cancelMyMessages) cancelMyMessages.addEventListener('click', (e) => { e.preventDefault(); myMessagesPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    /* ---------- Support Tickets panel (ICT) ---------- */
+    const supportTicketsLink = document.getElementById('supportTicketsLink');
+    const supportTicketsPanel = document.getElementById('supportTicketsPanel');
+    const cancelSupportTickets = document.getElementById('cancelSupportTickets');
+    if (supportTicketsLink && supportTicketsPanel && dbMainContent) {
+      supportTicketsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; supportTicketsPanel.style.display = 'block'; });
+    }
+    if (cancelSupportTickets) cancelSupportTickets.addEventListener('click', (e) => { e.preventDefault(); supportTicketsPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    const viewAllTicketsLink = document.getElementById('viewAllTicketsLink');
+    if (viewAllTicketsLink && supportTicketsLink) {
+      viewAllTicketsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        supportTicketsLink.click();
+      });
+    }
+
+
+    /* ---------- Ticket expand/collapse + lazy-load messages ---------- */
+    document.querySelectorAll('.ticket-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.ticket-item');
+        const ticketId = item.dataset.ticketId;
+        const wasOpen = item.classList.contains('is-open');
+        item.classList.toggle('is-open');
+
+        if (!wasOpen) {
+          fetch(`/account/tickets/${ticketId}/messages`)
+            .then(res => res.json())
+            .then(messages => {
+              const container = document.getElementById(`messages-${ticketId}`);
+              if (!container) return;
+              if (messages.length === 0) {
+                container.innerHTML = '<p style="font-size:0.8rem; color:#9ca3af;">No replies yet.</p>';
+                return;
+              }
+              container.innerHTML = messages.map(m => {
+                const isIct = m.account_type === 'ict_staff' || m.account_type === 'admin';
+                const cls = isIct ? 'ticket-msg-theirs' : 'ticket-msg-mine';
+                const time = new Date(m.created_at).toLocaleString('en-GB');
+                return `<div class="ticket-msg ${cls}">${m.message}<div class="ticket-msg-meta">${m.full_name} &middot; ${time}</div></div>`;
+              }).join('');
+            })
+            .catch(() => {
+              const container = document.getElementById(`messages-${ticketId}`);
+              if (container) container.innerHTML = '<p style="font-size:0.8rem; color:#c0392b;">Failed to load messages.</p>';
+            });
+        }
+      });
+    });
+    //end here
+
+    /*****************
+     * 
+     * Delivery get all members
+     * 
+     */
+    const allMembersLink = document.getElementById('allMembersLink');
+    const allMembersPanel = document.getElementById('allMembersPanel');
+    const cancelAllMembers = document.getElementById('cancelAllMembers');
+
+    if (allMembersLink && allMembersPanel && dbMainContent) {
+      allMembersLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        allMembersPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAllMembers && allMembersPanel && dbMainContent) {
+      cancelAllMembers.addEventListener('click', (e) => {
+        e.preventDefault();
+        allMembersPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // end here
+
+    /********************
+     * 
+     * Delivery team member
+     */
+    const addTeamMemberLink = document.getElementById('addTeamMemberLink');
+    const addTeamMemberPanel = document.getElementById('addTeamMemberPanel');
+    const cancelAddTeamMember = document.getElementById('cancelAddTeamMember');
+
+    if (addTeamMemberLink && addTeamMemberPanel && dbMainContent) {
+      addTeamMemberLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        addTeamMemberPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAddTeamMember && addTeamMemberPanel && dbMainContent) {
+      cancelAddTeamMember.addEventListener('click', (e) => {
+        e.preventDefault();
+        addTeamMemberPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    const teamPhotoUploadArea = document.getElementById('teamPhotoUploadArea');
+    const teamPhotoUploadInput = document.getElementById('teamPhotoUploadInput');
+    if (teamPhotoUploadArea && teamPhotoUploadInput) {
+      teamPhotoUploadArea.addEventListener('click', () => teamPhotoUploadInput.click());
+      teamPhotoUploadInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('teamPhotoUploadedFile').style.display = 'block';
+          document.getElementById('teamPhotoFileName').textContent = e.target.files[0].name;
+        }
+      });
+    }
+    // end here team member.
+
+    // Delivery admin to see all team member
+    const allTeamMembersLink = document.getElementById('allTeamMembersLink');
+    const allTeamMembersPanel = document.getElementById('allTeamMembersPanel');
+    const cancelAllTeamMembers = document.getElementById('cancelAllTeamMembers');
+
+    if (allTeamMembersLink && allTeamMembersPanel && dbMainContent) {
+      allTeamMembersLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        allTeamMembersPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAllTeamMembers && allTeamMembersPanel && dbMainContent) {
+      cancelAllTeamMembers.addEventListener('click', (e) => {
+        e.preventDefault();
+        allTeamMembersPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // admin see all team member end here
+
+    //  edit profile photo (original code kept)
+    const profilePhotoUpload = document.getElementById('profilePhotoUpload');
+    const profilePhotoInput = document.getElementById('profilePhotoInput');
+
+    if (profilePhotoUpload && profilePhotoInput) {
+      profilePhotoUpload.addEventListener('click', () => profilePhotoInput.click());
+
+      profilePhotoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const oldPreview = document.getElementById('profilePhotoPreview');
+          if (oldPreview) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.id = 'profilePhotoPreview';
+            img.className = 'profile-photo-preview';
+            oldPreview.replaceWith(img);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    // end here
+
+    // message read
+    const messagesLink = document.getElementById('messagesLink');
+    const messagesPanel = document.getElementById('messagesPanel');
+    const cancelMessages = document.getElementById('cancelMessages');
+
+    if (messagesLink && messagesPanel && dbMainContent) {
+      messagesLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        messagesPanel.style.display = 'block';
+      });
+    }
+    if (cancelMessages && messagesPanel && dbMainContent) {
+      cancelMessages.addEventListener('click', (e) => {
+        e.preventDefault();
+        messagesPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    document.querySelectorAll('.message-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.ticket-item');
+        item.classList.toggle('is-open');
+      });
+    });
+    // end here messages
+
+    /**************************
+     * Delivery registered users for events.
+     */
+    const registeredUsersLink = document.getElementById('registeredUsersLink');
+    const registeredUsersPanel = document.getElementById('registeredUsersPanel');
+    const cancelRegisteredUsers = document.getElementById('cancelRegisteredUsers');
+
+    if (registeredUsersLink && registeredUsersPanel && dbMainContent) {
+      registeredUsersLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        registeredUsersPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelRegisteredUsers && registeredUsersPanel && dbMainContent) {
+      cancelRegisteredUsers.addEventListener('click', (e) => {
+        e.preventDefault();
+        registeredUsersPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here
+
+    /* ---------- Dashboard search ---------- */
+    const dashboardSearchInput = document.getElementById('dashboardSearchInput');
+    const dashboardSearchResults = document.getElementById('dashboardSearchResults');
+
+    if (dashboardSearchInput && dashboardSearchResults) {
+      const roleAttr = document.body.getAttribute('data-role') || '';
+      let searchEndpoint = '/account/search/member';
+      if (roleAttr === 'admin') searchEndpoint = '/account/search/admin';
+      if (roleAttr === 'ict_staff') searchEndpoint = '/account/search/ict';
+
+      let debounceTimer;
+
+      dashboardSearchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = dashboardSearchInput.value.trim();
+
+        if (query.length < 2) {
+          dashboardSearchResults.style.display = 'none';
+          return;
+        }
+
+        debounceTimer = setTimeout(() => {
+          fetch(`${searchEndpoint}?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => renderSearchResults(data))
+            .catch(() => {
+              dashboardSearchResults.innerHTML = '<div class="search-no-results">Search failed. Try again.</div>';
+              dashboardSearchResults.style.display = 'block';
+            });
+        }, 300);
+      });
+
+      function renderSearchResults(data) {
+        let html = '';
+        let hasResults = false;
+
+        if (data.accounts && data.accounts.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">Users</div>';
+          data.accounts.forEach(a => {
+            html += `<div class="search-result-item"><b>${a.full_name}</b><small>${a.email} &middot; ${a.account_type}</small></div>`;
+          });
+          html += '</div>';
+        }
+
+        if (data.jobs && data.jobs.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">Jobs</div>';
+          data.jobs.forEach(j => {
+            html += `<div class="search-result-item"><b>${j.title}</b><small>${j.region} &middot; ${j.job_type}</small></div>`;
+          });
+          html += '</div>';
+        }
+
+        if (data.news && data.news.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">News</div>';
+          data.news.forEach(n => {
+            html += `<div class="search-result-item"><b>${n.title}</b></div>`;
+          });
+          html += '</div>';
+        }
+
+        if (data.events && data.events.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">Events</div>';
+          data.events.forEach(e => {
+            html += `<div class="search-result-item"><b>${e.title}</b></div>`;
+          });
+          html += '</div>';
+        }
+
+        if (data.tickets && data.tickets.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">Tickets</div>';
+          data.tickets.forEach(t => {
+            html += `<div class="search-result-item"><b>#${t.ticket_number} — ${t.subject}</b><small>${t.full_name}</small></div>`;
+          });
+          html += '</div>';
+        }
+
+        if (data.trainings && data.trainings.length > 0) {
+          hasResults = true;
+          html += '<div class="search-result-group"><div class="search-result-group-title">Trainings</div>';
+          data.trainings.forEach(t => {
+            html += `<div class="search-result-item"><b>${t.title}</b></div>`;
+          });
+          html += '</div>';
+        }
+
+        dashboardSearchResults.innerHTML = hasResults ? html : '<div class="search-no-results">No results found.</div>';
+        dashboardSearchResults.style.display = 'block';
+      }
+
+      document.addEventListener('click', (e) => {
+        if (!dashboardSearchInput.contains(e.target) && !dashboardSearchResults.contains(e.target)) {
+          dashboardSearchResults.style.display = 'none';
+        }
+      });
+    }
+    // end here search.
+
+    // payments
+    const allPaymentsLink = document.getElementById('allPaymentsLink');
+    const allPaymentsLink2 = document.getElementById('allPaymentsLink2');
+    const allPaymentsPanel = document.getElementById('allPaymentsPanel');
+    const cancelAllPayments = document.getElementById('cancelAllPayments');
+
+    function openAllPayments(e) {
+      e.preventDefault();
+      dbMainContent.style.display = 'none';
+      allPaymentsPanel.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (allPaymentsLink && allPaymentsPanel && dbMainContent) allPaymentsLink.addEventListener('click', openAllPayments);
+    if (allPaymentsLink2 && allPaymentsPanel && dbMainContent) allPaymentsLink2.addEventListener('click', openAllPayments);
+
+    if (cancelAllPayments && allPaymentsPanel && dbMainContent) {
+      cancelAllPayments.addEventListener('click', (e) => {
+        e.preventDefault();
+        allPaymentsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here
+
+    // show all members
+    const ictAllMembersLink = document.getElementById('ictAllMembersLink');
+    const ictAllMembersPanel = document.getElementById('ictAllMembersPanel');
+    const cancelIctAllMembers = document.getElementById('cancelIctAllMembers');
+
+    if (ictAllMembersLink && ictAllMembersPanel && dbMainContent) {
+      ictAllMembersLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        ictAllMembersPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelIctAllMembers && ictAllMembersPanel && dbMainContent) {
+      cancelIctAllMembers.addEventListener('click', (e) => {
+        e.preventDefault();
+        ictAllMembersPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here show all members
+
+    // delivery admin
+    const adminManagementLink = document.getElementById('adminManagementLink');
+    const adminManagementPanel = document.getElementById('adminManagementPanel');
+    const cancelAdminManagement = document.getElementById('cancelAdminManagement');
+    if (adminManagementLink && adminManagementPanel && dbMainContent) {
+      adminManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; adminManagementPanel.style.display = 'block'; });
+    }
+    if (cancelAdminManagement) cancelAdminManagement.addEventListener('click', (e) => { e.preventDefault(); adminManagementPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    // notifications area
+    const notifToggle = document.getElementById('notifToggle');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifCount = document.getElementById('notifCount');
+    const notifDot = document.getElementById('notifDot');
+    const notifList = document.getElementById('notifList');
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+    function loadNotifications() {
+      fetch('/account/notifications')
+        .then(res => res.json())
+        .then(items => {
+          if (notifCount) {
+            if (items.length > 0) {
+              notifCount.textContent = items.length > 9 ? '9+' : items.length;
+              notifCount.style.display = 'flex';
+            } else {
+              notifCount.style.display = 'none';
+            }
+          }
+
+
+          notifList.innerHTML = items.map(n => `
         <div class="db-notif-item" data-id="${n.id}">
           <div class="db-notif-item-body">
             <b>${n.title}</b>
@@ -2379,756 +2529,759 @@ function loadNotifications() {
         </div>
       `).join('');
 
-      notifList.querySelectorAll('.notif-mark-read').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const item = btn.closest('.db-notif-item');
-          const id = item.dataset.id;
-          fetch(`/account/notifications/${id}/read`, { method: 'POST',
-             headers: { 'x-csrf-token': csrfToken },
-           })
-            .then(() => { item.remove(); loadNotifications(); });
-        });
-      });
-
-      notifList.querySelectorAll('.notif-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const item = btn.closest('.db-notif-item');
-          const id = item.dataset.id;
-          fetch(`/account/notifications/${id}/delete`, { method: 'POST',
-             headers: { 'x-csrf-token': csrfToken },
-           })
-            .then(() => { item.remove(); loadNotifications(); });
-        });
-      });
-    })
-    .catch(() => {
-      if (notifList) notifList.innerHTML = '<p class="db-notif-empty">Failed to load.</p>';
-    });
-}
-
-if (notifToggle && notifDropdown) {
-  notifToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = notifDropdown.classList.toggle('open');
-    if (isOpen) loadNotifications();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!notifDropdown.contains(e.target) && e.target !== notifToggle) {
-      notifDropdown.classList.remove('open');
-    }
-  });
-
-  if (markAllReadBtn) {
-    markAllReadBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      fetch('/account/notifications/mark-all-read', { method: 'POST',
-         headers: { 'x-csrf-token': csrfToken },
-       })
-        .then(() => loadNotifications());
-    });
-  }
-
-  loadNotifications();
-  setInterval(loadNotifications, 30000);
-}
-// end here
-
-// Delivery ict staff create
-const addIctStaffLink = document.getElementById('addIctStaffLink');
-const addIctStaffPanel = document.getElementById('addIctStaffPanel');
-const cancelAddIctStaff = document.getElementById('cancelAddIctStaff');
-
-if (addIctStaffLink && addIctStaffPanel && dbMainContent) {
-  addIctStaffLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    addIctStaffPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelAddIctStaff && addIctStaffPanel && dbMainContent) {
-  cancelAddIctStaff.addEventListener('click', (e) => {
-    e.preventDefault();
-    addIctStaffPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here. 
-
-// delivery ict staff management
-const ictManagementLink = document.getElementById('ictManagementLink');
-const ictManagementPanel = document.getElementById('ictManagementPanel');
-const cancelIctManagement = document.getElementById('cancelIctManagement');
-
-if (ictManagementLink && ictManagementPanel && dbMainContent) {
-  ictManagementLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    ictManagementPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelIctManagement && ictManagementPanel && dbMainContent) {
-  cancelIctManagement.addEventListener('click', (e) => {
-    e.preventDefault();
-    ictManagementPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here ict staff management.
-
-// task management
-const taskManagementLink = document.getElementById('taskManagementLink');
-const taskManagementPanel = document.getElementById('taskManagementPanel');
-const cancelTaskManagement = document.getElementById('cancelTaskManagement');
-if (taskManagementLink && taskManagementPanel && dbMainContent) {
-  taskManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; taskManagementPanel.style.display='block'; });
-}
-if (cancelTaskManagement) cancelTaskManagement.addEventListener('click', (e) => { e.preventDefault(); taskManagementPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-const myTasksLink = document.getElementById('myTasksLink');
-const myTasksPanel = document.getElementById('myTasksPanel');
-const cancelMyTasks = document.getElementById('cancelMyTasks');
-if (myTasksLink && myTasksPanel && dbMainContent) {
-  myTasksLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; myTasksPanel.style.display='block'; });
-}
-if (cancelMyTasks) cancelMyTasks.addEventListener('click', (e) => { e.preventDefault(); myTasksPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-document.querySelectorAll('.ticket-toggle-simple').forEach(btn => {
-  btn.addEventListener('click', () => btn.closest('.ticket-item').classList.toggle('is-open'));
-});
-// end here
-
-// testimonials delivery here
-
-const addTestimonialLink = document.getElementById('addTestimonialLink');
-const addTestimonialPanel = document.getElementById('addTestimonialPanel');
-const cancelAddTestimonial = document.getElementById('cancelAddTestimonial');
-if (addTestimonialLink && addTestimonialPanel && dbMainContent) {
-  addTestimonialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; addTestimonialPanel.style.display='block'; });
-}
-if (cancelAddTestimonial) cancelAddTestimonial.addEventListener('click', (e) => { e.preventDefault(); addTestimonialPanel.style.display='none'; dbMainContent.style.display='block'; });
-
-const testimonialUploadArea = document.getElementById('testimonialUploadArea');
-const testimonialUploadInput = document.getElementById('testimonialUploadInput');
-if (testimonialUploadArea && testimonialUploadInput) {
-  testimonialUploadArea.addEventListener('click', () => testimonialUploadInput.click());
-  testimonialUploadInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      document.getElementById('testimonialUploadedFile').style.display = 'block';
-      document.getElementById('testimonialFileName').textContent = e.target.files[0].name;
-    }
-  });
-}
-// end here.
-
-// chatbots
-// const liveChatsLink = document.getElementById('liveChatsLink');
-// const liveChatsPanel = document.getElementById('liveChatsPanel');
-// const cancelLiveChats = document.getElementById('cancelLiveChats');
-// const waitingChatsList = document.getElementById('waitingChatsList');
-// const activeChatThread = document.getElementById('activeChatThread');
-// const activeChatMessages = document.getElementById('activeChatMessages');
-// const ictChatReplyForm = document.getElementById('ictChatReplyForm');
-// const ictChatReplyInput = document.getElementById('ictChatReplyInput');
-// let activeSessionId = null;
-// let ictPollTimer = null;
-
-// if (liveChatsLink && liveChatsPanel && dbMainContent) {
-//   liveChatsLink.addEventListener('click', (e) => {
-//     e.preventDefault();
-//     dbMainContent.style.display = 'none';
-//     liveChatsPanel.style.display = 'block';
-//     loadWaitingChats();
-//   });
-// }
-// if (cancelLiveChats) cancelLiveChats.addEventListener('click', (e) => {
-//   e.preventDefault();
-//   liveChatsPanel.style.display = 'none';
-//   dbMainContent.style.display = 'block';
-//   clearInterval(ictPollTimer);
-// });
-
-// function loadWaitingChats() {
-//   fetch('/account/chat/waiting')
-//     .then(res => res.json())
-//     .then(sessions => {
-//       if (sessions.length === 0) {
-//         waitingChatsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No visitors waiting right now.</p>';
-//         return;
-//       }
-//       waitingChatsList.innerHTML = sessions.map(s => `
-//         <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f5f5f5;">
-//           <span>${s.visitor_name}</span>
-//           <button type="button" class="btn-outline-sm accept-chat-btn" data-session-id="${s.id}">Accept</button>
-//         </div>
-//       `).join('');
-
-//       document.querySelectorAll('.accept-chat-btn').forEach(btn => {
-//         btn.addEventListener('click', () => {
-//           const sid = btn.dataset.sessionId;
-//           fetch(`/account/chat/${sid}/accept`, { method: 'POST',
-//             headers: { 'x-csrf-token': csrfToken },
-//            })
-//             .then(() => openChatThread(sid));
-//         });
-//       });
-//     });
-// }
-
-// function openChatThread(sid) {
-//   activeSessionId = sid;
-//   activeChatThread.style.display = 'block';
-//   pollActiveChat();
-//   clearInterval(ictPollTimer);
-//   ictPollTimer = setInterval(pollActiveChat, 3000);
-// }
-
-// function pollActiveChat() {
-//   fetch(`/chat/${activeSessionId}/messages`)
-//     .then(res => res.json())
-//     .then(messages => {
-//       activeChatMessages.innerHTML = messages.map(m => `
-//         <div style="align-self:${m.sender_type === 'ict' ? 'flex-end' : 'flex-start'}; background:${m.sender_type === 'ict' ? 'var(--primary-green)' : '#f1f8e9'}; color:${m.sender_type === 'ict' ? '#fff' : '#000'}; padding:8px 12px; border-radius:12px; max-width:75%; font-size:0.85rem;">
-//           ${m.message}
-//         </div>
-//       `).join('');
-//       activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
-//     });
-// }
-
-// if (ictChatReplyForm) {
-//   ictChatReplyForm.addEventListener('submit', (e) => {
-//     e.preventDefault();
-//     const text = ictChatReplyInput.value.trim();
-//     if (!text || !activeSessionId) return;
-//     fetch(`/chat/${activeSessionId}/send`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
-//       body: JSON.stringify({ message: text, sender_type: 'ict', sender_name: '<%= account.full_name %>' }),
-//     }).then(() => {
-//       ictChatReplyInput.value = '';
-//       pollActiveChat();
-//     });
-//   });
-// }
-// end here.
-  // =====================================================
-  // PUBLIC CHATBOT (Visitor side) - Popular questions + Password/Email change
-  // =====================================================
-    // =====================================================
-  // PUBLIC CHATBOT - Toggle + Popular Questions + Flow
-  // =====================================================
-  const chatbotToggle = document.getElementById('chatbotToggle');
-  const chatbotWindow = document.getElementById('chatbotWindow');
-  const chatbotClose = document.getElementById('chatbotClose');
-  const chatbotForm = document.getElementById('chatbotForm');
-  const chatbotInput = document.getElementById('chatbotInput');
-  const chatbotMessages = document.getElementById('chatbotMessages');
-
-  // 1. Open / Close the chatbot window
-  if (chatbotToggle && chatbotWindow) {
-    chatbotToggle.addEventListener('click', () => {
-      chatbotWindow.style.display = 'flex'; // or 'block'
-    });
-  }
-
-  if (chatbotClose && chatbotWindow) {
-    chatbotClose.addEventListener('click', () => {
-      chatbotWindow.style.display = 'none';
-    });
-  }
-
-  // 2. Chatbot logic (only if form exists)
-  if (chatbotForm && chatbotInput && chatbotMessages) {
-    let sessionId = null;
-    let pendingFlow = null;
-    let pendingAccountId = null;
-    let pendingStep = null;
-
-    function addMessage(text, type) {
-      const div = document.createElement('div');
-      div.className = `chatbot-msg chatbot-msg-${type}`;
-      div.textContent = text;
-      chatbotMessages.appendChild(div);
-      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-    }
-
-    function addBotMessage(text) {
-      addMessage(text, 'bot');
-    }
-
-    // 3. Popular questions pills
-    document.querySelectorAll('.chatbot-quick-pill').forEach((pill) => {
-      pill.addEventListener('click', () => {
-        const question = pill.getAttribute('data-question');
-        const popular = document.getElementById('chatbotPopularQuestions');
-        if (popular) popular.style.display = 'none';
-
-        chatbotInput.value = question;
-        chatbotForm.dispatchEvent(new Event('submit'));
-      });
-    });
-
-    // 4. Form submit + multi-step flow
-    chatbotForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = chatbotInput.value.trim();
-      if (!text) return;
-
-      addMessage(text, 'user');
-      chatbotInput.value = '';
-
-      // Step: waiting for full name
-      if (pendingStep === 'awaiting_name') {
-        pendingFlow.fullName = text;
-        pendingStep = 'awaiting_email';
-        addBotMessage('Thanks. Now please confirm the email address on your account.');
-        return;
-      }
-
-      // Step: waiting for email
-      if (pendingStep === 'awaiting_email') {
-        fetch('/chatbot/verify-identity', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name: pendingFlow.fullName,
-            email: text
-          })
-        })
-          .then(res => res.json())
-          .then(data => {
-            addBotMessage(data.text);
-            if (data.verified) {
-              pendingAccountId = data.account_id;
-              pendingStep = 'awaiting_new_value';
-            } else {
-              pendingStep = null;
-              pendingFlow = null;
-            }
-          })
-          .catch(() => {
-            addBotMessage('Something went wrong. Please try again.');
-            pendingStep = null;
-            pendingFlow = null;
+          notifList.querySelectorAll('.notif-mark-read').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const item = btn.closest('.db-notif-item');
+              const id = item.dataset.id;
+              fetch(`/account/notifications/${id}/read`, {
+                method: 'POST',
+                headers: { 'x-csrf-token': csrfToken },
+              })
+                .then(() => { item.remove(); loadNotifications(); });
+            });
           });
-        return;
+
+          notifList.querySelectorAll('.notif-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const item = btn.closest('.db-notif-item');
+              const id = item.dataset.id;
+              fetch(`/account/notifications/${id}/delete`, {
+                method: 'POST',
+                headers: { 'x-csrf-token': csrfToken },
+              })
+                .then(() => { item.remove(); loadNotifications(); });
+            });
+          });
+        })
+        .catch(() => {
+          if (notifList) notifList.innerHTML = '<p class="db-notif-empty">Failed to load.</p>';
+        });
+    }
+
+    if (notifToggle && notifDropdown) {
+      notifToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = notifDropdown.classList.toggle('open');
+        if (isOpen) loadNotifications();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!notifDropdown.contains(e.target) && e.target !== notifToggle) {
+          notifDropdown.classList.remove('open');
+        }
+      });
+
+      if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          fetch('/account/notifications/mark-all-read', {
+            method: 'POST',
+            headers: { 'x-csrf-token': csrfToken },
+          })
+            .then(() => loadNotifications());
+        });
       }
 
-      // Step: waiting for new password / email
-      if (pendingStep === 'awaiting_new_value') {
-        fetch('/chatbot/apply-change', {
+      loadNotifications();
+      setInterval(loadNotifications, 30000);
+    }
+    // end here
+
+    // Delivery ict staff create
+    const addIctStaffLink = document.getElementById('addIctStaffLink');
+    const addIctStaffPanel = document.getElementById('addIctStaffPanel');
+    const cancelAddIctStaff = document.getElementById('cancelAddIctStaff');
+
+    if (addIctStaffLink && addIctStaffPanel && dbMainContent) {
+      addIctStaffLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        addIctStaffPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelAddIctStaff && addIctStaffPanel && dbMainContent) {
+      cancelAddIctStaff.addEventListener('click', (e) => {
+        e.preventDefault();
+        addIctStaffPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here. 
+
+    // delivery ict staff management
+    const ictManagementLink = document.getElementById('ictManagementLink');
+    const ictManagementPanel = document.getElementById('ictManagementPanel');
+    const cancelIctManagement = document.getElementById('cancelIctManagement');
+
+    if (ictManagementLink && ictManagementPanel && dbMainContent) {
+      ictManagementLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        ictManagementPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelIctManagement && ictManagementPanel && dbMainContent) {
+      cancelIctManagement.addEventListener('click', (e) => {
+        e.preventDefault();
+        ictManagementPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here ict staff management.
+
+    // task management
+    const taskManagementLink = document.getElementById('taskManagementLink');
+    const taskManagementPanel = document.getElementById('taskManagementPanel');
+    const cancelTaskManagement = document.getElementById('cancelTaskManagement');
+    if (taskManagementLink && taskManagementPanel && dbMainContent) {
+      taskManagementLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; taskManagementPanel.style.display = 'block'; });
+    }
+    if (cancelTaskManagement) cancelTaskManagement.addEventListener('click', (e) => { e.preventDefault(); taskManagementPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    const myTasksLink = document.getElementById('myTasksLink');
+    const myTasksPanel = document.getElementById('myTasksPanel');
+    const cancelMyTasks = document.getElementById('cancelMyTasks');
+    if (myTasksLink && myTasksPanel && dbMainContent) {
+      myTasksLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; myTasksPanel.style.display = 'block'; });
+    }
+    if (cancelMyTasks) cancelMyTasks.addEventListener('click', (e) => { e.preventDefault(); myTasksPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    document.querySelectorAll('.ticket-toggle-simple').forEach(btn => {
+      btn.addEventListener('click', () => btn.closest('.ticket-item').classList.toggle('is-open'));
+    });
+    // end here
+
+    // testimonials delivery here
+
+    const addTestimonialLink = document.getElementById('addTestimonialLink');
+    const addTestimonialPanel = document.getElementById('addTestimonialPanel');
+    const cancelAddTestimonial = document.getElementById('cancelAddTestimonial');
+    if (addTestimonialLink && addTestimonialPanel && dbMainContent) {
+      addTestimonialLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; addTestimonialPanel.style.display = 'block'; });
+    }
+    if (cancelAddTestimonial) cancelAddTestimonial.addEventListener('click', (e) => { e.preventDefault(); addTestimonialPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+
+    const testimonialUploadArea = document.getElementById('testimonialUploadArea');
+    const testimonialUploadInput = document.getElementById('testimonialUploadInput');
+    if (testimonialUploadArea && testimonialUploadInput) {
+      testimonialUploadArea.addEventListener('click', () => testimonialUploadInput.click());
+      testimonialUploadInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          document.getElementById('testimonialUploadedFile').style.display = 'block';
+          document.getElementById('testimonialFileName').textContent = e.target.files[0].name;
+        }
+      });
+    }
+    // end here.
+
+    // chatbots
+    // const liveChatsLink = document.getElementById('liveChatsLink');
+    // const liveChatsPanel = document.getElementById('liveChatsPanel');
+    // const cancelLiveChats = document.getElementById('cancelLiveChats');
+    // const waitingChatsList = document.getElementById('waitingChatsList');
+    // const activeChatThread = document.getElementById('activeChatThread');
+    // const activeChatMessages = document.getElementById('activeChatMessages');
+    // const ictChatReplyForm = document.getElementById('ictChatReplyForm');
+    // const ictChatReplyInput = document.getElementById('ictChatReplyInput');
+    // let activeSessionId = null;
+    // let ictPollTimer = null;
+
+    // if (liveChatsLink && liveChatsPanel && dbMainContent) {
+    //   liveChatsLink.addEventListener('click', (e) => {
+    //     e.preventDefault();
+    //     dbMainContent.style.display = 'none';
+    //     liveChatsPanel.style.display = 'block';
+    //     loadWaitingChats();
+    //   });
+    // }
+    // if (cancelLiveChats) cancelLiveChats.addEventListener('click', (e) => {
+    //   e.preventDefault();
+    //   liveChatsPanel.style.display = 'none';
+    //   dbMainContent.style.display = 'block';
+    //   clearInterval(ictPollTimer);
+    // });
+
+    // function loadWaitingChats() {
+    //   fetch('/account/chat/waiting')
+    //     .then(res => res.json())
+    //     .then(sessions => {
+    //       if (sessions.length === 0) {
+    //         waitingChatsList.innerHTML = '<p style="text-align:center; color:#9ca3af;">No visitors waiting right now.</p>';
+    //         return;
+    //       }
+    //       waitingChatsList.innerHTML = sessions.map(s => `
+    //         <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f5f5f5;">
+    //           <span>${s.visitor_name}</span>
+    //           <button type="button" class="btn-outline-sm accept-chat-btn" data-session-id="${s.id}">Accept</button>
+    //         </div>
+    //       `).join('');
+
+    //       document.querySelectorAll('.accept-chat-btn').forEach(btn => {
+    //         btn.addEventListener('click', () => {
+    //           const sid = btn.dataset.sessionId;
+    //           fetch(`/account/chat/${sid}/accept`, { method: 'POST',
+    //             headers: { 'x-csrf-token': csrfToken },
+    //            })
+    //             .then(() => openChatThread(sid));
+    //         });
+    //       });
+    //     });
+    // }
+
+    // function openChatThread(sid) {
+    //   activeSessionId = sid;
+    //   activeChatThread.style.display = 'block';
+    //   pollActiveChat();
+    //   clearInterval(ictPollTimer);
+    //   ictPollTimer = setInterval(pollActiveChat, 3000);
+    // }
+
+    // function pollActiveChat() {
+    //   fetch(`/chat/${activeSessionId}/messages`)
+    //     .then(res => res.json())
+    //     .then(messages => {
+    //       activeChatMessages.innerHTML = messages.map(m => `
+    //         <div style="align-self:${m.sender_type === 'ict' ? 'flex-end' : 'flex-start'}; background:${m.sender_type === 'ict' ? 'var(--primary-green)' : '#f1f8e9'}; color:${m.sender_type === 'ict' ? '#fff' : '#000'}; padding:8px 12px; border-radius:12px; max-width:75%; font-size:0.85rem;">
+    //           ${m.message}
+    //         </div>
+    //       `).join('');
+    //       activeChatMessages.scrollTop = activeChatMessages.scrollHeight;
+    //     });
+    // }
+
+    // if (ictChatReplyForm) {
+    //   ictChatReplyForm.addEventListener('submit', (e) => {
+    //     e.preventDefault();
+    //     const text = ictChatReplyInput.value.trim();
+    //     if (!text || !activeSessionId) return;
+    //     fetch(`/chat/${activeSessionId}/send`, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json','x-csrf-token': csrfToken  },
+    //       body: JSON.stringify({ message: text, sender_type: 'ict', sender_name: '<%= account.full_name %>' }),
+    //     }).then(() => {
+    //       ictChatReplyInput.value = '';
+    //       pollActiveChat();
+    //     });
+    //   });
+    // }
+    // end here.
+    // =====================================================
+    // PUBLIC CHATBOT (Visitor side) - Popular questions + Password/Email change
+    // =====================================================
+    // =====================================================
+    // PUBLIC CHATBOT - Toggle + Popular Questions + Flow
+    // =====================================================
+    const chatbotToggle = document.getElementById('chatbotToggle');
+    const chatbotWindow = document.getElementById('chatbotWindow');
+    const chatbotClose = document.getElementById('chatbotClose');
+    const chatbotForm = document.getElementById('chatbotForm');
+    const chatbotInput = document.getElementById('chatbotInput');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+
+    // 1. Open / Close the chatbot window
+    if (chatbotToggle && chatbotWindow) {
+      chatbotToggle.addEventListener('click', () => {
+        chatbotWindow.style.display = 'flex'; // or 'block'
+      });
+    }
+
+    if (chatbotClose && chatbotWindow) {
+      chatbotClose.addEventListener('click', () => {
+        chatbotWindow.style.display = 'none';
+      });
+    }
+
+    // 2. Chatbot logic (only if form exists)
+    if (chatbotForm && chatbotInput && chatbotMessages) {
+      let sessionId = null;
+      let pendingFlow = null;
+      let pendingAccountId = null;
+      let pendingStep = null;
+
+      function addMessage(text, type) {
+        const div = document.createElement('div');
+        div.className = `chatbot-msg chatbot-msg-${type}`;
+        div.textContent = text;
+        chatbotMessages.appendChild(div);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+
+      function addBotMessage(text) {
+        addMessage(text, 'bot');
+      }
+
+      // 3. Popular questions pills
+      document.querySelectorAll('.chatbot-quick-pill').forEach((pill) => {
+        pill.addEventListener('click', () => {
+          const question = pill.getAttribute('data-question');
+          const popular = document.getElementById('chatbotPopularQuestions');
+          if (popular) popular.style.display = 'none';
+
+          chatbotInput.value = question;
+          chatbotForm.dispatchEvent(new Event('submit'));
+        });
+      });
+
+      // 4. Form submit + multi-step flow
+      chatbotForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = chatbotInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatbotInput.value = '';
+
+        // Step: waiting for full name
+        if (pendingStep === 'awaiting_name') {
+          pendingFlow.fullName = text;
+          pendingStep = 'awaiting_email';
+          addBotMessage('Thanks. Now please confirm the email address on your account.');
+          return;
+        }
+
+        // Step: waiting for email
+        if (pendingStep === 'awaiting_email') {
+          fetch('/chatbot/verify-identity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              full_name: pendingFlow.fullName,
+              email: text
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              addBotMessage(data.text);
+              if (data.verified) {
+                pendingAccountId = data.account_id;
+                pendingStep = 'awaiting_new_value';
+              } else {
+                pendingStep = null;
+                pendingFlow = null;
+              }
+            })
+            .catch(() => {
+              addBotMessage('Something went wrong. Please try again.');
+              pendingStep = null;
+              pendingFlow = null;
+            });
+          return;
+        }
+
+        // Step: waiting for new password / email
+        if (pendingStep === 'awaiting_new_value') {
+          fetch('/chatbot/apply-change', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              account_id: pendingAccountId,
+              flow: pendingFlow.type,
+              new_value: text
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              addBotMessage(data.text);
+              if (data.success) {
+                pendingStep = null;
+                pendingFlow = null;
+                pendingAccountId = null;
+              }
+            })
+            .catch(() => addBotMessage('Something went wrong applying the change.'));
+          return;
+        }
+
+        // Normal question
+        fetch('/chatbot/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            account_id: pendingAccountId,
-            flow: pendingFlow.type,
-            new_value: text
-          })
+          body: JSON.stringify({ message: text, session_id: sessionId })
         })
           .then(res => res.json())
           .then(data => {
             addBotMessage(data.text);
-            if (data.success) {
-              pendingStep = null;
-              pendingFlow = null;
-              pendingAccountId = null;
+
+            if (data.type === 'start_identity_flow') {
+              pendingFlow = { type: data.flow, fullName: null };
+              pendingStep = 'awaiting_name';
             }
           })
-          .catch(() => addBotMessage('Something went wrong applying the change.'));
-        return;
-      }
-
-      // Normal question
-      fetch('/chatbot/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, session_id: sessionId })
-      })
-        .then(res => res.json())
-        .then(data => {
-          addBotMessage(data.text);
-
-          if (data.type === 'start_identity_flow') {
-            pendingFlow = { type: data.flow, fullName: null };
-            pendingStep = 'awaiting_name';
-          }
-        })
-        .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
-    });
-  }
-// delivery FAQ
-          const siteFaqsLink = document.getElementById('siteFaqsLink');
-          const siteFaqsPanel = document.getElementById('siteFaqsPanel');
-          const cancelSiteFaqs = document.getElementById('cancelSiteFaqs');
-       if (siteFaqsLink && siteFaqsPanel && dbMainContent) {
-           siteFaqsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display='none'; siteFaqsPanel.style.display='block'; });
-       }
-       if (cancelSiteFaqs) cancelSiteFaqs.addEventListener('click', (e) => { e.preventDefault(); siteFaqsPanel.style.display='none'; dbMainContent.style.display='block'; });
-     // END HERE
+          .catch(() => addBotMessage('Sorry, something went wrong. Please try again.'));
+      });
+    }
+    // delivery FAQ
+    const siteFaqsLink = document.getElementById('siteFaqsLink');
+    const siteFaqsPanel = document.getElementById('siteFaqsPanel');
+    const cancelSiteFaqs = document.getElementById('cancelSiteFaqs');
+    if (siteFaqsLink && siteFaqsPanel && dbMainContent) {
+      siteFaqsLink.addEventListener('click', (e) => { e.preventDefault(); dbMainContent.style.display = 'none'; siteFaqsPanel.style.display = 'block'; });
+    }
+    if (cancelSiteFaqs) cancelSiteFaqs.addEventListener('click', (e) => { e.preventDefault(); siteFaqsPanel.style.display = 'none'; dbMainContent.style.display = 'block'; });
+    // END HERE
 
     //  hero home
     // Hero Slides
-// ===== Manage Hero / Hero Slides =====
-// ===== HERO SLIDES =====
-  const heroSlidesLink   = document.getElementById('heroSlidesLink');
-  const heroSlidesPanel  = document.getElementById('heroSlidesPanel');
-  const cancelHeroSlides = document.getElementById('cancelHeroSlides');
-  const mainContent      = document.getElementById('dbMainContent');
+    // ===== Manage Hero / Hero Slides =====
+    // ===== HERO SLIDES =====
+    const heroSlidesLink = document.getElementById('heroSlidesLink');
+    const heroSlidesPanel = document.getElementById('heroSlidesPanel');
+    const cancelHeroSlides = document.getElementById('cancelHeroSlides');
+    const mainContent = document.getElementById('dbMainContent');
 
-  // Open panel
-  if (heroSlidesLink && heroSlidesPanel) {
-    heroSlidesLink.addEventListener('click', function (e) {
-      e.preventDefault();
+    // Open panel
+    if (heroSlidesLink && heroSlidesPanel) {
+      heroSlidesLink.addEventListener('click', function (e) {
+        e.preventDefault();
 
-      // Hide main dashboard
-      if (mainContent) mainContent.style.display = 'none';
+        // Hide main dashboard
+        if (mainContent) mainContent.style.display = 'none';
 
-      // Hide all other panels
-      document.querySelectorAll('.db-card').forEach(function (panel) {
-        if (panel.id !== 'heroSlidesPanel') {
-          panel.style.display = 'none';
-        }
-      });
-
-      // Show hero panel
-      heroSlidesPanel.style.display = 'block';
-    });
-  }
-
-  // Close panel (Back to Dashboard)
-  if (cancelHeroSlides && heroSlidesPanel) {
-    cancelHeroSlides.addEventListener('click', function (e) {
-      e.preventDefault();          // ← this is the most important line
-      e.stopPropagation();
-
-      heroSlidesPanel.style.display = 'none';
-
-      // Show main dashboard again
-      if (mainContent) mainContent.style.display = 'block';
-    });
-  }
-
-  // ===== Image upload =====
-  const uploadArea   = document.getElementById('heroSlideUploadArea');
-  const uploadInput  = document.getElementById('heroSlideUploadInput');
-  const uploadedFile = document.getElementById('heroSlideUploadedFile');
-  const fileNameSpan = document.getElementById('heroSlideFileName');
-
-  if (uploadArea && uploadInput) {
-    uploadArea.addEventListener('click', function () {
-      uploadInput.click();
-    });
-
-    uploadInput.addEventListener('change', function () {
-      const file = this.files[0];
-      if (!file) {
-        if (uploadedFile) uploadedFile.style.display = 'none';
-        return;
-      }
-
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        alert('Please select a JPG or PNG image only.');
-        this.value = '';
-        return;
-      }
-
-      if (file.size > 3 * 1024 * 1024) {
-        alert('Image must be smaller than 3MB.');
-        this.value = '';
-        return;
-      }
-
-      if (fileNameSpan) fileNameSpan.textContent = file.name;
-      if (uploadedFile) uploadedFile.style.display = 'block';
-    });
-  }
-
-
-// for charts graph
-const registrationsChartCanvas = document.getElementById('registrationsChart');
-if (registrationsChartCanvas && typeof Chart !== 'undefined') {
-  const dataScript = document.getElementById('registrationsChartData');
-  const monthlyData = dataScript ? JSON.parse(dataScript.textContent) : [];
-
-  const ctx = registrationsChartCanvas.getContext('2d');
-
-  // ✅ Gradient fill beneath the line, like a trading chart
-  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(46, 125, 50, 0.35)');
-  gradient.addColorStop(1, 'rgba(46, 125, 50, 0)');
-
-  const chart = new Chart(registrationsChartCanvas, {
-    type: 'line',
-    data: {
-      labels: monthlyData.map(m => m.label),
-      datasets: [{
-        label: 'New Members',
-        data: monthlyData.map(m => m.count),
-        borderColor: '#2E7D32',
-        borderWidth: 2,
-        backgroundColor: gradient,
-        fill: true,
-        tension: 0,               // ✅ sharp straight segments, like a price line — set to 0.2 if you want slight smoothing
-        pointRadius: 0,           // ✅ hide points by default (trading charts usually don't show dots)
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#2E7D32',
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2,
-      }],
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1b1b1b',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          padding: 10,
-          cornerRadius: 6,
-          displayColors: false,
-          callbacks: {
-            label: (context) => `${context.parsed.y} new member${context.parsed.y === 1 ? '' : 's'}`,
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: '#9ca3af', font: { size: 11 } },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { precision: 0, color: '#9ca3af', font: { size: 11 } },
-          grid: { color: '#f0f0f0' },
-        },
-      },
-    },
-  });
-
-  const downloadChartBtn = document.getElementById('downloadChartBtn');
-  if (downloadChartBtn) {
-    downloadChartBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.href = chart.toBase64Image();
-      link.download = `member-registrations-${new Date().toISOString().split('T')[0]}.png`;
-      link.click();
-    });
-  }
-}
-
-
-/* ---------- Member Referrers (Registration Names) panel ---------- */
-const memberReferrersLink = document.getElementById('memberReferrersLink');
-const memberReferrersPanel = document.getElementById('memberReferrersPanel');
-const cancelMemberReferrers = document.getElementById('cancelMemberReferrers');
-
-if (memberReferrersLink && memberReferrersPanel && dbMainContent) {
-  memberReferrersLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    memberReferrersPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (cancelMemberReferrers && memberReferrersPanel && dbMainContent) {
-  cancelMemberReferrers.addEventListener('click', (e) => {
-    e.preventDefault();
-    memberReferrersPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-if (window.location.search.includes('referrersUpdated=true')) {
-  if (memberReferrersPanel) memberReferrersPanel.style.display = 'block';
-  if (dbMainContent) dbMainContent.style.display = 'none';
-}
-// end here
-
-// view map location
-const memberLocationsMapEl = document.getElementById('memberLocationsMap');
-if (memberLocationsMapEl && typeof L !== 'undefined') {
-  const dataScript = document.getElementById('memberLocationsData');
-  const locations = dataScript ? JSON.parse(dataScript.textContent) : [];
-
-  const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  locations.forEach(loc => {
-    L.marker([loc.latitude, loc.longitude])
-      .addTo(map)
-      .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
-  });
-}
-
-// Member Locations panel toggle
-/* ---------- Member Locations panel ---------- */
-const memberLocationsLink = document.getElementById('memberLocationsLink');
-const memberLocationsPanel = document.getElementById('memberLocationsPanel');
-const cancelMemberLocations = document.getElementById('cancelMemberLocations');
-
-if (memberLocationsLink && memberLocationsPanel && dbMainContent) {
-  memberLocationsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    memberLocationsPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Initialize map only once when panel opens
-    if (typeof L !== 'undefined' && !window._memberLocationsMapInitialized) {
-      const mapEl = document.getElementById('memberLocationsMap');
-      const dataScript = document.getElementById('memberLocationsData');
-      if (mapEl && dataScript) {
-        const locations = JSON.parse(dataScript.textContent || '[]');
-
-        const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        const bounds = [];
-        locations.forEach((loc) => {
-          const lat = parseFloat(loc.latitude);
-          const lng = parseFloat(loc.longitude);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            L.marker([lat, lng])
-              .addTo(map)
-              .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
-            bounds.push([lat, lng]);
+        // Hide all other panels
+        document.querySelectorAll('.db-card').forEach(function (panel) {
+          if (panel.id !== 'heroSlidesPanel') {
+            panel.style.display = 'none';
           }
         });
 
-        if (bounds.length > 0) {
-          map.fitBounds(bounds, { padding: [30, 30] });
-        }
-
-        // Force Leaflet to recalculate size after panel becomes visible
-        setTimeout(() => map.invalidateSize(), 200);
-        window._memberLocationsMapInitialized = true;
-      }
+        // Show hero panel
+        heroSlidesPanel.style.display = 'block';
+      });
     }
-  });
-}
 
-if (cancelMemberLocations && memberLocationsPanel && dbMainContent) {
-  cancelMemberLocations.addEventListener('click', (e) => {
-    e.preventDefault();
-    memberLocationsPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
+    // Close panel (Back to Dashboard)
+    if (cancelHeroSlides && heroSlidesPanel) {
+      cancelHeroSlides.addEventListener('click', function (e) {
+        e.preventDefault();          // ← this is the most important line
+        e.stopPropagation();
 
-// end here
+        heroSlidesPanel.style.display = 'none';
 
-//referral
-// Copy referral link
+        // Show main dashboard again
+        if (mainContent) mainContent.style.display = 'block';
+      });
+    }
 
-/* ---------- Referral Network panel ---------- */
-const referralNetworkLink = document.getElementById('referralNetworkLink');
-const referralNetworkPanel = document.getElementById('referralNetworkPanel');
-const cancelReferralNetwork = document.getElementById('cancelReferralNetwork');
+    // ===== Image upload =====
+    const uploadArea = document.getElementById('heroSlideUploadArea');
+    const uploadInput = document.getElementById('heroSlideUploadInput');
+    const uploadedFile = document.getElementById('heroSlideUploadedFile');
+    const fileNameSpan = document.getElementById('heroSlideFileName');
 
-if (referralNetworkLink && referralNetworkPanel && dbMainContent) {
-  referralNetworkLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    referralNetworkPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-if (cancelReferralNetwork && referralNetworkPanel && dbMainContent) {
-  cancelReferralNetwork.addEventListener('click', (e) => {
-    e.preventDefault();
-    referralNetworkPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-
-/* ---------- Copy Referral Link ---------- */
-const copyReferralLinkBtn = document.getElementById('copyReferralLink');
-if (copyReferralLinkBtn) {
-  copyReferralLinkBtn.addEventListener('click', () => {
-    const input = document.getElementById('referralLinkInput');
-    if (!input) return;
-
-    input.select();
-    navigator.clipboard.writeText(input.value).then(() => {
-      const originalText = copyReferralLinkBtn.textContent;
-      copyReferralLinkBtn.textContent = 'Copied!';
-      setTimeout(() => {
-        copyReferralLinkBtn.textContent = originalText;
-      }, 2000);
-    }).catch(() => {
-      // Fallback for older browsers
-      document.execCommand('copy');
-      copyReferralLinkBtn.textContent = 'Copied!';
-      setTimeout(() => {
-        copyReferralLinkBtn.textContent = 'Copy Link';
-      }, 2000);
-    });
-  });
-}
-
-// FACE ID RECOGNITION
-const enableFaceIdBtn = document.getElementById('enableFaceIdBtn');
-if (enableFaceIdBtn) {
-  enableFaceIdBtn.addEventListener('click', async () => {
-    const statusEl = document.getElementById('enableFaceIdStatus');
-    try {
-      statusEl.textContent = 'Preparing setup...';
-      const optionsRes = await fetch('/account/webauthn/register-options', { method: 'POST' });
-      const options = await optionsRes.json();
-
-      statusEl.textContent = 'Follow the prompt on your device...';
-      const credential = await SimpleWebAuthnBrowser.startRegistration(options);
-
-      const verifyRes = await fetch('/account/webauthn/register-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential, deviceName: navigator.platform }),
+    if (uploadArea && uploadInput) {
+      uploadArea.addEventListener('click', function () {
+        uploadInput.click();
       });
 
-      const result = await verifyRes.json();
-      statusEl.textContent = result.message;
-      statusEl.style.color = result.success ? '#2e7d32' : '#c0392b';
-    } catch (error) {
-      statusEl.textContent = 'Setup was cancelled or failed.';
-      statusEl.style.color = '#c0392b';
+      uploadInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) {
+          if (uploadedFile) uploadedFile.style.display = 'none';
+          return;
+        }
+
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+          alert('Please select a JPG or PNG image only.');
+          this.value = '';
+          return;
+        }
+
+        if (file.size > 3 * 1024 * 1024) {
+          alert('Image must be smaller than 3MB.');
+          this.value = '';
+          return;
+        }
+
+        if (fileNameSpan) fileNameSpan.textContent = file.name;
+        if (uploadedFile) uploadedFile.style.display = 'block';
+      });
     }
-  });
-}
-// END HERE
 
-// trust review for Admin dashboard
-/* ---------- Trust & Bot Review panel ---------- */
-const trustReviewLink = document.getElementById('trustReviewLink');
-const trustReviewPanel = document.getElementById('trustReviewPanel');
-const cancelTrustReview = document.getElementById('cancelTrustReview');
 
-if (trustReviewLink && trustReviewPanel && dbMainContent) {
-  trustReviewLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    dbMainContent.style.display = 'none';
-    trustReviewPanel.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
+    // for charts graph
+    const registrationsChartCanvas = document.getElementById('registrationsChart');
+    if (registrationsChartCanvas && typeof Chart !== 'undefined') {
+      const dataScript = document.getElementById('registrationsChartData');
+      const monthlyData = dataScript ? JSON.parse(dataScript.textContent) : [];
 
-if (cancelTrustReview && trustReviewPanel && dbMainContent) {
-  cancelTrustReview.addEventListener('click', (e) => {
-    e.preventDefault();
-    trustReviewPanel.style.display = 'none';
-    dbMainContent.style.display = 'block';
-  });
-}
-// end here
+      const ctx = registrationsChartCanvas.getContext('2d');
+
+      // ✅ Gradient fill beneath the line, like a trading chart
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, 'rgba(46, 125, 50, 0.35)');
+      gradient.addColorStop(1, 'rgba(46, 125, 50, 0)');
+
+      const chart = new Chart(registrationsChartCanvas, {
+        type: 'line',
+        data: {
+          labels: monthlyData.map(m => m.label),
+          datasets: [{
+            label: 'New Members',
+            data: monthlyData.map(m => m.count),
+            borderColor: '#2E7D32',
+            borderWidth: 2,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0,               // ✅ sharp straight segments, like a price line — set to 0.2 if you want slight smoothing
+            pointRadius: 0,           // ✅ hide points by default (trading charts usually don't show dots)
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#2E7D32',
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1b1b1b',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              padding: 10,
+              cornerRadius: 6,
+              displayColors: false,
+              callbacks: {
+                label: (context) => `${context.parsed.y} new member${context.parsed.y === 1 ? '' : 's'}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#9ca3af', font: { size: 11 } },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: '#9ca3af', font: { size: 11 } },
+              grid: { color: '#f0f0f0' },
+            },
+          },
+        },
+      });
+
+      const downloadChartBtn = document.getElementById('downloadChartBtn');
+      if (downloadChartBtn) {
+        downloadChartBtn.addEventListener('click', () => {
+          const link = document.createElement('a');
+          link.href = chart.toBase64Image();
+          link.download = `member-registrations-${new Date().toISOString().split('T')[0]}.png`;
+          link.click();
+        });
+      }
+    }
+
+
+    /* ---------- Member Referrers (Registration Names) panel ---------- */
+    const memberReferrersLink = document.getElementById('memberReferrersLink');
+    const memberReferrersPanel = document.getElementById('memberReferrersPanel');
+    const cancelMemberReferrers = document.getElementById('cancelMemberReferrers');
+
+    if (memberReferrersLink && memberReferrersPanel && dbMainContent) {
+      memberReferrersLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        memberReferrersPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    if (cancelMemberReferrers && memberReferrersPanel && dbMainContent) {
+      cancelMemberReferrers.addEventListener('click', (e) => {
+        e.preventDefault();
+        memberReferrersPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    if (window.location.search.includes('referrersUpdated=true')) {
+      if (memberReferrersPanel) memberReferrersPanel.style.display = 'block';
+      if (dbMainContent) dbMainContent.style.display = 'none';
+    }
+    // end here
+
+    // view map location
+    const memberLocationsMapEl = document.getElementById('memberLocationsMap');
+    if (memberLocationsMapEl && typeof L !== 'undefined') {
+      const dataScript = document.getElementById('memberLocationsData');
+      const locations = dataScript ? JSON.parse(dataScript.textContent) : [];
+
+      const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      locations.forEach(loc => {
+        L.marker([loc.latitude, loc.longitude])
+          .addTo(map)
+          .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
+      });
+    }
+
+    // Member Locations panel toggle
+    /* ---------- Member Locations panel ---------- */
+    const memberLocationsLink = document.getElementById('memberLocationsLink');
+    const memberLocationsPanel = document.getElementById('memberLocationsPanel');
+    const cancelMemberLocations = document.getElementById('cancelMemberLocations');
+
+    if (memberLocationsLink && memberLocationsPanel && dbMainContent) {
+      memberLocationsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        memberLocationsPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Initialize map only once when panel opens
+        if (typeof L !== 'undefined' && !window._memberLocationsMapInitialized) {
+          const mapEl = document.getElementById('memberLocationsMap');
+          const dataScript = document.getElementById('memberLocationsData');
+          if (mapEl && dataScript) {
+            const locations = JSON.parse(dataScript.textContent || '[]');
+
+            const map = L.map('memberLocationsMap').setView([-6.369, 34.888], 6); // Tanzania center
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const bounds = [];
+            locations.forEach((loc) => {
+              const lat = parseFloat(loc.latitude);
+              const lng = parseFloat(loc.longitude);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                L.marker([lat, lng])
+                  .addTo(map)
+                  .bindPopup(`<b>${loc.full_name}</b><br>${loc.email}<br>${loc.phone_number || ''}`);
+                bounds.push([lat, lng]);
+              }
+            });
+
+            if (bounds.length > 0) {
+              map.fitBounds(bounds, { padding: [30, 30] });
+            }
+
+            // Force Leaflet to recalculate size after panel becomes visible
+            setTimeout(() => map.invalidateSize(), 200);
+            window._memberLocationsMapInitialized = true;
+          }
+        }
+      });
+    }
+
+    if (cancelMemberLocations && memberLocationsPanel && dbMainContent) {
+      cancelMemberLocations.addEventListener('click', (e) => {
+        e.preventDefault();
+        memberLocationsPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    // end here
+
+    //referral
+    // Copy referral link
+
+    /* ---------- Referral Network panel ---------- */
+    const referralNetworkLink = document.getElementById('referralNetworkLink');
+    const referralNetworkPanel = document.getElementById('referralNetworkPanel');
+    const cancelReferralNetwork = document.getElementById('cancelReferralNetwork');
+
+    if (referralNetworkLink && referralNetworkPanel && dbMainContent) {
+      referralNetworkLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        referralNetworkPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelReferralNetwork && referralNetworkPanel && dbMainContent) {
+      cancelReferralNetwork.addEventListener('click', (e) => {
+        e.preventDefault();
+        referralNetworkPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+
+    /* ---------- Copy Referral Link ---------- */
+    const copyReferralLinkBtn = document.getElementById('copyReferralLink');
+    if (copyReferralLinkBtn) {
+      copyReferralLinkBtn.addEventListener('click', () => {
+        const input = document.getElementById('referralLinkInput');
+        if (!input) return;
+
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+          const originalText = copyReferralLinkBtn.textContent;
+          copyReferralLinkBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyReferralLinkBtn.textContent = originalText;
+          }, 2000);
+        }).catch(() => {
+          // Fallback for older browsers
+          document.execCommand('copy');
+          copyReferralLinkBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyReferralLinkBtn.textContent = 'Copy Link';
+          }, 2000);
+        });
+      });
+    }
+
+    // FACE ID RECOGNITION
+    const enableFaceIdBtn = document.getElementById('enableFaceIdBtn');
+    if (enableFaceIdBtn) {
+      enableFaceIdBtn.addEventListener('click', async () => {
+        const statusEl = document.getElementById('enableFaceIdStatus');
+        try {
+          statusEl.textContent = 'Preparing setup...';
+          const optionsRes = await fetch('/account/webauthn/register-options', { method: 'POST' });
+          const options = await optionsRes.json();
+
+          statusEl.textContent = 'Follow the prompt on your device...';
+          const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+
+          const verifyRes = await fetch('/account/webauthn/register-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential, deviceName: navigator.platform }),
+          });
+
+          const result = await verifyRes.json();
+          statusEl.textContent = result.message;
+          statusEl.style.color = result.success ? '#2e7d32' : '#c0392b';
+        } catch (error) {
+          statusEl.textContent = 'Setup was cancelled or failed.';
+          statusEl.style.color = '#c0392b';
+        }
+      });
+    }
+    // END HERE
+
+    // trust review for Admin dashboard
+    /* ---------- Trust & Bot Review panel ---------- */
+    const trustReviewLink = document.getElementById('trustReviewLink');
+    const trustReviewPanel = document.getElementById('trustReviewPanel');
+    const cancelTrustReview = document.getElementById('cancelTrustReview');
+
+    if (trustReviewLink && trustReviewPanel && dbMainContent) {
+      trustReviewLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        dbMainContent.style.display = 'none';
+        trustReviewPanel.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    if (cancelTrustReview && trustReviewPanel && dbMainContent) {
+      cancelTrustReview.addEventListener('click', (e) => {
+        e.preventDefault();
+        trustReviewPanel.style.display = 'none';
+        dbMainContent.style.display = 'block';
+      });
+    }
+    // end here
 
 
 
