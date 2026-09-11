@@ -97,6 +97,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // end here
 
+  // region maque
+  const regionsMarqueeTrack = document.getElementById('regionsMarqueeTrack');
+  const regionTooltip = document.getElementById('regionTooltip');
+
+  if (regionsMarqueeTrack && regionTooltip) {
+    const regionPills = regionsMarqueeTrack.querySelectorAll('.region-pill');
+
+    regionPills.forEach(pill => {
+      pill.addEventListener('mouseenter', (e) => {
+        const region = pill.getAttribute('data-region');
+        const count = pill.getAttribute('data-count');
+        const memberLabel = count === '1' ? 'member' : 'members';
+
+        regionTooltip.textContent = `${count} registered ${memberLabel} in ${region}`;
+        regionTooltip.style.display = 'block';
+
+        const rect = pill.getBoundingClientRect();
+        regionTooltip.style.left = `${rect.left + rect.width / 2}px`;
+        regionTooltip.style.top = `${rect.top - 10}px`;
+
+        // ✅ pause the marquee scroll while hovering
+        regionsMarqueeTrack.style.animationPlayState = 'paused';
+      });
+
+      pill.addEventListener('mouseleave', () => {
+        regionTooltip.style.display = 'none';
+        regionsMarqueeTrack.style.animationPlayState = 'running';
+      });
+
+      pill.addEventListener('mousemove', (e) => {
+        regionTooltip.style.left = `${e.clientX}px`;
+        regionTooltip.style.top = `${e.clientY - 15}px`;
+      });
+    });
+  }
+  // end here
+
+  // current date display in dashboards
+  const dbCurrentDateText = document.getElementById('dbCurrentDateText');
+  if (dbCurrentDateText) {
+    const now = new Date();
+    const formatted = now.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+
+    });
+    dbCurrentDateText.textContent = formatted;
+  }
+
+
 
 
   // /* =====================================================

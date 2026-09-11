@@ -40,7 +40,7 @@
 </section>
 
 <!-- ===================== REGIONS MARQUEE ===================== -->
-<section class="regions-marquee-section">
+<!-- <section class="regions-marquee-section">
   <div class="regions-marquee-title">
     <i class="bi bi-geo-alt-fill"></i> Serving Farmers Across All Regions of Tanzania
   </div>
@@ -80,6 +80,32 @@
       
     </div>
   </div>
+</section> -->
+<!-- ===================== REGIONS MARQUEE ===================== -->
+<section class="regions-marquee-section">
+  <div class="regions-marquee-title">
+    <i class="bi bi-geo-alt-fill"></i> Serving Farmers Across All Regions of Tanzania
+  </div>
+  <div class="regions-marquee-wrap">
+    <div class="regions-marquee-track" id="regionsMarqueeTrack">
+      <% 
+        const regionsList = [
+          "Arusha","Dar es Salaam","Dodoma","Geita","Iringa","Kagera","Katavi","Kigoma",
+          "Kilimanjaro","Lindi","Manyara","Mara","Mbeya","Morogoro","Mtwara","Mwanza",
+          "Njombe","Pemba North","Pemba South","Pwani","Rukwa","Ruvuma","Shinyanga",
+          "Simiyu","Singida","Songwe","Tabora","Tanga","Zanzibar North","Zanzibar South","Zanzibar Urban/West"
+        ];
+        const doubledRegions = regionsList.concat(regionsList);
+      %>
+      <% doubledRegions.forEach(region => { %>
+        <span class="region-pill" data-region="<%= region %>" data-count="<%= regionCounts[region] || 0 %>">
+          <%= region %>
+        </span>
+      <% }) %>
+    </div>
+  </div>
+
+  <div id="regionTooltip" class="region-tooltip" style="display:none;"></div>
 </section>
 <!-- ===================== ANIMATED STATS COUNTER ===================== -->
 <section class="stats-counter-section">

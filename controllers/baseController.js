@@ -18,6 +18,11 @@ baseController.buildHome = async function (req, res) {
     // ===== LIVE SUPPORT STATUS =====
     const ictOnline = await accountModel.isIctSupportOnline();
 
+    // // count all region
+    // const regionCounts = await accountModel.getAllRegionCounts();
+    // ===== REGION COUNTS (this was missing) =====
+    const regionCounts = await accountModel.getAllRegionCounts();
+
     let nav = await utilities.getNav();
     res.render("pages/index", {
       title: "Home",
@@ -31,6 +36,8 @@ baseController.buildHome = async function (req, res) {
       totalEvents,
       totalNews,
       ictOnline,
+      regionCounts,
+
     });
   } catch (err) {
     console.error("Home page error:", err);

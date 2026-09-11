@@ -1761,6 +1761,39 @@ async function isIctSupportOnline() {
   return !!staff;
 }
 
+// get all region
+// async function getAllRegionCounts() {
+//   const rows = await db("accounts as a")
+//     .leftJoin("profiles as p", "a.id", "p.account_id")
+//     .leftJoin("birth_places as bp", "p.id", "bp.profile_id")
+//     .where("a.account_type", "member")
+//     .whereNotNull("bp.region")
+//     .select("bp.region")
+//     .count("a.id as count")
+//     .groupBy("bp.region");
+
+//   const counts = {};
+//   rows.forEach(r => { counts[r.region] = parseInt(r.count, 10); });
+//   return counts;
+// }
+async function getAllRegionCounts() {
+  const rows = await db("accounts as a")
+    .leftJoin("profiles as p", "a.id", "p.account_id")
+    .leftJoin("birth_places as bp", "p.id", "bp.profile_id")
+    .where("a.account_type", "member")
+    .whereNotNull("bp.region")
+    .select("bp.region")
+    .count("a.id as count")
+    .groupBy("bp.region");
+
+  const counts = {};
+  rows.forEach(r => {
+    counts[r.region] = parseInt(r.count, 10);
+  });
+  return counts;
+}
+// end here
+
 
 module.exports = {
   registerAccount, checkExistingEmail, getAccountByEmail, getAccountById, updatePassword, updateFullName, getProfileByAccountId, upsertProfile,
@@ -1769,6 +1802,6 @@ module.exports = {
   getJobById, createJobApplication, getAllApplications, getApplicationsByJobId, updateApplicationStatus, getApplicationsByAccountId, countAllJobs, countOpenJobs, countApplicationsByAccountId, createNews, getLatestNews, createEvent, getUpcomingEvents, countAllEvents, countUpcomingEvents, getNewsById, updateNews, deleteNews, getEventById, updateEvent, deleteEvent, getAllNews, getAllEventsAdmin, createLoginLog, recordLogout, getAllLoginLogs, createActivityLog, getAllActivityLogs, createTraining, getAllTrainings, getActiveTrainings, getTrainingById, updateTraining, deleteTraining, registerForTraining, getMyTrainingRegistrations, isRegisteredForTraining, getAllTrainingRegistrations, updateTrainingRegistrationStatus, createTrainingGuide, getAllTrainingGuides, deleteTrainingGuide, createLesson, getAllLessons, getLessonsByTrainingId, getLessonById, createLessonMaterial, getMaterialsByLessonId, deleteLessonMaterial, markLessonComplete, getProgressForTraining, getTrainingProgressSummary,
   createTicket, generateTicketNumber, getAllTickets, getTicketsByAccountId, getTicketById, updateTicketStatus, countTicketsByStatus, createTicketMessage, getMessagesByTicketId, getAllAccounts, deactivateAccount, reactivateAccount,
   countMembersOnly, countNewMembersThisMonth, countAdminsOnly, createTeamMember,
-  getAllTeamMembers, getTeamMemberById, updateTeamMember, getTeamMembersByCategory, deleteTeamMember, upsertProfile, getProfilePhotoByAccountId, getMemberByProfileId, upsertMember, getEducationsByProfileId, replaceEducations, getExperiencesByProfileId, replaceExperiences, updatePhone, getFullMemberProfile, createContactMessage, getAllContactMessages, countUnreadContactMessages, markContactMessageAsRead, getEventById, createEventRegistration, getEventRegistrationsByEventId, getAllEventRegistrations, deleteEventRegistration, updateLastActive, markOffline, getAvailableIctStaff, getAllOnlineIctStaff, searchAdminDashboard, searchMemberDashboard, searchIctDashboard, createPayment, getAllPendingPayments, getRecentPendingPayments, countPendingPayments, approvePayment, rejectPayment, getAllPaymentHistory, getAllMembersOnly, getFullMemberDetailsForIct, permanentlyDeleteAccount, adminResetPassword, getNewsById, createAdminAccount, updateAdminLevel, getAllAdminAccounts, createNotification, notifyRoles, getNotificationsForAccount, countUnreadNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification, createIctStaffAccount, getAllIctStaffOnly, updateIctStaffDetails, createTask, getAllTasksForSuperAdmin, getAssigneesForTask, getTasksForAccount, submitTaskReport, updateIndividualTaskStatus, deleteTask, createTestimonial, getActiveTestimonials, getAllTestimonials, deleteTestimonial, updateTestimonial, createIntake, getActiveIntake, closeIntake, getAllIntakes, getUpcomingEventsWithRegistrationCount, getRecentActivityForDashboard, findFaqMatch, createChatSession, assignChatToAgent, addChatMessage, getChatMessages, getChatSession, getWaitingChatSessions, getActiveChatSessionsForIct, closeChatSession, getAvailableIctStaff, updateFailedAttempts, createSiteFaq, getAllSiteFaqs, getSiteFaqById, updateSiteFaq, deleteSiteFaq, createHeroSlide, getActiveHeroSlides, getAllHeroSlides, updateHeroSlide, deleteHeroSlide, getMemberRegistrationStats, getMonthlyMemberRegistrations, createReferrer, getAllReferrers, deleteReferrer, getMembersByReferrer, updateAccountLocation, getAllMemberLocations, calculateProfileCompletion, getDistinctRegionsForCalculator, getDistrictsByRegion, getCropsByRegionDistrict, getCropBenchmark, saveCostCalculation, detectClosingIntent, deleteContactMessage, convertMessageToTicket, getDirectReferrals, countTotalReferrals, getReferralTree, getNextTier, calculateReferralHealth, awardReferralTierIfEligible, getReferralRewards, saveWebauthnCredential, getWebauthnCredentialsByAccount, getWebauthnCredentialById, updateWebauthnCounter, deleteWebauthnCredential, hashDevice, getOrCreateDeviceTrust, adjustDeviceTrust, calculateBehaviorScore, getAllFlaggedRegistrations, verifyIdentityForChange, changeEmailViaChatbot, changePasswordViaChatbot, countMembersOnly, countUpcomingEvents, getTotalNews, isIctSupportOnline
+  getAllTeamMembers, getTeamMemberById, updateTeamMember, getTeamMembersByCategory, deleteTeamMember, upsertProfile, getProfilePhotoByAccountId, getMemberByProfileId, upsertMember, getEducationsByProfileId, replaceEducations, getExperiencesByProfileId, replaceExperiences, updatePhone, getFullMemberProfile, createContactMessage, getAllContactMessages, countUnreadContactMessages, markContactMessageAsRead, getEventById, createEventRegistration, getEventRegistrationsByEventId, getAllEventRegistrations, deleteEventRegistration, updateLastActive, markOffline, getAvailableIctStaff, getAllOnlineIctStaff, searchAdminDashboard, searchMemberDashboard, searchIctDashboard, createPayment, getAllPendingPayments, getRecentPendingPayments, countPendingPayments, approvePayment, rejectPayment, getAllPaymentHistory, getAllMembersOnly, getFullMemberDetailsForIct, permanentlyDeleteAccount, adminResetPassword, getNewsById, createAdminAccount, updateAdminLevel, getAllAdminAccounts, createNotification, notifyRoles, getNotificationsForAccount, countUnreadNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification, createIctStaffAccount, getAllIctStaffOnly, updateIctStaffDetails, createTask, getAllTasksForSuperAdmin, getAssigneesForTask, getTasksForAccount, submitTaskReport, updateIndividualTaskStatus, deleteTask, createTestimonial, getActiveTestimonials, getAllTestimonials, deleteTestimonial, updateTestimonial, createIntake, getActiveIntake, closeIntake, getAllIntakes, getUpcomingEventsWithRegistrationCount, getRecentActivityForDashboard, findFaqMatch, createChatSession, assignChatToAgent, addChatMessage, getChatMessages, getChatSession, getWaitingChatSessions, getActiveChatSessionsForIct, closeChatSession, getAvailableIctStaff, updateFailedAttempts, createSiteFaq, getAllSiteFaqs, getSiteFaqById, updateSiteFaq, deleteSiteFaq, createHeroSlide, getActiveHeroSlides, getAllHeroSlides, updateHeroSlide, deleteHeroSlide, getMemberRegistrationStats, getMonthlyMemberRegistrations, createReferrer, getAllReferrers, deleteReferrer, getMembersByReferrer, updateAccountLocation, getAllMemberLocations, calculateProfileCompletion, getDistinctRegionsForCalculator, getDistrictsByRegion, getCropsByRegionDistrict, getCropBenchmark, saveCostCalculation, detectClosingIntent, deleteContactMessage, convertMessageToTicket, getDirectReferrals, countTotalReferrals, getReferralTree, getNextTier, calculateReferralHealth, awardReferralTierIfEligible, getReferralRewards, saveWebauthnCredential, getWebauthnCredentialsByAccount, getWebauthnCredentialById, updateWebauthnCounter, deleteWebauthnCredential, hashDevice, getOrCreateDeviceTrust, adjustDeviceTrust, calculateBehaviorScore, getAllFlaggedRegistrations, verifyIdentityForChange, changeEmailViaChatbot, changePasswordViaChatbot, countMembersOnly, countUpcomingEvents, getTotalNews, isIctSupportOnline, getAllRegionCounts
 
 };

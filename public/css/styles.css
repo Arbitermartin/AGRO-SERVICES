@@ -789,6 +789,48 @@ button {
 }
 
 
+.region-pill {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  position: relative;
+}
+
+.region-pill:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.region-tooltip {
+  position: fixed;
+  background: #1b1b1b;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+}
+
+.region-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1b1b1b;
+}
+
+
 /* end her */
 
 /* live member track */
