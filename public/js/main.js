@@ -135,18 +135,47 @@ document.addEventListener('DOMContentLoaded', () => {
   // end here
 
   // current date display in dashboards
-  const dbCurrentDateText = document.getElementById('dbCurrentDateText');
-  if (dbCurrentDateText) {
+  // const dbCurrentDateText = document.getElementById('dbCurrentDateText');
+  // if (dbCurrentDateText) {
+  //   const now = new Date();
+  //   const formatted = now.toLocaleDateString('en-GB', {
+  //     weekday: 'long',
+  //     day: 'numeric',
+  //     month: 'long',
+  //     year: 'numeric',
+
+  //   });
+  //   dbCurrentDateText.textContent = formatted;
+  // }
+  function updateDashboardDateTime() {
     const now = new Date();
-    const formatted = now.toLocaleDateString('en-GB', {
+
+    const date = now.toLocaleDateString('en-GB', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric',
-
+      year: 'numeric'
     });
-    dbCurrentDateText.textContent = formatted;
+
+    const time = now.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    const dateTimeElement = document.getElementById('dbCurrentDateText');
+
+    if (dateTimeElement) {
+      dateTimeElement.textContent = `${date} | ${time}`;
+    }
   }
+
+  // Display immediately
+  updateDashboardDateTime();
+
+  // Update every second
+  setInterval(updateDashboardDateTime, 1000);
 
 
 
